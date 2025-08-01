@@ -1,6 +1,4 @@
 
-"use client";
-
 import { useState, useEffect } from "react";
 import { differenceInSeconds } from "date-fns";
 import { Timer } from "lucide-react";
