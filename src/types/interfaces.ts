@@ -1,15 +1,19 @@
 // User related interfaces
-export interface User {
+export interface UserType {
   id: string;
   username: string;
   email: string;
+  coins: number;
+  totalWon: number;
+  winningAmount: number;
+  refernceId: string;
   avatar?: string;
   createdAt: string;
 }
 
 // Auth related interfaces
 export interface AuthState {
-  user: User | null;
+  user: UserType | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error?: string;
@@ -42,10 +46,14 @@ export interface WebSocketMessage {
   requestId?: string;
 }
 
-// Navigation interfaces
-export interface NavItem {
-  label: string;
-  path: string;
-  icon?: string;
-  requiresAuth?: boolean;
+// MegaPot related interfaces
+export interface MegaPotType {
+  id: number;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  isWon: boolean;
+  winnerId: number;
+  nextDrawDate: string;
 }

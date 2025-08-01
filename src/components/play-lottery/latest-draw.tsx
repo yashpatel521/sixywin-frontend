@@ -1,27 +1,211 @@
+import { useState, useEffect } from "react";
+import { Award, Clock } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { wsClient } from "@/websocket";
+import { differenceInSeconds } from "date-fns";
 
-"use client";
-
-import { useMemo } from "react";
-import { useHistory } from "@/hooks/use-history";
-import { Award } from "lucide-react";
+interface LatestDrawData {
+  winningNumbers: number[];
+  drawDate: string;
+  totalWinners: number;
+  totalPrize: number;
+  nextDrawTime: string;
+}
 
 export const LatestDrawNumbers = () => {
-    const { history } = useHistory();
-    const latestWinningNumbers = useMemo(() => history.length > 0 ? history[0].winningNumbers : [5, 12, 23, 31, 42, 49], [history]);
+  const [latestDraw, setLatestDraw] = useState<LatestDrawData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState({
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
-    return (
-        <div className="flex-1 text-center">
-            <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2">
-                <Award className="h-4 w-4" />
-                Latest Winning Numbers
-            </div>
-            <div className="flex justify-center gap-2 mt-2">
-                {latestWinningNumbers.map((num, i) => (
-                    <div key={i} className="h-8 w-8 flex items-center justify-center font-bold text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
-                        {num}
-                    </div>
-                ))}
-            </div>
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let handleLatestDrawResponse: (message: any) => void;
+    let countdownInterval: NodeJS.Timeout;
+
+    const fetchLatestDraw = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const requestId = Math.random().toString(36).substring(7);
+
+        if (!wsClient.isConnected()) {
+          setError("Connecting to server...");
+
+          const connectionTimeout = setTimeout(() => {
+            setError("Connection failed. Please refresh the page.");
+            setIsLoading(false);
+          }, 5000);
+
+          const connectionCheckInterval = setInterval(() => {
+            if (wsClient.isConnected()) {
+              clearTimeout(connectionTimeout);
+              clearInterval(connectionCheckInterval);
+              setError(null);
+              sendLatestDrawRequest(requestId);
+            }
+          }, 100);
+
+          return;
+        }
+
+        sendLatestDrawRequest(requestId);
+      } catch (err) {
+        setError("Failed to connect to server");
+        setIsLoading(false);
+      }
+    };
+
+    const sendLatestDrawRequest = (requestId: string) => {
+      wsClient.send({
+        type: "latestDraw",
+        requestId,
+        payload: {},
+        timestamp: new Date().toISOString(),
+      });
+
+      handleLatestDrawResponse = (message: any) => {
+        if (
+          message.type === "latest_draw_response" &&
+          message.requestId === requestId
+        ) {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+
+          if (message.payload.success) {
+            setLatestDraw(message.payload.data);
+            startCountdown(message.payload.data.nextDrawTime);
+          } else {
+            setError(message.payload.message || "Failed to fetch latest draw");
+          }
+          setIsLoading(false);
+        }
+      };
+
+      wsClient.on("latest_draw_response", handleLatestDrawResponse);
+
+      timeoutId = setTimeout(() => {
+        setError("Request timeout. Please try again.");
+        setIsLoading(false);
+      }, 10000);
+    };
+
+    const startCountdown = (nextDrawTime: string) => {
+      const updateCountdown = () => {
+        const now = new Date();
+        const nextDraw = new Date(nextDrawTime);
+        const totalSeconds = Math.max(0, differenceInSeconds(nextDraw, now));
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        setCountdown({ hours, minutes, seconds });
+      };
+
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    };
+
+    fetchLatestDraw();
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (handleLatestDrawResponse) {
+        wsClient.off("latest_draw_response", handleLatestDrawResponse);
+      }
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+    };
+  }, []);
+
+  const winningNumbers = latestDraw?.winningNumbers;
+
+  return (
+    <div className="relative p-4 flex flex-row gap-4 items-center justify-center">
+      {/* Next Draw Countdown */}
+      <div className="text-center mb-4">
+        <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 mb-3">
+          <Clock className="h-4 w-4" />
+          Next Draw In
         </div>
-    )
-}
+
+        {isLoading ? (
+          <div className="flex justify-center gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-10 rounded-full" />
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-center gap-2">
+            <div className="h-10 w-10 flex items-center justify-center font-bold text-lg rounded-full bg-secondary text-secondary-foreground shadow-inner">
+              {countdown.hours.toString().padStart(2, "0")}
+            </div>
+            <span className="text-yellow-500 font-bold text-lg">:</span>
+            <div className="h-10 w-10 flex items-center justify-center font-bold text-lg rounded-full bg-secondary text-secondary-foreground shadow-inner">
+              {countdown.minutes.toString().padStart(2, "0")}
+            </div>
+            <span className="text-yellow-500 font-bold text-lg">:</span>
+            <div className="h-10 w-10 flex items-center justify-center font-bold text-lg rounded-full bg-secondary text-secondary-foreground shadow-inner">
+              {countdown.seconds.toString().padStart(2, "0")}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Latest Winning Numbers */}
+      <div className="text-center">
+        <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 mb-3">
+          <Award className="h-4 w-4" />
+          Latest Winning Numbers
+        </div>
+
+        {error && (
+          <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-destructive text-xs">{error}</p>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="flex justify-center gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-8 rounded-full" />
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-center gap-2">
+            {winningNumbers?.map((num, i) => (
+              <div
+                key={i}
+                className="h-8 w-8 flex items-center justify-center font-bold text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner"
+              >
+                {num}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {latestDraw && (
+          <div className="mt-3 text-xs text-muted-foreground flex justify-center gap-4">
+            <div>
+              Draw Date: {new Date(latestDraw.drawDate).toLocaleDateString()}
+            </div>
+            <div>Total Winners: {latestDraw.totalWinners}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Border */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-600 to-transparent opacity-50"></div>
+    </div>
+  );
+};

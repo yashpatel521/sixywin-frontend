@@ -2,7 +2,7 @@ import {
   ApiResponse,
   LoginCredentials,
   RegisterCredentials,
-  User,
+  UserType,
 } from "../types/interfaces";
 
 // API Configuration
@@ -58,7 +58,7 @@ class ApiClient {
   // Auth endpoints
   async login(
     credentials: LoginCredentials
-  ): Promise<ApiResponse<{ user: User; token: string }>> {
+  ): Promise<ApiResponse<{ user: UserType; token: string }>> {
     return this.request("/auth/login", {
       method: "POST",
       body: JSON.stringify(credentials),
@@ -67,7 +67,7 @@ class ApiClient {
 
   async register(
     credentials: RegisterCredentials
-  ): Promise<ApiResponse<{ user: User; token: string }>> {
+  ): Promise<ApiResponse<{ user: UserType; token: string }>> {
     return this.request("/auth/register", {
       method: "POST",
       body: JSON.stringify(credentials),
@@ -80,23 +80,23 @@ class ApiClient {
     });
   }
 
-  async getCurrentUser(): Promise<ApiResponse<User>> {
+  async getCurrentUser(): Promise<ApiResponse<UserType>> {
     return this.request("/auth/me");
   }
 
   // Example API functions
-  async getUsers(): Promise<ApiResponse<User[]>> {
+  async getUsers(): Promise<ApiResponse<UserType[]>> {
     return this.request("/users");
   }
 
-  async getUserById(id: string): Promise<ApiResponse<User>> {
+  async getUserById(id: string): Promise<ApiResponse<UserType>> {
     return this.request(`/users/${id}`);
   }
 
   async updateUser(
     id: string,
-    userData: Partial<User>
-  ): Promise<ApiResponse<User>> {
+    userData: Partial<UserType>
+  ): Promise<ApiResponse<UserType>> {
     return this.request(`/users/${id}`, {
       method: "PUT",
       body: JSON.stringify(userData),
@@ -125,7 +125,7 @@ export const authAPI = {
 export const userAPI = {
   getUsers: () => apiClient.getUsers(),
   getUserById: (id: string) => apiClient.getUserById(id),
-  updateUser: (id: string, userData: Partial<User>) =>
+  updateUser: (id: string, userData: Partial<UserType>) =>
     apiClient.updateUser(id, userData),
   deleteUser: (id: string) => apiClient.deleteUser(id),
 };

@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { ROUTES } from "./constants/routes";
 import { Toaster } from "./components/ui/toaster";
-import { StickyAdBanner } from "./components/shared/sticky-ad-banner";
+
 import LandingPage from "./pages/Landing";
 import AboutUsPage from "./pages/AboutUs";
 import { Header } from "./components/layout/header";

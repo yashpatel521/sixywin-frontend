@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,7 +110,7 @@ export default function DoubleTroublePage() {
 
           if (userNumberBets && userNumberBets.length > 0) {
             const winningBet = userNumberBets.find(
-              (bet) => bet.number === drawnNumber
+              (bet: PlacedNumberBet) => bet.number === drawnNumber
             );
             if (winningBet) {
               if (outcome === "loss") outcome = "win";

@@ -1,10 +1,3 @@
-
-import type { LucideProps } from 'lucide-react';
-
-// =================================================================
-// App Data
-// =================================================================
-
 export interface Ticket {
   id: string;
   date: string;
@@ -24,58 +17,54 @@ export interface Leader {
 }
 
 export interface UserData {
-    username: string,
-    email: string,
-    coins: number,
-    adEarnings: number,
+  username: string;
+  email: string;
+  coins: number;
+  adEarnings: number;
 }
 
 export interface Referral {
-    username: string;
-    joinDate: string;
+  username: string;
+  joinDate: string;
 }
 
 export interface RedeemHistoryItem {
-    id: string;
-    date: string;
-    brand: string;
-    coupon: string;
-    coinsSpent: number;
-    icon: React.ReactNode;
+  id: string;
+  date: string;
+  brand: string;
+  coupon: string;
+  coinsSpent: number;
+  icon: React.ReactNode;
 }
 
 export interface Coupon {
-    id: string;
-    brand: string;
-    title: string;
-    description: string;
-    cost: number;
-    icon: React.ReactNode;
+  id: string;
+  brand: string;
+  title: string;
+  description: string;
+  cost: number;
+  icon: React.ReactNode;
 }
 
 // =================================================================
 // Component Props
 // =================================================================
 
-export interface TopLeadersProps {
-  leaders: Leader[];
-}
-
 export interface MegaPotProps {
   nextDrawDate: Date;
 }
 
 export interface TicketSubmissionProps {
-    nextDrawDate: Date;
+  nextDrawDate: Date;
 }
 
 export interface CountdownTimerProps {
-    nextDrawDate: Date;
-    label: string;
+  nextDrawDate: Date;
+  label: string;
 }
 
 export interface HeaderProps {
-    isAuthenticated?: boolean;
+  isAuthenticated?: boolean;
 }
 
 // =================================================================
@@ -83,20 +72,21 @@ export interface HeaderProps {
 // =================================================================
 export type BetDirection = "under" | "over";
 
-export type DrawResult = { number: number; outcome: "win" | "loss" | "jackpot" };
+export type DrawResult = {
+  number: number;
+  outcome: "win" | "loss" | "jackpot";
+};
 
 export type PlacedBet = {
-    direction: BetDirection | null;
-    bid: number;
-}
+  direction: BetDirection | null;
+  bid: number;
+};
 export type PlacedNumberBet = {
-    number: number;
-    bid: number;
-}
+  number: number;
+  bid: number;
+};
 
 export interface CurrentBetsProps {
-    overUnderBets: PlacedBet[];
-    numberBets: PlacedNumberBet[];
+  overUnderBets: PlacedBet[];
+  numberBets: PlacedNumberBet[];
 }
-
-    

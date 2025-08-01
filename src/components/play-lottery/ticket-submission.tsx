@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,14 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import Confetti from "react-confetti";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-// import { useMegaPot } from "@/hooks/use-mega-pot";
 import { LatestDrawNumbers } from "./latest-draw";
-import { Separator } from "@/components/ui/separator";
-import { CountdownTimer } from "@/components/shared/countdown-timer";
 import { MAX_NUMBERS, TOTAL_NUMBERS } from "@/lib/constants";
-import { TicketSubmissionProps } from "@/lib/types";
+import { wsClient } from "@/websocket";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { User } from "@/lib/interfaces";
 
-export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
+export function TicketSubmission() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [bidAmount, setBidAmount] = useState([10]);
   const { addTicket } = useHistory();
@@ -31,7 +28,8 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [isClient, setIsClient] = useState(false);
-  // const { pot, setPot, isLoaded } = useMegaPot();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useLocalStorage<User | null>("user", null);
 
   useEffect(() => {
     setIsClient(true);
@@ -44,6 +42,11 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  // Handle bid amount changes with toast notification
+  const handleBidChange = (value: number[]) => {
+    setBidAmount(value);
+  };
 
   const handleNumberClick = (num: number) => {
     setSelectedNumbers((prev) => {
@@ -62,49 +65,152 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
     while (numbers.size < MAX_NUMBERS) {
       numbers.add(Math.floor(Math.random() * TOTAL_NUMBERS) + 1);
     }
-    setSelectedNumbers(Array.from(numbers).sort((a, b) => a - b));
+    const quickPickedNumbers = Array.from(numbers).sort((a, b) => a - b);
+    setSelectedNumbers(quickPickedNumbers);
   };
 
-  const handleSubmit = () => {
-    // This is where you would connect to your own backend.
-    // For now, we'll simulate a draw result locally for demonstration.
-    const winningNumbers = new Set<number>();
-    while (winningNumbers.size < MAX_NUMBERS) {
-      winningNumbers.add(Math.floor(Math.random() * TOTAL_NUMBERS) + 1);
+  const handleSubmit = async () => {
+    if (!user) {
+      return;
     }
-    const winningNumbersArray = Array.from(winningNumbers).sort(
-      (a, b) => a - b
-    );
-    const matches = selectedNumbers.filter((num) =>
-      winningNumbersArray.includes(num)
-    ).length;
-    const multipliers: { [key: number]: number } = {
-      3: 5,
-      4: 50,
-      5: 1000,
-      6: 100000,
-    };
-    const coinsWon = (multipliers[matches] || 0) * bidAmount[0];
 
-    addTicket({
-      userNumbers: selectedNumbers,
-      winningNumbers: winningNumbersArray,
-      matches,
-      coinsWon,
-      bid: bidAmount[0],
-    });
+    if (selectedNumbers.length !== MAX_NUMBERS) {
+      return;
+    }
+
+    // Check if user has enough coins
+    const totalFunds = (user.coins || 0) + (user.winningAmount || 0);
+    if (totalFunds < bidAmount[0]) {
+      return;
+    }
 
     toast({
-      title: "Ticket Submitted!",
-      description: `You matched ${matches} numbers and won ${coinsWon.toLocaleString()} coins!`,
+      title: "🎫 Ticket Submitted!",
+      description: `Your ticket with numbers [${selectedNumbers.join(
+        ", "
+      )}] and bid of ${bidAmount[0].toLocaleString()} coins has been submitted successfully!`,
+      className:
+        "bg-green-500/20 backdrop-blur-md border-green-500/30 text-green-100 shadow-lg shadow-green-500/25",
     });
 
-    if (coinsWon > 0) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
-    }
+    setIsSubmitting(true);
 
-    setSelectedNumbers([]);
+    try {
+      const requestId = Math.random().toString(36).substring(7);
+
+      // Wait for WebSocket connection if not connected
+      if (!wsClient.isConnected()) {
+        toast({
+          title: "Connection Error",
+          description: "Connecting to server...",
+          variant: "destructive",
+        });
+
+        const connectionTimeout = setTimeout(() => {
+          toast({
+            title: "Connection Failed",
+            description: "Please refresh the page and try again.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+        }, 5000);
+
+        const connectionCheckInterval = setInterval(() => {
+          if (wsClient.isConnected()) {
+            clearTimeout(connectionTimeout);
+            clearInterval(connectionCheckInterval);
+            sendTicketRequest(requestId);
+          }
+        }, 100);
+
+        return;
+      }
+
+      sendTicketRequest(requestId);
+    } catch (error) {
+      setIsSubmitting(false);
+    }
+  };
+
+  const sendTicketRequest = (requestId: string) => {
+    let handleCreateTicketResponse: (message: any) => void;
+    let timeoutId: NodeJS.Timeout;
+
+    const ticketData = {
+      numbers: selectedNumbers,
+      bid: bidAmount[0],
+      userId: user?.id,
+    };
+
+    wsClient.send({
+      type: "createTicket",
+      requestId,
+      payload: ticketData,
+      timestamp: new Date().toISOString(),
+    });
+
+    handleCreateTicketResponse = (message: any) => {
+      if (
+        message.type === "createTicket_response" &&
+        message.requestId === requestId
+      ) {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+
+        if (message.payload.success) {
+          const ticketData = message.payload.data;
+
+          // Update user data directly from response
+          if (ticketData.user) {
+            setUser(ticketData.user);
+
+            // Dispatch custom event to notify other components
+            window.dispatchEvent(
+              new CustomEvent("userDataChanged", {
+                detail: ticketData.user,
+              })
+            );
+          }
+
+          // Add ticket to local history
+          const historyTicket = {
+            userNumbers: selectedNumbers,
+            winningNumbers: ticketData.winningNumbers || [],
+            matches: ticketData.matchedNumbers?.length || 0,
+            coinsWon: ticketData.coinsWon || 0,
+            bid: bidAmount[0],
+          };
+
+          addTicket(historyTicket);
+
+          if (ticketData.coinsWon > 0) {
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 5000);
+          }
+
+          setSelectedNumbers([]);
+        }
+
+        setIsSubmitting(false);
+      }
+    };
+
+    wsClient.on("createTicket_response", handleCreateTicketResponse);
+
+    timeoutId = setTimeout(() => {
+      setIsSubmitting(false);
+    }, 10000);
+
+    // Cleanup function
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (handleCreateTicketResponse) {
+        wsClient.off("createTicket_response", handleCreateTicketResponse);
+      }
+    };
   };
 
   const numberGrid = useMemo(
@@ -134,16 +240,7 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
               ticket.
             </CardDescription>
           </div>
-          <div className="flex-shrink-0 w-full md:w-auto">
-            <div className="p-2 flex items-center gap-4">
-              <CountdownTimer
-                nextDrawDate={nextDrawDate}
-                label="Next Draw In"
-              />
-              <Separator orientation="vertical" className="h-12" />
-              <LatestDrawNumbers />
-            </div>
-          </div>
+          <LatestDrawNumbers />
         </CardHeader>
         <CardContent>
           <div className="mb-6 flex p-4 justify-center items-center rounded-lg bg-secondary/30 border-2 border-dashed border-primary/20 min-h-[64px]">
@@ -204,14 +301,21 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
                 max={100}
                 step={1}
                 value={bidAmount}
-                onValueChange={setBidAmount}
+                onValueChange={handleBidChange}
                 className="w-full"
               />
+              <div className="text-sm text-muted-foreground text-center">
+                Available Coins:{" "}
+                {(
+                  (user?.coins || 0) + (user?.winningAmount || 0)
+                ).toLocaleString()}
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 variant="outline"
                 onClick={handleQuickPick}
+                disabled={isSubmitting}
                 className="w-full animation-all hover:scale-105 active:scale-95"
               >
                 <Dices className="mr-2 h-4 w-4" />
@@ -219,11 +323,13 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={selectedNumbers.length !== MAX_NUMBERS}
+                disabled={
+                  selectedNumbers.length !== MAX_NUMBERS || isSubmitting
+                }
                 className="w-full animation-all hover:scale-105 active:scale-95"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                Submit Ticket & Bid
+                {isSubmitting ? "Submitting..." : "Submit Ticket & Bid"}
               </Button>
             </div>
           </div>
