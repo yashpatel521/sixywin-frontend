@@ -45,3 +45,15 @@ export interface WebSocketMessage {
   timestamp: string;
   requestId?: string;
 }
+
+// MegaPot related interfaces
+export interface MegaPotType {
+  id: number;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  isWon: boolean;
+  winnerId: number;
+  nextDrawDate: string;
+}
