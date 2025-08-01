@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { wsClient } from "@/websocket";
 import { MegaPotType } from "@/types/interfaces";
 import { CountdownTimer } from "@/components/shared/countdown-timer";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function MegaPot() {

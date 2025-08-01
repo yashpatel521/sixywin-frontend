@@ -15,15 +15,12 @@ import Confetti from "react-confetti";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { LatestDrawNumbers } from "./latest-draw";
-import { Separator } from "@/components/ui/separator";
-import { CountdownTimer } from "@/components/shared/countdown-timer";
 import { MAX_NUMBERS, TOTAL_NUMBERS } from "@/lib/constants";
-import { TicketSubmissionProps } from "@/lib/types";
 import { wsClient } from "@/websocket";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { User } from "@/lib/interfaces";
 
-export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
+export function TicketSubmission() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [bidAmount, setBidAmount] = useState([10]);
   const { addTicket } = useHistory();
@@ -243,16 +240,7 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
               ticket.
             </CardDescription>
           </div>
-          <div className="flex-shrink-0 w-full md:w-auto">
-            <div className="p-2 flex items-center gap-4">
-              <CountdownTimer
-                nextDrawDate={nextDrawDate}
-                label="Next Draw In"
-              />
-              <Separator orientation="vertical" className="h-12" />
-              <LatestDrawNumbers />
-            </div>
-          </div>
+          <LatestDrawNumbers />
         </CardHeader>
         <CardContent>
           <div className="mb-6 flex p-4 justify-center items-center rounded-lg bg-secondary/30 border-2 border-dashed border-primary/20 min-h-[64px]">
