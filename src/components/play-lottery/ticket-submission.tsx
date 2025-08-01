@@ -32,7 +32,7 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [isClient, setIsClient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user] = useLocalStorage<User | null>("user", null);
+  const [user, setUser] = useLocalStorage<User | null>("user", null);
 
   useEffect(() => {
     setIsClient(true);
@@ -163,6 +163,11 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
 
         if (message.payload.success) {
           const ticketData = message.payload.data;
+
+          // Update user data if provided in response
+          if (message.payload.user) {
+            setUser(message.payload.user);
+          }
 
           // Add ticket to local history
           const historyTicket = {
