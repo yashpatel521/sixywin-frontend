@@ -1,0 +1,46 @@
+import { Link } from "react-router-dom";
+import { Icons } from "../shared/icons";
+
+export function Footer() {
+  return (
+    <footer className="w-full border-t bg-card/50 backdrop-blur-lg mt-auto">
+      <div className="container py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <Link to="/" className="flex items-center space-x-2">
+          <Icons.logo className="h-6 w-6 text-primary" />
+          <span className="font-headline font-bold">SixyWin</span>
+        </Link>
+        <p className="text-sm text-muted-foreground text-center md:text-left">
+          © {new Date().getFullYear()} SixyWin. All rights reserved.
+          <br className="sm:hidden" />
+          For entertainment purposes only.
+        </p>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/about"
+            className="text-sm text-muted-foreground hover:text-primary"
+          >
+            About Us
+          </Link>
+          <Link
+            to="/contact"
+            className="text-sm text-muted-foreground hover:text-primary"
+          >
+            Contact Us
+          </Link>
+          <Link
+            to="/privacy"
+            className="text-sm text-muted-foreground hover:text-primary"
+          >
+            Privacy Policy
+          </Link>
+          <Link
+            to="/terms"
+            className="text-sm text-muted-foreground hover:text-primary"
+          >
+            Terms of Service
+          </Link>
+        </div>
+      </div>
+    </footer>
+  );
+}

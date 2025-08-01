@@ -1,0 +1,231 @@
+import { Link, useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+
+import { MainNav } from "../layout/main-nav";
+import { Gem, Menu, Gift, Film } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../ui/sheet";
+import { SpinWheel } from "../shared/spin-wheel";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+// import { useMegaPot } from "../../hooks/use-mega-pot";
+import { WatchAd } from "../shared/watch-ad-modal";
+import { Icons } from "../shared/icons";
+import { clearAuthData, isAuthenticated } from "@/lib/localStorage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { User } from "@/lib/interfaces";
+import { useEffect } from "react";
+
+export function Header() {
+  const isLoggedIn = isAuthenticated();
+  const navigate = useNavigate();
+  const [user, setUser] = useLocalStorage<User | null>("user", null);
+  // const { pot } = useMegaPot();
+
+  // Listen for user data changes from other parts of the app
+  useEffect(() => {
+    const handleUserDataChange = (event: CustomEvent) => {
+      if (event.detail) {
+        setUser(event.detail);
+      }
+    };
+
+    window.addEventListener(
+      "userDataChanged",
+      handleUserDataChange as EventListener
+    );
+    return () =>
+      window.removeEventListener(
+        "userDataChanged",
+        handleUserDataChange as EventListener
+      );
+  }, [setUser]);
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b bg-card/50 backdrop-blur-lg">
+      <div className="container flex h-16 items-center">
+        <div className="mr-4 hidden md:flex">
+          <Link to="/" className="mr-6 flex items-center space-x-2">
+            <Icons.logo className="h-6 w-6 text-primary" />
+            <span className="hidden font-headline font-bold sm:inline-block">
+              SixyWin
+            </span>
+          </Link>
+          {isLoggedIn && (
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+              <MainNav />
+            </nav>
+          )}
+        </div>
+
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <div className="flex-1 md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-full max-w-xs glassmorphism"
+              >
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                <Link to="/" className="mb-8 flex items-center space-x-2">
+                  <Icons.logo className="h-6 w-6 text-primary" />
+                  <span className="font-headline font-bold">SixyWin</span>
+                </Link>
+                {isLoggedIn && (
+                  <nav className="flex flex-col space-y-4">
+                    <MainNav />
+                  </nav>
+                )}
+              </SheetContent>
+            </Sheet>
+          </div>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-full border border-secondary bg-background/50 px-3 py-1 text-sm font-semibold text-primary">
+                <Gem className="h-4 w-4" />
+                <span>{(user?.coins || 0) + (user?.winningAmount || 0)}</span>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full animation-all hover:scale-105 active:scale-95"
+                  >
+                    <Film className="h-4 w-4" />
+                    <span className="sr-only">Watch and Earn</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="glassmorphism">
+                  <DialogHeader>
+                    <DialogTitle className="font-headline text-2xl flex items-center justify-center gap-2">
+                      <Film className="h-6 w-6 text-primary" />
+                      Watch & Earn
+                    </DialogTitle>
+                    <DialogDescription className="text-center">
+                      Watch a short ad to earn a guaranteed coin reward.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <WatchAd />
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="animation-all hover:scale-105 active:scale-95 bg-accent text-accent-foreground hover:bg-accent/90"
+                    >
+                      <Gift className="mr-2 h-4 w-4" />
+                      Spin to Win
+                    </Button>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="glassmorphism">
+                  <DialogHeader>
+                    <DialogTitle className="font-headline text-2xl flex items-center justify-center gap-2">
+                      <Gift className="h-6 w-6 text-primary" />
+                      Daily Bonus Wheel
+                    </DialogTitle>
+                    <DialogDescription className="text-center">
+                      Spin the wheel to win extra coins! You get one free spin
+                      per day.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <SpinWheel />
+                </DialogContent>
+              </Dialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-9 w-9 rounded-full animation-all hover:scale-110"
+                  >
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage
+                        src={user?.avatar || "https://i.pravatar.cc/150"}
+                        data-ai-hint="person portrait"
+                        alt={`@${user?.username || "user"}`}
+                      />
+                      <AvatarFallback>
+                        {user?.username?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 glassmorphism"
+                  align="end"
+                  forceMount
+                >
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user?.username || "User"}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email || "user@example.com"}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/games">Games</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/leaderboard">Leaderboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => {
+                        clearAuthData();
+                        navigate("/login");
+                      }}
+                    >
+                      Log out
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
