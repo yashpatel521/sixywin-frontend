@@ -8,7 +8,7 @@ import { Ticket } from "@/lib/types";
 
 export const useHistory = () => {
   const [history, setHistory] = useState<Ticket[]>(userTicketHistory);
-  const [isLoaded, setIsLoaded] = useState(true);
+  const [isLoaded] = useState(true);
 
   const addTicket = useCallback((ticketData: Omit<Ticket, "id" | "date">) => {
     setHistory((prevHistory) => {
