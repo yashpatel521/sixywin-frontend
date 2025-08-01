@@ -220,7 +220,7 @@ export function Header() {
                 <Link to="/login">Login</Link>
               </Button>
               <Button asChild>
-                <Link to="/signup">Sign Up</Link>
+                <Link to="/register">Sign Up</Link>
               </Button>
             </div>
           )}
