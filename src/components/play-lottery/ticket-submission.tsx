@@ -164,9 +164,16 @@ export function TicketSubmission({ nextDrawDate }: TicketSubmissionProps) {
         if (message.payload.success) {
           const ticketData = message.payload.data;
 
-          // Update user data if provided in response
-          if (message.payload.user) {
-            setUser(message.payload.user);
+          // Update user data directly from response
+          if (ticketData.user) {
+            setUser(ticketData.user);
+
+            // Dispatch custom event to notify other components
+            window.dispatchEvent(
+              new CustomEvent("userDataChanged", {
+                detail: ticketData.user,
+              })
+            );
           }
 
           // Add ticket to local history
