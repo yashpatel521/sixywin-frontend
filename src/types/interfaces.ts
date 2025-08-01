@@ -1,15 +1,19 @@
 // User related interfaces
-export interface User {
+export interface UserType {
   id: string;
   username: string;
   email: string;
+  coins: number;
+  totalWon: number;
+  winningAmount: number;
+  refernceId: string;
   avatar?: string;
   createdAt: string;
 }
 
 // Auth related interfaces
 export interface AuthState {
-  user: User | null;
+  user: UserType | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error?: string;
@@ -40,12 +44,4 @@ export interface WebSocketMessage {
   payload: any;
   timestamp: string;
   requestId?: string;
-}
-
-// Navigation interfaces
-export interface NavItem {
-  label: string;
-  path: string;
-  icon?: string;
-  requiresAuth?: boolean;
 }

@@ -40,7 +40,6 @@ class WebSocketClient {
       };
 
       this.ws.onclose = () => {
-        console.log(WEBSOCKET_MESSAGES.DISCONNECTED);
         this.emit("disconnection", {
           type: "disconnected",
           payload: null,
@@ -50,7 +49,6 @@ class WebSocketClient {
       };
 
       this.ws.onerror = (error) => {
-        console.error(WEBSOCKET_MESSAGES.CONNECTION_ERROR, error);
         this.emit("error", {
           type: "error",
           payload: error,
@@ -58,7 +56,6 @@ class WebSocketClient {
         });
       };
     } catch (error) {
-      console.error("Failed to create WebSocket connection:", error);
       this.handleReconnect();
     }
   }
@@ -66,15 +63,9 @@ class WebSocketClient {
   private handleReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      console.log(
-        `${WEBSOCKET_MESSAGES.RECONNECTING} (Attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
-      );
-
       setTimeout(() => {
         this.connect();
       }, this.reconnectDelay * this.reconnectAttempts);
-    } else {
-      console.error("Max reconnection attempts reached");
     }
   }
 

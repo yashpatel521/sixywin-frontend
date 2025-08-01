@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -10,8 +10,6 @@ import {
 import {
   Gem,
   User,
-  History as HistoryIcon,
-  Calendar as CalendarIcon,
   Ticket,
   BarChart,
   Copy,
@@ -19,7 +17,6 @@ import {
   Users,
   Award,
 } from "lucide-react";
-import { useHistory } from "@/hooks/use-history";
 import {
   Table,
   TableBody,
@@ -28,40 +25,128 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { format, parseISO, startOfDay, endOfDay } from "date-fns";
-import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { format, parseISO } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { leaderboardDataMap, referralData } from "@/lib/dummy-data.tsx";
 import { Link, useParams } from "react-router-dom";
+import { wsClient } from "@/websocket";
+import { UserType } from "@/types/interfaces";
+import TicketHistory from "@/components/shared/ticket-history";
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
-  const username = userId;
-  if (!username) {
-    return <div>No username provided</div>;
-  }
-  const userData = leaderboardDataMap[username];
-  const userReferrals = referralData[username] || [];
 
-  // NOTE: This uses the logged-in user's history for demonstration.
-  // In a real app, you would fetch the specific user's history.
-  const { history, isLoaded } = useHistory();
-  const [date, setDate] = React.useState<Date | undefined>();
+  const [userData, setUserData] = useState<UserType | null>(null);
+  const [referredUsers, setReferredUsers] = useState<UserType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isUserNotFound, setIsUserNotFound] = useState(false);
+
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
-  const referralId = `ref-${username.toLowerCase()}`;
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let handleUserProfileResponse: (message: any) => void;
+
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        setIsUserNotFound(false);
+
+        const requestId = Math.random().toString(36).substring(7);
+
+        // Wait for WebSocket connection if not connected
+        if (!wsClient.isConnected()) {
+          setError("Connecting to server...");
+
+          const connectionTimeout = setTimeout(() => {
+            setError("Connection failed. Please refresh the page.");
+            setIsLoading(false);
+          }, 5000);
+
+          const connectionCheckInterval = setInterval(() => {
+            if (wsClient.isConnected()) {
+              clearTimeout(connectionTimeout);
+              clearInterval(connectionCheckInterval);
+              setError(null);
+              sendUserProfileRequest(requestId);
+            }
+          }, 100);
+
+          return;
+        }
+
+        sendUserProfileRequest(requestId);
+      } catch (err) {
+        setError("Failed to connect to server");
+        setIsLoading(false);
+      }
+    };
+
+    const sendUserProfileRequest = (requestId: string) => {
+      wsClient.send({
+        type: "get_user_profile",
+        requestId,
+        payload: { id: userId },
+        timestamp: new Date().toISOString(),
+      });
+
+      handleUserProfileResponse = (message: any) => {
+        if (
+          message.type === "user_profile_response" &&
+          message.requestId === requestId
+        ) {
+          // Clear the timeout since we got a response
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+
+          if (message.payload.success) {
+            setUserData(message?.payload?.data?.user);
+            setReferredUsers(message?.payload?.data?.referredUsers || []);
+          } else {
+            if (message.payload.message?.includes("not found")) {
+              setIsUserNotFound(true);
+            } else {
+              setError(
+                message.payload.message || "Failed to fetch user profile"
+              );
+            }
+          }
+          setIsLoading(false);
+        }
+      };
+
+      wsClient.on("user_profile_response", handleUserProfileResponse);
+
+      timeoutId = setTimeout(() => {
+        setError("Request timeout. Please try again.");
+        setIsLoading(false);
+      }, 10000);
+    };
+
+    if (userId) {
+      fetchUserProfile();
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (handleUserProfileResponse) {
+        wsClient.off("user_profile_response", handleUserProfileResponse);
+      }
+    };
+  }, [userId]);
+
+  const referralId = userData?.refernceId
+    ? `ref-${userData.refernceId.toLowerCase()}`
+    : "";
   const referralLink =
     typeof window !== "undefined"
       ? `${window.location.origin}/signup?ref=${referralId}`
@@ -79,48 +164,87 @@ export default function UserProfilePage() {
     }, 2000);
   }, [referralLink, toast]);
 
-  const filteredHistory = history.filter((ticket) => {
-    if (!date) return true;
-    const ticketDate = parseISO(ticket.date);
-    const dayStart = startOfDay(date);
-    const dayEnd = endOfDay(date);
-    return ticketDate >= dayStart && ticketDate <= dayEnd;
-  });
+  const totalTickets = 0; // Will be handled by TicketHistory component
 
-  const totalWinnings = history.reduce(
-    (acc, ticket) => acc + ticket.coinsWon,
-    0
-  );
-  const totalTickets = history.length;
-  const totalEarnings = totalWinnings + (userData?.adEarnings || 0);
+  if (!userId) {
+    return (
+      <div className="container mx-auto p-4 md:p-8 text-center">
+        <h1 className="text-2xl font-bold">No username provided</h1>
+      </div>
+    );
+  }
 
-  const renderNumbers = (numbers: number[], userNumbers?: number[]) => (
-    <div className="flex gap-1 flex-wrap max-w-xs">
-      {numbers.map((num, i) => {
-        const isMatch = userNumbers?.includes(num);
-        return (
-          <span
-            key={i}
-            className={cn(
-              "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold animation-all hover:scale-110",
-              isMatch
-                ? "bg-accent text-accent-foreground"
-                : "bg-secondary text-secondary-foreground"
-            )}
-          >
-            {num}
-          </span>
-        );
-      })}
-    </div>
-  );
-
-  if (!userData) {
+  if (isUserNotFound) {
     return (
       <div className="container mx-auto p-4 md:p-8 text-center">
         <h1 className="text-2xl font-bold">User not found</h1>
         <p className="text-muted-foreground">
-          The user "{username}" does not exist.
+          The user {userId} does not exist.
+        </p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4 md:p-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+          <div className="space-y-8">
+            <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
+              <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 rounded-full" />
+                <div className="flex-grow space-y-4">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="text-center">
+                        <Skeleton className="h-4 w-20 mx-auto mb-2" />
+                        <Skeleton className="h-6 w-16 mx-auto" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+            <Card className="glassmorphism animation-all hover:shadow-2xl">
+              <CardHeader>
+                <Skeleton className="h-8 w-64" />
+                <Skeleton className="h-4 w-48" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <Card className="glassmorphism animation-all hover:shadow-2xl">
+            <CardHeader>
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="container mx-auto p-4 md:p-8 text-center">
+        <h1 className="text-2xl font-bold">Failed to load user</h1>
+        <p className="text-muted-foreground">
+          {error || "Unable to load user profile"}
         </p>
       </div>
     );
@@ -128,287 +252,196 @@ export default function UserProfilePage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-        <div className="space-y-8">
-          <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
-            <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-              <Avatar className="w-24 h-24 sm:w-32 sm:h-32 shrink-0 border-4 border-primary animation-all hover:scale-110">
-                <AvatarImage
-                  src={`https://i.pravatar.cc/150?u=${username}`}
-                  data-ai-hint="person portrait"
-                  alt={username}
-                />
-                <AvatarFallback>
-                  {username.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-grow text-center sm:text-left">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-                  <CardTitle className="font-headline text-3xl flex items-center gap-2">
-                    <User className="h-8 w-8 text-primary" />
-                    {username}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 text-xl font-semibold text-primary">
-                    <Gem className="h-6 w-6" />
-                    <span>{userData.coins.toLocaleString()} Coins</span>
-                  </div>
-                </div>
-                <CardDescription className="mt-1">
-                  Public Profile
-                </CardDescription>
+      {error && (
+        <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-destructive text-center">{error}</p>
+          <div className="mt-2 text-center space-x-2">
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              size="sm"
+            >
+              Refresh Page
+            </Button>
+            <Button
+              onClick={() => {
+                setError(null);
+                setIsLoading(true);
+                setUserData(null);
+                setReferredUsers([]);
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Retry Request
+            </Button>
+          </div>
+        </div>
+      )}
 
-                <div className="mt-4">
-                  <Label
-                    htmlFor="referral-id"
-                    className="text-sm text-muted-foreground"
+      {/* User Details and Referral Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* User Profile Card */}
+        <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
+          <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <Avatar className="w-24 h-24 sm:w-32 sm:h-32 shrink-0 border-4 border-primary animation-all hover:scale-110">
+              <AvatarImage
+                src={
+                  userData.avatar ||
+                  `https://i.pravatar.cc/150?u=${userData.username}`
+                }
+                data-ai-hint="person portrait"
+                alt={userData.username}
+              />
+              <AvatarFallback>
+                {userData.username.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-grow text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+                <CardTitle className="font-headline text-3xl flex items-center gap-2">
+                  <User className="h-8 w-8 text-primary" />
+                  {userData.username}
+                </CardTitle>
+                <div className="flex items-center gap-2 text-xl font-semibold text-primary">
+                  <Gem className="h-6 w-6" />
+                  <span>
+                    {(userData.coins || 0) + (userData.winningAmount || 0)}{" "}
+                    Coins
+                  </span>
+                </div>
+              </div>
+              <CardDescription className="mt-1">Public Profile</CardDescription>
+
+              <div className="mt-4">
+                <Label
+                  htmlFor="referral-id"
+                  className="text-sm text-muted-foreground"
+                >
+                  Referral Link
+                </Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    id="referral-id"
+                    readOnly
+                    value={referralLink}
+                    className="bg-background/50"
+                  />
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={handleCopy}
+                    className="animation-all hover:scale-105 active:scale-95"
                   >
-                    Referral Link
-                  </Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      id="referral-id"
-                      readOnly
-                      value={referralLink}
-                      className="bg-background/50"
-                    />
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={handleCopy}
-                      className="animation-all hover:scale-105 active:scale-95"
-                    >
-                      {isCopied ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                      <span className="sr-only">Copy Referral Link</span>
-                    </Button>
+                    {isCopied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Copy Referral Link</span>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center border-t mt-4 pt-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">
+                    Tickets Played
+                  </div>
+                  <div className="text-2xl font-bold flex items-center justify-center gap-2">
+                    <Ticket className="h-6 w-6 text-primary/80" />
+                    {totalTickets}
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center border-t mt-4 pt-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Tickets Played
-                    </div>
-                    <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                      <Ticket className="h-6 w-6 text-primary/80" />
-                      {isLoaded ? (
-                        totalTickets
-                      ) : (
-                        <Skeleton className="h-6 w-10" />
-                      )}
-                    </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">
+                    Winning Amount
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Winning Amount
-                    </div>
-                    <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                      <BarChart className="h-6 w-6 text-primary/80" />
-                      {isLoaded ? (
-                        totalWinnings.toLocaleString()
-                      ) : (
-                        <Skeleton className="h-6 w-24" />
-                      )}
-                    </div>
+                  <div className="text-2xl font-bold flex items-center justify-center gap-2">
+                    <BarChart className="h-6 w-6 text-primary/80" />
+                    {userData.winningAmount.toLocaleString()}
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Ad Earnings
-                    </div>
-                    <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                      <Gem className="h-6 w-6 text-primary/80" />
-                      {isLoaded ? (
-                        userData.adEarnings.toLocaleString()
-                      ) : (
-                        <Skeleton className="h-6 w-20" />
-                      )}
-                    </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">
+                    Ad Earnings
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Total Winnings
-                    </div>
-                    <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                      <Award className="h-6 w-6 text-primary/80" />
-                      {isLoaded ? (
-                        totalEarnings.toLocaleString()
-                      ) : (
-                        <Skeleton className="h-6 w-28" />
-                      )}
-                    </div>
+                  <div className="text-2xl font-bold flex items-center justify-center gap-2">
+                    <Gem className="h-6 w-6 text-primary/80" />
+                    {(userData.winningAmount || 0).toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Winnings
+                  </div>
+                  <div className="text-2xl font-bold flex items-center justify-center gap-2">
+                    <Award className="h-6 w-6 text-primary/80" />
+                    {userData.totalWon.toLocaleString()}
                   </div>
                 </div>
               </div>
             </div>
-          </Card>
-          <Card className="glassmorphism animation-all hover:shadow-2xl">
-            <CardHeader>
-              <CardTitle className="font-headline text-3xl flex items-center gap-2">
-                <Users className="h-8 w-8 text-primary" />
-                Referred Users ({userReferrals.length})
-              </CardTitle>
-              <CardDescription>Users referred by {username}.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {userReferrals.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-lg font-medium">No referrals yet!</p>
-                  <p className="text-sm">
-                    Share the referral ID to bring friends.
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Player</TableHead>
-                        <TableHead className="text-right">Join Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {userReferrals.map((referral) => (
-                        <TableRow
-                          key={referral.username}
-                          className="hover:bg-muted/30"
-                        >
-                          <TableCell>
-                            <Link
-                              to={`/user/${referral.username}`}
-                              className="flex items-center gap-3 group"
-                            >
-                              <Avatar className="animation-all group-hover:scale-110 h-9 w-9">
-                                <AvatarImage
-                                  src={`https://i.pravatar.cc/150?u=${referral.username}`}
-                                  data-ai-hint="person avatar"
-                                />
-                                <AvatarFallback>
-                                  {referral.username
-                                    .substring(0, 2)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="font-medium group-hover:text-primary group-hover:underline">
-                                {referral.username}
-                              </span>
-                            </Link>
-                          </TableCell>
-                          <TableCell className="text-right font-medium whitespace-nowrap">
-                            {format(parseISO(referral.joinDate), "MMM d, yyyy")}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+          </div>
+        </Card>
+
+        {/* Referred Users Card */}
         <Card className="glassmorphism animation-all hover:shadow-2xl">
-          <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="space-y-1.5">
-              <CardTitle className="font-headline text-3xl flex items-center gap-2">
-                <HistoryIcon className="h-8 w-8 text-primary" />
-                Ticket History
-              </CardTitle>
-              <CardDescription>
-                Review {username}'s past plays and winnings.
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date"
-                    variant={"outline"}
-                    className={cn(
-                      "w-full sm:w-[240px] justify-start text-left font-normal animation-all hover:scale-105 active:scale-95",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    initialFocus
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={{ after: new Date() }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          <CardHeader>
+            <CardTitle className="font-headline text-3xl flex items-center gap-2">
+              <Users className="h-8 w-8 text-primary" />
+              Referred Users ({referredUsers.length})
+            </CardTitle>
+            <CardDescription>
+              Users referred by {userData.username}.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {!isLoaded ? (
-              <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full bg-muted/50" />
-                ))}
-              </div>
-            ) : filteredHistory.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground">
-                <div className="text-xl font-medium">
-                  No tickets found for this user.
-                </div>
+            {referredUsers.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-lg font-medium">No referrals yet!</p>
+                <p className="text-sm">
+                  Share the referral ID to bring friends.
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Their Numbers</TableHead>
-                      <TableHead>Winning Numbers</TableHead>
-                      <TableHead className="text-center">Bid</TableHead>
-                      <TableHead className="text-center">Matches</TableHead>
-                      <TableHead className="text-right">Coins Won</TableHead>
+                      <TableHead>Player</TableHead>
+                      <TableHead className="text-right">Join Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredHistory.map((ticket) => (
-                      <TableRow key={ticket.id} className="hover:bg-muted/30">
-                        <TableCell className="font-medium whitespace-nowrap">
-                          {format(parseISO(ticket.date), "MMM d, yyyy")}
-                        </TableCell>
+                    {referredUsers.map((referral) => (
+                      <TableRow key={referral.id} className="hover:bg-muted/30">
                         <TableCell>
-                          {renderNumbers(
-                            ticket.userNumbers,
-                            ticket.winningNumbers
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {renderNumbers(
-                            ticket.winningNumbers,
-                            ticket.userNumbers
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center font-semibold">
-                          {ticket.bid}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant={
-                              ticket.matches > 0 ? "default" : "secondary"
-                            }
-                            className={cn(
-                              ticket.matches > 0 &&
-                                "bg-accent text-accent-foreground hover:bg-accent/80 animation-all hover:scale-110"
-                            )}
+                          <Link
+                            to={`/user/${referral.username}`}
+                            className="flex items-center gap-3 group"
                           >
-                            {ticket.matches}
-                          </Badge>
+                            <Avatar className="animation-all group-hover:scale-110 h-9 w-9">
+                              <AvatarImage
+                                src={
+                                  referral.avatar ||
+                                  `https://i.pravatar.cc/150?u=${referral.username}`
+                                }
+                                data-ai-hint="person avatar"
+                              />
+                              <AvatarFallback>
+                                {referral.username
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium group-hover:text-primary group-hover:underline">
+                              {referral.username}
+                            </span>
+                          </Link>
                         </TableCell>
-                        <TableCell className="text-right font-semibold flex items-center justify-end gap-1 whitespace-nowrap">
-                          <Gem className="h-4 w-4 text-primary" />
-                          {ticket.coinsWon.toLocaleString()}
+                        <TableCell className="text-right font-medium whitespace-nowrap">
+                          {format(parseISO(referral.createdAt), "MMM d, yyyy")}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -419,6 +452,9 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Ticket History - Using Shared Component */}
+      <TicketHistory />
     </div>
   );
 }

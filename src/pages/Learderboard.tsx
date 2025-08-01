@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,11 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Crown, Gem, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { wsClient } from "@/websocket";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useWebSocket } from "@/contexts/WebSocketContext";
 
 interface LeaderboardPlayer {
   id: number;
@@ -42,8 +44,12 @@ export default function LeaderboardPage() {
   const [players, setPlayers] = useState<LeaderboardPlayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isConnected } = useWebSocket();
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let handleLeaderboardResponse: (message: any) => void;
+
     const fetchLeaderboard = async () => {
       try {
         setIsLoading(true);
@@ -51,53 +57,81 @@ export default function LeaderboardPage() {
 
         const requestId = Math.random().toString(36).substring(7);
 
-        // Send leaderboard request via WebSocket
-        wsClient.send({
-          type: "leaderboard",
-          requestId,
-          payload: { limit: 10 },
-          timestamp: new Date().toISOString(),
-        });
+        // Wait for WebSocket connection if not connected
+        if (!wsClient.isConnected()) {
+          setError("Connecting to server...");
 
-        // Listen for leaderboard response
-        const handleLeaderboardResponse = (message: any) => {
-          if (
-            message.type === "leaderboard_response" &&
-            message.requestId === requestId
-          ) {
-            if (message.payload.success) {
-              setPlayers(message.payload.data);
-            } else {
-              setError(
-                message.payload.message || "Failed to fetch leaderboard"
-              );
+          const connectionTimeout = setTimeout(() => {
+            setError("Connection failed. Please refresh the page.");
+            setIsLoading(false);
+          }, 5000);
+
+          const connectionCheckInterval = setInterval(() => {
+            if (wsClient.isConnected()) {
+              clearTimeout(connectionTimeout);
+              clearInterval(connectionCheckInterval);
+              setError(null);
+              sendLeaderboardRequest(requestId);
             }
-            setIsLoading(false);
-          }
-        };
+          }, 100);
 
-        wsClient.on("leaderboard_response", handleLeaderboardResponse);
+          return;
+        }
 
-        // Timeout after 10 seconds
-        setTimeout(() => {
-          if (isLoading) {
-            setError("Request timeout. Please try again.");
-            setIsLoading(false);
-          }
-        }, 10000);
-
-        // Cleanup
-        return () => {
-          wsClient.off("leaderboard_response", handleLeaderboardResponse);
-        };
+        sendLeaderboardRequest(requestId);
       } catch (err) {
         setError("Failed to connect to server");
         setIsLoading(false);
       }
     };
 
+    const sendLeaderboardRequest = (requestId: string) => {
+      wsClient.send({
+        type: "leaderboard",
+        requestId,
+        payload: { limit: 10 },
+        timestamp: new Date().toISOString(),
+      });
+
+      handleLeaderboardResponse = (message: any) => {
+        if (
+          message.type === "leaderboard_response" &&
+          message.requestId === requestId
+        ) {
+          // Clear the timeout since we got a response
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+
+          if (message.payload.success) {
+            setPlayers(message.payload.data);
+            setError(null);
+          } else {
+            setError(message.payload.message || "Failed to fetch leaderboard");
+          }
+          setIsLoading(false);
+        }
+      };
+
+      wsClient.on("leaderboard_response", handleLeaderboardResponse);
+
+      timeoutId = setTimeout(() => {
+        setError("Request timeout. Please try again.");
+        setIsLoading(false);
+      }, 10000);
+    };
+
     fetchLeaderboard();
-  }, []);
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (handleLeaderboardResponse) {
+        wsClient.off("leaderboard_response", handleLeaderboardResponse);
+      }
+    };
+  }, [isConnected]);
 
   const renderSkeletonRows = () => {
     return Array.from({ length: 10 }).map((_, index) => (
@@ -137,6 +171,26 @@ export default function LeaderboardPage() {
           {error && (
             <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
               <p className="text-destructive text-center">{error}</p>
+              <div className="mt-2 text-center space-x-2">
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  size="sm"
+                >
+                  Refresh Page
+                </Button>
+                <Button
+                  onClick={() => {
+                    setError(null);
+                    setIsLoading(true);
+                    setPlayers([]);
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Retry Request
+                </Button>
+              </div>
             </div>
           )}
 
@@ -190,7 +244,7 @@ export default function LeaderboardPage() {
                       </TableCell>
                       <TableCell>
                         <Link
-                          to={`/user/${player.username}`}
+                          to={`/user/${player.id}`}
                           className="flex items-center gap-3 group"
                         >
                           <Avatar className="animation-all group-hover:scale-110">
