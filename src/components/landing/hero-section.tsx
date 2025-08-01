@@ -62,7 +62,7 @@ export function HeroSection() {
             size="lg"
             className="animation-all hover:scale-105 active:scale-95"
           >
-            <Link to="/signup">
+            <Link to="/register">
               {sectionContent.buttonText}{" "}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

@@ -43,7 +43,7 @@ export default function ProfilePage() {
     : "";
   const referralLink =
     typeof window !== "undefined"
-      ? `${window.location.origin}/signup?ref=${referralId}`
+      ? `${window.location.origin}/register?ref=${referralId}`
       : "";
 
   const handleCopy = useCallback(() => {
