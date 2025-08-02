@@ -42,20 +42,20 @@ export const CountdownTimer = ({
 
   return (
     <div className="flex-1 text-center">
-      <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2">
-        <Timer className="h-4 w-4" />
+      <div className="text-xs md:text-sm font-semibold text-muted-foreground flex items-center justify-center gap-1 md:gap-2">
+        <Timer className="h-3 w-3 md:h-4 md:w-4" />
         {label}
       </div>
-      <div className="flex justify-center items-center gap-1 mt-2">
-        <span className="h-8 w-8 flex items-center justify-center font-bold text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
+      <div className="flex justify-center items-center gap-1 mt-1 md:mt-2">
+        <span className="h-6 w-6 md:h-8 md:w-8 flex items-center justify-center font-bold text-xs md:text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
           {formatTime(timeLeft.hours)}
         </span>
-        <span className="font-bold text-primary">:</span>
-        <span className="h-8 w-8 flex items-center justify-center font-bold text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
+        <span className="font-bold text-primary text-xs md:text-sm">:</span>
+        <span className="h-6 w-6 md:h-8 md:w-8 flex items-center justify-center font-bold text-xs md:text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
           {formatTime(timeLeft.minutes)}
         </span>
-        <span className="font-bold text-primary">:</span>
-        <span className="h-8 w-8 flex items-center justify-center font-bold text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
+        <span className="font-bold text-primary text-xs md:text-sm">:</span>
+        <span className="h-6 w-6 md:h-8 md:w-8 flex items-center justify-center font-bold text-xs md:text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
           {formatTime(timeLeft.seconds)}
         </span>
       </div>
