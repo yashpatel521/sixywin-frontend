@@ -125,33 +125,37 @@ export function Header() {
                   <WatchAd />
                 </DialogContent>
               </Dialog>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="animation-all hover:scale-105 active:scale-95 bg-accent text-accent-foreground hover:bg-accent/90"
-                    >
-                      <Icons.gift className="mr-2 h-4 w-4" />
-                      Spin to Win
-                    </Button>
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="glassmorphism">
-                  <DialogHeader>
-                    <DialogTitle className="font-headline text-2xl flex items-center justify-center gap-2">
-                      <Icons.gift className="h-6 w-6 text-primary" />
-                      Daily Bonus Wheel
-                    </DialogTitle>
-                    <DialogDescription className="text-center">
-                      Spin the wheel to win extra coins! You get one free spin
-                      per day.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <SpinWheel />
-                </DialogContent>
-              </Dialog>
+              {user?.isSpinned ? (
+                <></>
+              ) : (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="animation-all hover:scale-105 active:scale-95 bg-accent text-accent-foreground hover:bg-accent/90"
+                      >
+                        <Icons.gift className="mr-2 h-4 w-4" />
+                        Spin to Win
+                      </Button>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="glassmorphism">
+                    <DialogHeader>
+                      <DialogTitle className="font-headline text-2xl flex items-center justify-center gap-2">
+                        <Icons.gift className="h-6 w-6 text-primary" />
+                        Daily Bonus Wheel
+                      </DialogTitle>
+                      <DialogDescription className="text-center">
+                        Spin the wheel to win extra coins! You get one free spin
+                        per day.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <SpinWheel />
+                  </DialogContent>
+                </Dialog>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

@@ -12,6 +12,7 @@ export interface User {
   totalWon: number;
   winningAmount: number;
   isBot: boolean;
+  isSpinned?: boolean;
   createdAt: Date;
   updatedAt: Date;
   token?: string;
