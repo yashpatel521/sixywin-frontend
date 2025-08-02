@@ -86,7 +86,7 @@ export default function LoginPage() {
     wsClient.on("login_response", handleResponse);
 
     // Send login request via WebSocket
-    wsClient.send({
+    const success = wsClient.send({
       type: "login",
       payload: {
         emailOrUsername: formData.emailOrUsername,
@@ -95,6 +95,13 @@ export default function LoginPage() {
       requestId: requestId,
       timestamp: new Date().toISOString(),
     });
+
+    if (!success) {
+      setError("Failed to send login request. Please check your connection.");
+      setIsLoading(false);
+      wsClient.off("login_response", handleResponse);
+      return;
+    }
 
     // Timeout after 10 seconds
     setTimeout(() => {

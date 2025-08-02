@@ -84,7 +84,7 @@ export default function SignupPage() {
     wsClient.on("register_response", handleResponse);
 
     // Send register request via WebSocket
-    wsClient.send({
+    const success = wsClient.send({
       type: "register",
       payload: {
         username: userData.username,
@@ -94,6 +94,15 @@ export default function SignupPage() {
       requestId: requestId,
       timestamp: new Date().toISOString(),
     });
+
+    if (!success) {
+      setError(
+        "Failed to send registration request. Please check your connection."
+      );
+      setIsLoading(false);
+      wsClient.off("register_response", handleResponse);
+      return;
+    }
 
     // Timeout after 10 seconds
     setTimeout(() => {

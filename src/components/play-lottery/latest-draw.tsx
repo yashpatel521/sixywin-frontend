@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { wsClient } from "@/websocket";
+import { useWebSocket } from "@/contexts/WebSocketContext";
 import { differenceInSeconds } from "date-fns";
 import { Icons } from "../shared/icons";
 
@@ -16,153 +16,139 @@ export const LatestDrawNumbers = () => {
   const [latestDraw, setLatestDraw] = useState<LatestDrawData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [countdown, setCountdown] = useState({
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let handleLatestDrawResponse: (message: any) => void;
-    let countdownInterval: NodeJS.Timeout;
+  const { isConnected, sendMessage, messages } = useWebSocket();
+  const countdownCleanupRef = useRef<(() => void) | null>(null);
+  const hasRequestedData = useRef(false);
 
-    const fetchLatestDraw = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const startCountdown = useCallback((nextDrawTime: string | Date) => {
+    const updateCountdown = () => {
+      const now = new Date();
 
-        const requestId = Math.random().toString(36).substring(7);
-
-        if (!wsClient.isConnected()) {
-          setError("Connecting to server...");
-
-          const connectionTimeout = setTimeout(() => {
-            setError("Connection failed. Please refresh the page.");
-            setIsLoading(false);
-          }, 5000);
-
-          const connectionCheckInterval = setInterval(() => {
-            if (wsClient.isConnected()) {
-              clearTimeout(connectionTimeout);
-              clearInterval(connectionCheckInterval);
-              setError(null);
-              sendLatestDrawRequest(requestId);
-            }
-          }, 100);
-
-          return;
-        }
-
-        sendLatestDrawRequest(requestId);
-      } catch (err) {
-        setError("Failed to connect to server");
-        setIsLoading(false);
+      // Handle different formats of nextDrawTime
+      let nextDraw: Date;
+      if (nextDrawTime instanceof Date) {
+        nextDraw = nextDrawTime;
+      } else if (typeof nextDrawTime === "string") {
+        nextDraw = new Date(nextDrawTime);
+      } else {
+        // Fallback: calculate next hour from current time
+        nextDraw = new Date();
+        nextDraw.setHours(nextDraw.getHours() + 1);
+        nextDraw.setMinutes(0, 0, 0);
       }
+
+      // Validate the date
+      if (isNaN(nextDraw.getTime())) {
+        // Invalid date, use fallback
+        nextDraw = new Date();
+        nextDraw.setHours(nextDraw.getHours() + 1);
+        nextDraw.setMinutes(0, 0, 0);
+      }
+
+      const totalSeconds = Math.max(0, differenceInSeconds(nextDraw, now));
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      setCountdown({ hours, minutes, seconds });
     };
 
-    const sendLatestDrawRequest = (requestId: string) => {
-      wsClient.send({
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
+
+    // Return cleanup function
+    return () => clearInterval(countdownInterval);
+  }, []);
+
+  // Handle WebSocket messages
+  useEffect(() => {
+    if (!messages.length) return;
+
+    const latestMessage = messages[messages.length - 1];
+
+    if (
+      latestMessage.type === "latestDraw_response" &&
+      latestMessage.payload?.success
+    ) {
+      const drawData = latestMessage.payload.data;
+
+      // Transform server data to match our interface
+      const transformedData: LatestDrawData = {
+        winningNumbers: drawData.winningNumbers || [],
+        drawDate: drawData.drawDate,
+        totalWinners: drawData.totalWinners || 0,
+        totalPrize: drawData.totalPrize || 0,
+        nextDrawTime: drawData.nextDrawTime,
+      };
+
+      setLatestDraw(transformedData);
+
+      // Clean up previous countdown
+      if (countdownCleanupRef.current) {
+        countdownCleanupRef.current();
+      }
+
+      // Start new countdown
+      const cleanup = startCountdown(transformedData.nextDrawTime);
+      countdownCleanupRef.current = cleanup;
+
+      setIsLoading(false);
+      setError(null);
+    } else if (latestMessage.type === "error") {
+      setError(latestMessage.payload?.message || "Failed to fetch latest draw");
+      setIsLoading(false);
+    }
+  }, [messages, startCountdown]);
+
+  // Request latest draw data when connected
+  useEffect(() => {
+    if (isConnected && !hasRequestedData.current) {
+      sendMessage({
         type: "latestDraw",
-        requestId,
         payload: {},
         timestamp: new Date().toISOString(),
+        requestId: `latest-draw-${Date.now()}`,
       });
 
-      handleLatestDrawResponse = (message: any) => {
-        if (message.type === "latestDraw_response") {
-          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-          if (message.requestId && message.requestId === requestId) {
-            // This is a response to our request
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
+      hasRequestedData.current = true;
+      setError(null);
+    } else if (!isConnected) {
+      setError("Connecting to server...");
+      hasRequestedData.current = false; // Reset flag when disconnected
+    }
+  }, [isConnected, sendMessage]);
 
-            if (message.payload.success) {
-              setLatestDraw(message.payload.data);
-              startCountdown(message.payload.data.nextDrawTime);
-            } else {
-              setError(
-                message.payload.message || "Failed to fetch latest draw"
-              );
-            }
-            setIsLoading(false);
-          } else if (!message.requestId) {
-            // This is a broadcast update
-            if (message.payload.success) {
-              setLatestDraw(message.payload.data);
-              startCountdown(message.payload.data.nextDrawTime);
-              setIsLoading(false);
+  // Reset request flag and refresh data periodically
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      if (isConnected) {
+        sendMessage({
+          type: "latestDraw",
+          payload: {},
+          timestamp: new Date().toISOString(),
+          requestId: `latest-draw-refresh-${Date.now()}`,
+        });
+      }
+    }, 60000); // Refresh every minute
 
-              // Show brief updating animation
-              setIsUpdating(true);
-              setTimeout(() => setIsUpdating(false), 1000);
-            }
-          }
-        }
-      };
+    return () => clearInterval(refreshInterval);
+  }, [isConnected, sendMessage]);
 
-      wsClient.on("latestDraw_response", handleLatestDrawResponse);
-
-      timeoutId = setTimeout(() => {
-        setError("Request timeout. Please try again.");
-        setIsLoading(false);
-      }, 10000);
-    };
-
-    const startCountdown = (nextDrawTime: string | Date) => {
-      const updateCountdown = () => {
-        const now = new Date();
-
-        // Handle different formats of nextDrawTime
-        let nextDraw: Date;
-        if (nextDrawTime instanceof Date) {
-          nextDraw = nextDrawTime;
-        } else if (typeof nextDrawTime === "string") {
-          nextDraw = new Date(nextDrawTime);
-        } else {
-          // Fallback: calculate next hour from current time
-          nextDraw = new Date();
-          nextDraw.setHours(nextDraw.getHours() + 1);
-          nextDraw.setMinutes(0, 0, 0);
-        }
-
-        // Validate the date
-        if (isNaN(nextDraw.getTime())) {
-          // Invalid date, use fallback
-          nextDraw = new Date();
-          nextDraw.setHours(nextDraw.getHours() + 1);
-          nextDraw.setMinutes(0, 0, 0);
-        }
-
-        const totalSeconds = Math.max(0, differenceInSeconds(nextDraw, now));
-
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        setCountdown({ hours, minutes, seconds });
-      };
-
-      updateCountdown();
-      countdownInterval = setInterval(updateCountdown, 1000);
-    };
-
-    fetchLatestDraw();
-
+  // Cleanup countdown when component unmounts
+  useEffect(() => {
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (handleLatestDrawResponse) {
-        wsClient.off("latestDraw_response", handleLatestDrawResponse);
-      }
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
+      if (countdownCleanupRef.current) {
+        countdownCleanupRef.current();
       }
     };
-  }, []);
+  }, []); // Empty dependency array - only runs on mount/unmount
 
   const winningNumbers = latestDraw?.winningNumbers;
 
@@ -220,11 +206,7 @@ export const LatestDrawNumbers = () => {
               ))}
             </div>
           ) : (
-            <div
-              className={`flex justify-center gap-2 flex-wrap transition-all duration-300 ${
-                isUpdating ? "scale-105" : ""
-              }`}
-            >
+            <div className="flex justify-center gap-2 flex-wrap transition-all duration-300">
               {winningNumbers?.map((num, i) => (
                 <div
                   key={i}
@@ -234,10 +216,6 @@ export const LatestDrawNumbers = () => {
                 </div>
               ))}
             </div>
-          )}
-
-          {isUpdating && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
           )}
 
           {/* {latestDraw && (

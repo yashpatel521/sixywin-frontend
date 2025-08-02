@@ -87,6 +87,19 @@ export default function LeaderboardPage() {
     };
 
     const sendLeaderboardRequest = (requestId: string) => {
+      // Use the new convenience method
+      const success = wsClient.requestLeaderboard();
+
+      if (!success) {
+        setError(
+          "Failed to request leaderboard. Please check your connection."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // For backward compatibility, also send the old format
+      // TODO: Update server to use the new get_leaderboard message type
       wsClient.send({
         type: "leaderboard",
         requestId,

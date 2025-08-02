@@ -80,12 +80,20 @@ export default function UserProfilePage() {
     };
 
     const sendUserProfileRequest = (requestId: string) => {
-      wsClient.send({
+      const success = wsClient.send({
         type: "get_user_profile",
         requestId,
         payload: { id: userId },
         timestamp: new Date().toISOString(),
       });
+
+      if (!success) {
+        setError(
+          "Failed to send profile request. Please check your connection."
+        );
+        setIsLoading(false);
+        return;
+      }
 
       handleUserProfileResponse = (message: any) => {
         if (

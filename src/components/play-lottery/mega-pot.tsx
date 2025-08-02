@@ -39,6 +39,19 @@ export function MegaPot() {
       let handleMegaPotResponse: (message: any) => void;
       let timeoutId: NodeJS.Timeout;
 
+      // Use the new convenience method
+      const success = wsClient.requestMegaPot();
+
+      if (!success) {
+        setError(
+          "Failed to request mega pot data. Please check your connection."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // For backward compatibility, also send the old format
+      // TODO: Update server to use the new get_mega_pot message type
       wsClient.send({
         type: "megaPot",
         requestId,

@@ -138,16 +138,30 @@ export function TicketSubmission() {
     let handleCreateTicketResponse: (message: any) => void;
     let timeoutId: NodeJS.Timeout;
 
-    const ticketData = {
-      numbers: selectedNumbers,
-      bid: bidAmount[0],
-      userId: user?.id,
-    };
+    // Use the new convenience method for ticket submission
+    const success = wsClient.submitTicket(selectedNumbers, bidAmount[0]);
 
+    if (!success) {
+      setIsSubmitting(false);
+      toast({
+        title: "❌ Submission Failed",
+        description:
+          "Failed to submit ticket. Please check your connection and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // For backward compatibility, also listen for the old response format
+    // TODO: Update server to use the new submitTicket message type
     wsClient.send({
       type: "createTicket",
       requestId,
-      payload: ticketData,
+      payload: {
+        numbers: selectedNumbers,
+        bid: bidAmount[0],
+        userId: user?.id,
+      },
       timestamp: new Date().toISOString(),
     });
 
