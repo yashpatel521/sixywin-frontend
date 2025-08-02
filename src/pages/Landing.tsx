@@ -1,3 +1,4 @@
+import { SEO, SEO_CONFIGS } from "../components/shared/seo";
 import { HeroSection } from "../components/landing/hero-section";
 import { GamesSection } from "../components/landing/games-section";
 import { RedeemSection } from "../components/landing/redeem-section";
@@ -9,6 +10,7 @@ import { CtaSection } from "../components/landing/cta-section";
 export default function LandingPage() {
   return (
     <>
+      <SEO {...SEO_CONFIGS.home} />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <HeroSection />

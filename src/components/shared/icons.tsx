@@ -8,11 +8,17 @@ import {
   Globe,
   Laptop,
 } from "lucide-react";
+import { IMAGES } from "@/lib/constants";
 
 export const Icons = {
   //logo image
   logo: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img src="/logo.png" alt="logo" {...props} className="w-10 h-10" />
+    <img
+      src={IMAGES.logo}
+      alt="SixyWin Logo"
+      {...props}
+      className="w-10 h-10"
+    />
   ),
   ticket: (props: LucideProps) => <TicketIcon {...props} />,
   user: (props: LucideProps) => <User {...props} />,

@@ -1,14 +1,15 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Mail, User, MessageSquare, VenetianMask } from "lucide-react";
+import { Mail, User, VenetianMask, MessageSquare } from "lucide-react";
+import { IMAGES } from "@/lib/constants";
 
 export default function ContactUsPage() {
   return (
@@ -102,7 +103,7 @@ export default function ContactUsPage() {
               </p>
             </div>
             <img
-              src="/img1.png"
+              src={IMAGES.loginImage}
               alt="Customer support person"
               className="relative z-10 mx-auto rounded-full object-cover animation-all hover:scale-105"
               data-ai-hint="customer support"

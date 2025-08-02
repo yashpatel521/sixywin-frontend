@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +11,6 @@ import { Ticket, Dices, Sparkles, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHistory } from "@/hooks/use-history";
 import { useToast } from "@/hooks/use-toast";
-import Confetti from "react-confetti";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { LatestDrawNumbers } from "./latest-draw";
@@ -19,6 +18,9 @@ import { MAX_NUMBERS, TOTAL_NUMBERS } from "@/lib/constants";
 import { wsClient } from "@/websocket";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { User } from "@/lib/interfaces";
+
+// Dynamically import Confetti to reduce bundle size
+const Confetti = React.lazy(() => import("react-confetti"));
 
 export function TicketSubmission() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
@@ -221,12 +223,14 @@ export function TicketSubmission() {
   return (
     <>
       {isClient && showConfetti && (
-        <Confetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={false}
-          numberOfPieces={400}
-        />
+        <React.Suspense fallback={null}>
+          <Confetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={false}
+            numberOfPieces={400}
+          />
+        </React.Suspense>
       )}
       <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

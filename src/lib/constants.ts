@@ -17,3 +17,11 @@ export const prizes = [
 ];
 
 export const segmentColors = ["#fde047", "#dc2626"];
+
+// Image assets
+export const IMAGES = {
+  logo: "/logo.png",
+  hero: "/img1.png",
+  redeem: "/img2.png",
+  loginImage: "/img1.png",
+} as const;

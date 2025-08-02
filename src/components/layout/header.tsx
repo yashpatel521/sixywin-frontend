@@ -58,7 +58,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-6 flex items-center space-x-2">
-            <Icons.logo className="h-6 w-6 text-primary" />
+            <Icons.logo className="h-6 w-6" />
             <span className="hidden font-headline font-bold sm:inline-block">
               SixyWin
             </span>
@@ -85,7 +85,7 @@ export function Header() {
               >
                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 <Link to="/" className="mb-8 flex items-center space-x-2">
-                  <Icons.logo className="h-6 w-6 text-primary" />
+                  <Icons.logo className="h-6 w-6" />
                   <span className="font-headline font-bold">SixyWin</span>
                 </Link>
                 {isLoggedIn && (

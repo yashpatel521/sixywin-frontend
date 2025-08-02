@@ -15,6 +15,7 @@ import {
 } from "@/lib/localStorage";
 import { UserType } from "@/types/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { IMAGES } from "@/lib/constants";
 
 export default function LoginPage() {
   // if the user is already logged in, redirect to the home page
@@ -110,7 +111,7 @@ export default function LoginPage() {
         <div className="hidden md:flex flex-col justify-center items-center p-12 bg-primary/10 relative overflow-hidden text-center">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-yellow-900/50 opacity-50 shapes" />
           <img
-            src="/img1.png"
+            src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
             className="rounded-full object-cover mb-6 shadow-2xl animation-all hover:scale-105"
             data-ai-hint="cartoon winner"
@@ -132,8 +133,8 @@ export default function LoginPage() {
               to="/"
               className="flex justify-center items-center gap-3 mb-6"
             >
-              <Icons.logo className="h-8 w-8 text-primary" />
-              <h1 className="font-headline text-3xl font-bold">SixyWin</h1>
+              <Icons.logo className="h-8 w-8" />
+              <span className="font-headline text-2xl font-bold">SixyWin</span>
             </Link>
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
               User Login

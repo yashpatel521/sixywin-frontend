@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BouncingBalls } from "@/components/shared/bouncing-balls";
 import { Trophy } from "lucide-react";
+import { IMAGES } from "@/lib/constants";
 
 const sectionContent = {
   welcome: "Welcome to",
@@ -11,7 +12,7 @@ const sectionContent = {
     "Your daily dose of fun and excitement! Pick your lucky numbers, win virtual coins, and climb the leaderboard. No risk, all fun.",
   buttonText: "Get Started for Free",
   image: {
-    src: "/img1.png",
+    src: IMAGES.hero,
     alt: "Joyful cartoon person celebrating with playing cards",
     width: 400,
     height: 400,

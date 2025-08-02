@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gift, RefreshCw } from "lucide-react";
+import { Gift, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { prizes, segmentColors } from "@/lib/constants";
@@ -139,7 +139,7 @@ export function SpinWheel() {
           className="w-full animation-all hover:scale-105 active:scale-95 text-lg font-bold py-6"
         >
           {isSpinning ? (
-            <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+            <RotateCcw className="mr-2 h-5 w-5 animate-spin" />
           ) : (
             <Gift className="mr-2 h-5 w-5" />
           )}

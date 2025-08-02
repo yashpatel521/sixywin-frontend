@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { SEO, SEO_CONFIGS } from "@/components/shared/seo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,11 +20,13 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import Confetti from "react-confetti";
 import { cn } from "@/lib/utils";
 import { CurrentBets } from "@/components/double-trouble/current-bets";
 import { PlacedBet, PlacedNumberBet, DrawResult } from "@/lib/types";
 import { TOTAL_NUMBERS, DRAW_INTERVAL_SECONDS } from "@/lib/constants";
+
+// Dynamically import Confetti to reduce bundle size
+const Confetti = React.lazy(() => import("react-confetti"));
 
 const initialHistory: DrawResult[] = [
   { number: 12, outcome: "win" },
@@ -177,7 +180,12 @@ export default function DoubleTroublePage() {
 
   return (
     <>
-      {showConfetti && <Confetti recycle={false} numberOfPieces={600} />}
+      {showConfetti && (
+        <React.Suspense fallback={null}>
+          <Confetti recycle={false} numberOfPieces={600} />
+        </React.Suspense>
+      )}
+      <SEO {...SEO_CONFIGS.doubleTrouble} />
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         <Card className="w-full glassmorphism">
           <CardHeader className="text-center">

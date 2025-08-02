@@ -1,11 +1,12 @@
 import { Gift } from "lucide-react";
+import { IMAGES } from "@/lib/constants";
 
 const sectionContent = {
   title: "Redeem Your Coins",
   description:
     "Turn your virtual winnings into real-world rewards! You can exchange the coins you win for valuable coupons from top brands like Amazon, Apple, and more.",
   image: {
-    src: "/img2.png",
+    src: IMAGES.redeem,
     alt: "Gift cards and coupons",
     width: 600,
     height: 400,

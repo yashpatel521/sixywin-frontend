@@ -1,15 +1,15 @@
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Link, useLocation } from "react-router-dom";
-import { User, Lock, Gift, EyeIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/shared/icons";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { User, Lock, Gift, Eye, EyeOff } from "lucide-react";
 import { wsClient } from "@/websocket";
-import { tokenStorage, userStorage } from "@/lib/localStorage";
+import { UserType } from "@/types/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import type { UserType } from "@/types/interfaces";
+import { tokenStorage, userStorage } from "@/lib/localStorage";
+import { IMAGES } from "@/lib/constants";
 
 export default function SignupPage() {
   // if the user is already logged in, redirect to the home page
@@ -112,8 +112,12 @@ export default function SignupPage() {
               to="/"
               className="flex justify-center items-center gap-3 mb-6"
             >
-              <Icons.logo className="h-8 w-8 text-primary" />
-              <h1 className="font-headline text-3xl font-bold">SixyWin</h1>
+              <div className="flex items-center space-x-2">
+                <Icons.logo className="h-8 w-8" />
+                <span className="font-headline text-2xl font-bold">
+                  SixyWin
+                </span>
+              </div>
             </Link>
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
               Sign Up
@@ -162,7 +166,7 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <Eye className="h-5 w-5" />
                 </button>
               </div>
               <div className="relative">
@@ -182,7 +186,7 @@ export default function SignupPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <EyeOff className="h-5 w-5" />
                 </button>
               </div>
               {!isPasswordValid &&
@@ -250,7 +254,7 @@ export default function SignupPage() {
         <div className="hidden md:flex flex-col justify-center items-center p-12 bg-primary/10 relative overflow-hidden text-center">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-yellow-900/50 opacity-50 shapes" />
           <img
-            src="/img1.png"
+            src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
             className="rounded-full object-cover mb-6 shadow-2xl animation-all hover:scale-105"
             data-ai-hint="cartoon winner"
