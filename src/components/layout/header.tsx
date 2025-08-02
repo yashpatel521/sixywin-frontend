@@ -22,7 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-// import { useMegaPot } from "../../hooks/use-mega-pot";
 import { WatchAd } from "../shared/watch-ad-modal";
 import { Icons } from "../shared/icons";
 import { clearAuthData, isAuthenticated } from "@/lib/localStorage";
@@ -34,7 +33,6 @@ export function Header() {
   const isLoggedIn = isAuthenticated();
   const navigate = useNavigate();
   const [user, setUser] = useLocalStorage<User | null>("user", null);
-  // const { pot } = useMegaPot();
 
   // Listen for user data changes from other parts of the app
   useEffect(() => {

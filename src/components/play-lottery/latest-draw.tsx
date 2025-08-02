@@ -9,13 +9,14 @@ interface LatestDrawData {
   drawDate: string;
   totalWinners: number;
   totalPrize: number;
-  nextDrawTime: string;
+  nextDrawTime: string | Date;
 }
 
 export const LatestDrawNumbers = () => {
   const [latestDraw, setLatestDraw] = useState<LatestDrawData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [countdown, setCountdown] = useState({
     hours: 0,
     minutes: 0,
@@ -70,25 +71,39 @@ export const LatestDrawNumbers = () => {
       });
 
       handleLatestDrawResponse = (message: any) => {
-        if (
-          message.type === "latest_draw_response" &&
-          message.requestId === requestId
-        ) {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
+        if (message.type === "latestDraw_response") {
+          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
+          if (message.requestId && message.requestId === requestId) {
+            // This is a response to our request
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
 
-          if (message.payload.success) {
-            setLatestDraw(message.payload.data);
-            startCountdown(message.payload.data.nextDrawTime);
-          } else {
-            setError(message.payload.message || "Failed to fetch latest draw");
+            if (message.payload.success) {
+              setLatestDraw(message.payload.data);
+              startCountdown(message.payload.data.nextDrawTime);
+            } else {
+              setError(
+                message.payload.message || "Failed to fetch latest draw"
+              );
+            }
+            setIsLoading(false);
+          } else if (!message.requestId) {
+            // This is a broadcast update
+            if (message.payload.success) {
+              setLatestDraw(message.payload.data);
+              startCountdown(message.payload.data.nextDrawTime);
+              setIsLoading(false);
+
+              // Show brief updating animation
+              setIsUpdating(true);
+              setTimeout(() => setIsUpdating(false), 1000);
+            }
           }
-          setIsLoading(false);
         }
       };
 
-      wsClient.on("latest_draw_response", handleLatestDrawResponse);
+      wsClient.on("latestDraw_response", handleLatestDrawResponse);
 
       timeoutId = setTimeout(() => {
         setError("Request timeout. Please try again.");
@@ -96,10 +111,31 @@ export const LatestDrawNumbers = () => {
       }, 10000);
     };
 
-    const startCountdown = (nextDrawTime: string) => {
+    const startCountdown = (nextDrawTime: string | Date) => {
       const updateCountdown = () => {
         const now = new Date();
-        const nextDraw = new Date(nextDrawTime);
+
+        // Handle different formats of nextDrawTime
+        let nextDraw: Date;
+        if (nextDrawTime instanceof Date) {
+          nextDraw = nextDrawTime;
+        } else if (typeof nextDrawTime === "string") {
+          nextDraw = new Date(nextDrawTime);
+        } else {
+          // Fallback: calculate next hour from current time
+          nextDraw = new Date();
+          nextDraw.setHours(nextDraw.getHours() + 1);
+          nextDraw.setMinutes(0, 0, 0);
+        }
+
+        // Validate the date
+        if (isNaN(nextDraw.getTime())) {
+          // Invalid date, use fallback
+          nextDraw = new Date();
+          nextDraw.setHours(nextDraw.getHours() + 1);
+          nextDraw.setMinutes(0, 0, 0);
+        }
+
         const totalSeconds = Math.max(0, differenceInSeconds(nextDraw, now));
 
         const hours = Math.floor(totalSeconds / 3600);
@@ -120,7 +156,7 @@ export const LatestDrawNumbers = () => {
         clearTimeout(timeoutId);
       }
       if (handleLatestDrawResponse) {
-        wsClient.off("latest_draw_response", handleLatestDrawResponse);
+        wsClient.off("latestDraw_response", handleLatestDrawResponse);
       }
       if (countdownInterval) {
         clearInterval(countdownInterval);
@@ -133,7 +169,7 @@ export const LatestDrawNumbers = () => {
   return (
     <div className="relative p-4">
       {/* Responsive Layout - Stack on mobile, side by side on larger screens */}
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center">
+      <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-center justify-center">
         {/* Next Draw Countdown */}
         <div className="text-center w-full md:w-auto">
           <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 mb-3">
@@ -165,7 +201,7 @@ export const LatestDrawNumbers = () => {
         </div>
 
         {/* Latest Winning Numbers */}
-        <div className="text-center w-full md:w-auto">
+        <div className="text-center w-full md:w-auto relative">
           <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 mb-3">
             <Award className="h-4 w-4" />
             Latest Winning Numbers
@@ -184,7 +220,11 @@ export const LatestDrawNumbers = () => {
               ))}
             </div>
           ) : (
-            <div className="flex justify-center gap-2 flex-wrap">
+            <div
+              className={`flex justify-center gap-2 flex-wrap transition-all duration-300 ${
+                isUpdating ? "scale-105" : ""
+              }`}
+            >
               {winningNumbers?.map((num, i) => (
                 <div
                   key={i}
@@ -196,14 +236,18 @@ export const LatestDrawNumbers = () => {
             </div>
           )}
 
-          {latestDraw && (
+          {isUpdating && (
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          )}
+
+          {/* {latestDraw && (
             <div className="mt-3 text-xs text-muted-foreground flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
               <div>
                 Draw Date: {new Date(latestDraw.drawDate).toLocaleDateString()}
               </div>
               <div>Total Winners: {latestDraw.totalWinners}</div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

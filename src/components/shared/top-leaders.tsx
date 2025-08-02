@@ -136,27 +136,41 @@ export function TopLeaders() {
       });
 
       handleLeaderboardResponse = (message: any) => {
-        if (
-          message.type === "leaderboard_response" &&
-          message.requestId === requestId
-        ) {
-          // Clear the timeout since we got a response
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
+        if (message.type === "leaderboard_response") {
+          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
+          if (message.requestId && message.requestId === requestId) {
+            // This is a response to our request
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
 
-          if (message.payload.success) {
-            // Add rank to each leader based on their position
-            const serverData: UserType[] = message.payload.data || [];
-            const leadersWithRank = serverData.map((leader, index) => ({
-              ...leader,
-              rank: index + 1,
-            }));
-            setLeaders(leadersWithRank);
-          } else {
-            setError(message.payload.message || "Failed to fetch leaderboard");
+            if (message.payload.success) {
+              // Add rank to each leader based on their position
+              const serverData: UserType[] = message.payload.data || [];
+              const leadersWithRank = serverData.map((leader, index) => ({
+                ...leader,
+                rank: index + 1,
+              }));
+              setLeaders(leadersWithRank);
+            } else {
+              setError(
+                message.payload.message || "Failed to fetch leaderboard"
+              );
+            }
+            setIsLoading(false);
+          } else if (!message.requestId) {
+            // This is a broadcast update
+            if (message.payload.success) {
+              // Add rank to each leader based on their position
+              const serverData: UserType[] = message.payload.data || [];
+              const leadersWithRank = serverData.map((leader, index) => ({
+                ...leader,
+                rank: index + 1,
+              }));
+              setLeaders(leadersWithRank);
+              setIsLoading(false);
+            }
           }
-          setIsLoading(false);
         }
       };
 

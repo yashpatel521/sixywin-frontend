@@ -165,7 +165,10 @@ export default function ProfilePage() {
                   {(user?.winningAmount || 0).toLocaleString()} Available Coins
                 </span>
               </div>
-              <Button disabled className="opacity-50 cursor-not-allowed w-full sm:w-auto">
+              <Button
+                disabled
+                className="opacity-50 cursor-not-allowed w-full sm:w-auto"
+              >
                 Coming Soon
               </Button>
             </div>
@@ -189,7 +192,9 @@ export default function ProfilePage() {
           <CardContent className="p-4 md:p-6">
             <form className="space-y-4 md:space-y-6">
               <div className="grid gap-2">
-                <Label htmlFor="username" className="text-sm md:text-base">Username</Label>
+                <Label htmlFor="username" className="text-sm md:text-base">
+                  Username
+                </Label>
                 <Input
                   id="username"
                   defaultValue={user?.username || ""}
@@ -240,7 +245,12 @@ export default function ProfilePage() {
               </div>
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="current-password" className="text-sm md:text-base">Current Password</Label>
+                  <Label
+                    htmlFor="current-password"
+                    className="text-sm md:text-base"
+                  >
+                    Current Password
+                  </Label>
                   <div className="relative">
                     <Input
                       id="current-password"
@@ -271,7 +281,12 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="new-password" className="text-sm md:text-base">New Password</Label>
+                  <Label
+                    htmlFor="new-password"
+                    className="text-sm md:text-base"
+                  >
+                    New Password
+                  </Label>
                   <div className="relative">
                     <Input
                       id="new-password"
@@ -322,7 +337,9 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="text-center py-6 md:py-8 text-muted-foreground">
-              <p className="text-base md:text-lg font-medium">No referrals yet!</p>
+              <p className="text-base md:text-lg font-medium">
+                No referrals yet!
+              </p>
               <p className="text-xs md:text-sm">
                 Share your referral ID to bring friends.
               </p>
@@ -337,11 +354,15 @@ export default function ProfilePage() {
               <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Redeem History
             </CardTitle>
-            <CardDescription className="text-sm md:text-base">Your history of redeemed coupons.</CardDescription>
+            <CardDescription className="text-sm md:text-base">
+              Your history of redeemed coupons.
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="text-center py-6 md:py-8 text-muted-foreground">
-              <p className="text-base md:text-lg font-medium">No redeem history yet!</p>
+              <p className="text-base md:text-lg font-medium">
+                No redeem history yet!
+              </p>
               <p className="text-xs md:text-sm">
                 Start redeeming coins to see your history here.
               </p>

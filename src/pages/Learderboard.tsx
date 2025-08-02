@@ -94,22 +94,31 @@ export default function LeaderboardPage() {
       });
 
       handleLeaderboardResponse = (message: any) => {
-        if (
-          message.type === "leaderboard_response" &&
-          message.requestId === requestId
-        ) {
-          // Clear the timeout since we got a response
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
+        if (message.type === "leaderboard_response") {
+          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
+          if (message.requestId && message.requestId === requestId) {
+            // This is a response to our request
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
 
-          if (message.payload.success) {
-            setPlayers(message.payload.data);
-            setError(null);
-          } else {
-            setError(message.payload.message || "Failed to fetch leaderboard");
+            if (message.payload.success) {
+              setPlayers(message.payload.data);
+              setError(null);
+            } else {
+              setError(
+                message.payload.message || "Failed to fetch leaderboard"
+              );
+            }
+            setIsLoading(false);
+          } else if (!message.requestId) {
+            // This is a broadcast update
+            if (message.payload.success) {
+              setPlayers(message.payload.data);
+              setError(null);
+              setIsLoading(false);
+            }
           }
-          setIsLoading(false);
         }
       };
 

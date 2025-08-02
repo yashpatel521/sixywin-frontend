@@ -15,6 +15,7 @@ export function MegaPot() {
   const [data, setData] = useState<MegaPotType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // WebSocket logic for fetching mega pot data
   useEffect(() => {
@@ -46,22 +47,34 @@ export function MegaPot() {
       });
 
       handleMegaPotResponse = (message: any) => {
-        if (
-          message.type === "megaPot_response" &&
-          message.requestId === requestId
-        ) {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
+        if (message.type === "megaPot_response") {
+          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
+          if (message.requestId && message.requestId === requestId) {
+            // This is a response to our request
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
 
-          if (message.payload.success) {
-            const megaPotData: MegaPotType = message.payload.data;
-            setData(megaPotData);
-            setError(null);
-          } else {
-            setError(message.payload.message || "Failed to fetch mega pot");
+            if (message.payload.success) {
+              const megaPotData: MegaPotType = message.payload.data;
+              setData(megaPotData);
+              setError(null);
+              setIsLoading(false);
+            } else {
+              setError(message.payload.message || "Failed to fetch mega pot");
+            }
+            setIsLoading(false);
+          } else if (!message.requestId) {
+            // This is a broadcast update
+            if (message.payload.success) {
+              const megaPotData: MegaPotType = message.payload.data;
+              setData(megaPotData);
+              setError(null);
+              setIsLoading(false);
+              setIsUpdating(true);
+              setTimeout(() => setIsUpdating(false), 1000);
+            }
           }
-          setIsLoading(false);
         }
       };
 
@@ -101,14 +114,23 @@ export function MegaPot() {
             </CardTitle>
           </div>
 
-          <div className="flex justify-center items-center gap-2 text-2xl md:text-4xl font-bold text-primary p-3 md:p-4 rounded-lg bg-primary/10 border-2 border-dashed border-primary/20 shadow-[0_0_15px_rgba(255,223,0,0.5)] drop-shadow-[0_2px_4px_hsl(var(--primary)/0.5)]">
+          <div
+            className={`flex justify-center items-center gap-2 text-2xl md:text-4xl font-bold text-primary p-3 md:p-4 rounded-lg bg-primary/10 border-2 border-dashed border-primary/20 shadow-[0_0_15px_rgba(255,223,0,0.5)] drop-shadow-[0_2px_4px_hsl(var(--primary)/0.5)] transition-all duration-300 ${
+              isUpdating ? "scale-105 bg-primary/20" : ""
+            }`}
+          >
             <Gem className="h-6 w-6 md:h-9 md:w-9" />
             {isLoading ? (
               <Skeleton className="h-8 w-20 md:h-10 md:w-24" />
             ) : error ? (
               <span className="text-red-500 text-base md:text-lg">Error</span>
             ) : (
-              <span className="text-sm md:text-base">{amount.toLocaleString()}</span>
+              <span className="text-sm md:text-base">
+                {amount.toLocaleString()}
+              </span>
+            )}
+            {isUpdating && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             )}
           </div>
 
