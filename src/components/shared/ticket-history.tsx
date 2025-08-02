@@ -33,6 +33,7 @@ import {
 import { useHistory } from "@/hooks/use-history";
 
 export default function TicketHistory() {
+  return <div></div>;
   const { history, isLoaded } = useHistory();
   const [date, setDate] = useState<Date | undefined>();
 
@@ -89,7 +90,11 @@ export default function TicketHistory() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
+                {date ? (
+                  format(date || new Date(), "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
