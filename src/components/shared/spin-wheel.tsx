@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gift, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { prizes, segmentColors } from "@/lib/constants";
+import { Icons } from "@/components/shared/icons";
 
 export function SpinWheel() {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -139,9 +139,9 @@ export function SpinWheel() {
           className="w-full animation-all hover:scale-105 active:scale-95 text-lg font-bold py-6"
         >
           {isSpinning ? (
-            <RotateCcw className="mr-2 h-5 w-5 animate-spin" />
+            <Icons.rotateCcw className="mr-2 h-5 w-5 animate-spin" />
           ) : (
-            <Gift className="mr-2 h-5 w-5" />
+            <Icons.gift className="mr-2 h-5 w-5" />
           )}
           {spun ? "Spun Today" : "Spin to Win!"}
         </Button>

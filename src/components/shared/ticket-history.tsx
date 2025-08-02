@@ -25,13 +25,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
-import {
-  History as HistoryIcon,
-  Calendar as CalendarIcon,
-  Gem,
-} from "lucide-react";
 import { useHistory } from "@/hooks/use-history";
-
+import { Icons } from "./icons";
 export default function TicketHistory() {
   return <div></div>;
   const { history, isLoaded } = useHistory();
@@ -71,7 +66,7 @@ export default function TicketHistory() {
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="space-y-1.5">
           <CardTitle className="font-headline text-3xl flex items-center gap-2">
-            <HistoryIcon className="h-8 w-8 text-primary" />
+            <Icons.history className="h-8 w-8 text-primary" />
             Ticket History
           </CardTitle>
           <CardDescription>
@@ -89,7 +84,7 @@ export default function TicketHistory() {
                   !date && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <Icons.calendar className="mr-2 h-4 w-4" />
                 {date ? (
                   format(date || new Date(), "PPP")
                 ) : (
@@ -162,7 +157,7 @@ export default function TicketHistory() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-semibold flex items-center justify-end gap-1 whitespace-nowrap">
-                      <Gem className="h-4 w-4 text-primary" />
+                      <Icons.gem className="h-4 w-4 text-primary" />
                       {ticket.coinsWon.toLocaleString()}
                     </TableCell>
                   </TableRow>

@@ -9,14 +9,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import {
-  Gem,
-  ArrowDown,
-  ArrowUp,
-  Hourglass,
-  Timer,
-  Target,
-} from "lucide-react";
+import { Icons } from "@/components/shared/icons";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -190,7 +183,7 @@ export default function DoubleTroublePage() {
         <Card className="w-full glassmorphism">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl flex items-center justify-center gap-2">
-              <Hourglass className="h-8 w-8 text-primary" />
+              <Icons.hourglass className="h-8 w-8 text-primary" />
               Double Trouble
             </CardTitle>
             <CardDescription>
@@ -205,7 +198,7 @@ export default function DoubleTroublePage() {
                   Next draw in...
                 </div>
                 <div className="flex items-center gap-2 text-6xl">
-                  <Timer className="h-14 w-14 animate-pulse text-primary" />
+                  <Icons.timer className="h-14 w-14 animate-pulse text-primary" />
                   <span className="font-bold text-primary">{countdown}</span>
                 </div>
               </div>
@@ -238,8 +231,8 @@ export default function DoubleTroublePage() {
           <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
             <CardHeader>
               <CardTitle className="font-headline text-2xl flex items-center justify-center gap-2">
-                <ArrowDown className="h-6 w-6" />
-                <ArrowUp className="h-6 w-6" />
+                <Icons.arrowDown className="h-6 w-6" />
+                <Icons.arrowUp className="h-6 w-6" />
                 Bet on the Range
               </CardTitle>
               <CardDescription className="text-center">
@@ -251,7 +244,7 @@ export default function DoubleTroublePage() {
                 <div className="flex justify-between items-center">
                   <Label htmlFor="bid-slider-range">Range Bid</Label>
                   <div className="flex items-center gap-2 font-bold text-primary">
-                    <Gem className="h-5 w-5" />
+                    <Icons.gem className="h-5 w-5" />
                     <span>{overUnderBid[0].toLocaleString()} Coins</span>
                   </div>
                 </div>
@@ -271,14 +264,14 @@ export default function DoubleTroublePage() {
                   onClick={() => setBetDirection("under")}
                   className="h-16 text-lg animation-all hover:scale-105 active:scale-95"
                 >
-                  <ArrowDown className="mr-2" /> Under 25
+                  <Icons.arrowDown className="mr-2" /> Under 25
                 </Button>
                 <Button
                   variant={betDirection === "over" ? "default" : "outline"}
                   onClick={() => setBetDirection("over")}
                   className="h-16 text-lg animation-all hover:scale-105 active:scale-95"
                 >
-                  <ArrowUp className="mr-2" /> Over 25
+                  <Icons.arrowUp className="mr-2" /> Over 25
                 </Button>
               </div>
             </CardContent>
@@ -295,7 +288,7 @@ export default function DoubleTroublePage() {
           <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
             <CardHeader>
               <CardTitle className="font-headline text-2xl flex items-center justify-center gap-2">
-                <Target className="h-6 w-6" />
+                <Icons.target className="h-6 w-6" />
                 Bet on a Specific Number
               </CardTitle>
               <CardDescription className="text-center">
@@ -309,7 +302,7 @@ export default function DoubleTroublePage() {
                     Number Bid (per number)
                   </Label>
                   <div className="flex items-center gap-2 font-bold text-primary">
-                    <Gem className="h-5 w-5" />
+                    <Icons.gem className="h-5 w-5" />
                     <span>{numberBid[0].toLocaleString()} Coins</span>
                   </div>
                 </div>

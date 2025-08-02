@@ -1,5 +1,5 @@
-import { Gift } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
+import { Icons } from "../shared/icons";
 
 const sectionContent = {
   title: "Redeem Your Coins",
@@ -29,7 +29,7 @@ export function RedeemSection() {
       </div>
       <div className="animation-all animate-in fade-in slide-in-from-right-8 duration-700">
         <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4 text-foreground flex items-center gap-2">
-          <Gift className="h-8 w-8 text-primary" />
+          <Icons.gift className="h-8 w-8 text-primary" />
           {sectionContent.title}
         </h2>
         <p className="text-lg text-muted-foreground">

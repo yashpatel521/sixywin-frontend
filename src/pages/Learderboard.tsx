@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Crown, Gem, Trophy } from "lucide-react";
+import { Icons } from "@/components/shared/icons";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { wsClient } from "@/websocket";
@@ -172,7 +172,7 @@ export default function LeaderboardPage() {
         <Card className="glassmorphism animation-all hover:shadow-2xl">
           <CardHeader>
             <CardTitle className="font-headline text-3xl flex items-center gap-2">
-              <Trophy className="h-8 w-8 text-primary" />
+              <Icons.trophy className="h-8 w-8 text-primary" />
               Top Players Leaderboard
             </CardTitle>
             <CardDescription>
@@ -243,7 +243,7 @@ export default function LeaderboardPage() {
                         <TableCell className="font-bold text-lg text-center">
                           <div className="flex items-center justify-center">
                             {rank <= 3 ? (
-                              <Crown
+                              <Icons.crown
                                 className={cn(
                                   "h-6 w-6 animation-all hover:scale-125",
                                   getRankClasses(rank)
@@ -278,13 +278,13 @@ export default function LeaderboardPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2 font-semibold">
-                            <Gem className="h-4 w-4 text-primary/70" />
+                            <Icons.gem className="h-4 w-4 text-primary/70" />
                             {todayBid.toLocaleString()}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2 font-bold text-lg text-primary">
-                            <Gem className="h-5 w-5" />
+                            <Icons.gem className="h-5 w-5" />
                             {(player.totalWon || 0).toLocaleString()}
                           </div>
                         </TableCell>

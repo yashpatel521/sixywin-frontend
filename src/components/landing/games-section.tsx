@@ -7,14 +7,14 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Ticket, Layers, Puzzle } from "lucide-react";
 import { ReactNode } from "react";
+import { Icons } from "../shared/icons";
 
 const sectionContent = {
   title: "Try Our Games",
   games: [
     {
-      icon: <Ticket className="h-8 w-8" />,
+      icon: <Icons.ticket className="h-8 w-8" />,
       title: "Play Lottery",
       description:
         "The classic SixyWin experience. Pick your six lucky numbers for the daily draw, place your bid, and hope for a big win from the Mega Pot!",
@@ -22,7 +22,7 @@ const sectionContent = {
       disabled: false,
     },
     {
-      icon: <Layers className="h-8 w-8" />,
+      icon: <Icons.layers className="h-8 w-8" />,
       title: "Double Trouble",
       description:
         "A fast-paced betting game where a new number is drawn every 30 seconds. Bet on a specific number, or bet on whether the number will be over or under 25. Quick rounds, quick wins!",
@@ -30,7 +30,7 @@ const sectionContent = {
       disabled: false,
     },
     {
-      icon: <Puzzle className="h-8 w-8" />,
+      icon: <Icons.puzzle className="h-8 w-8" />,
       title: "More Games On The Way!",
       description:
         "We're always working on new and exciting games to add to the SixyWin lineup. Check back soon for more ways to test your luck and win!",
@@ -78,7 +78,7 @@ function GameCard({ icon, title, children, href, disabled }: GameCardProps) {
           ) : (
             <Link to={href}>
               {sectionContent.buttonText}{" "}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <Icons.arrowRight className="ml-2 h-4 w-4" />
             </Link>
           )}
         </Button>

@@ -7,16 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Gem,
-  User,
-  Ticket,
-  BarChart,
-  Copy,
-  Check,
-  Users,
-  Award,
-} from "lucide-react";
+import { Icons } from "@/components/shared/icons";
 import {
   Table,
   TableBody,
@@ -300,11 +291,11 @@ export default function UserProfilePage() {
             <div className="flex-grow text-center sm:text-left">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                 <CardTitle className="font-headline text-3xl flex items-center gap-2">
-                  <User className="h-8 w-8 text-primary" />
+                  <Icons.user className="h-8 w-8 text-primary" />
                   {userData.username}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-xl font-semibold text-primary">
-                  <Gem className="h-6 w-6" />
+                  <Icons.gem className="h-6 w-6" />
                   <span>
                     {(userData.coins || 0) + (userData.winningAmount || 0)}{" "}
                     Coins
@@ -334,9 +325,9 @@ export default function UserProfilePage() {
                     className="animation-all hover:scale-105 active:scale-95"
                   >
                     {isCopied ? (
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Icons.check className="h-4 w-4 text-green-500" />
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <Icons.copy className="h-4 w-4" />
                     )}
                     <span className="sr-only">Copy Referral Link</span>
                   </Button>
@@ -349,7 +340,7 @@ export default function UserProfilePage() {
                     Tickets Played
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Ticket className="h-6 w-6 text-primary/80" />
+                    <Icons.ticket className="h-6 w-6 text-primary/80" />
                     {totalTickets}
                   </div>
                 </div>
@@ -358,7 +349,7 @@ export default function UserProfilePage() {
                     Winning Amount
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <BarChart className="h-6 w-6 text-primary/80" />
+                    <Icons.barChart className="h-6 w-6 text-primary/80" />
                     {userData.winningAmount.toLocaleString()}
                   </div>
                 </div>
@@ -367,7 +358,7 @@ export default function UserProfilePage() {
                     Ad Earnings
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Gem className="h-6 w-6 text-primary/80" />
+                    <Icons.gem className="h-6 w-6 text-primary/80" />
                     {(userData.winningAmount || 0).toLocaleString()}
                   </div>
                 </div>
@@ -376,7 +367,7 @@ export default function UserProfilePage() {
                     Total Winnings
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Award className="h-6 w-6 text-primary/80" />
+                    <Icons.award className="h-6 w-6 text-primary/80" />
                     {userData.totalWon.toLocaleString()}
                   </div>
                 </div>
@@ -389,7 +380,7 @@ export default function UserProfilePage() {
         <Card className="glassmorphism animation-all hover:shadow-2xl">
           <CardHeader>
             <CardTitle className="font-headline text-3xl flex items-center gap-2">
-              <Users className="h-8 w-8 text-primary" />
+              <Icons.users className="h-8 w-8 text-primary" />
               Referred Users ({referredUsers.length})
             </CardTitle>
             <CardDescription>

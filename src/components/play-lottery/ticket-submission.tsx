@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Ticket, Dices, Sparkles, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHistory } from "@/hooks/use-history";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +17,7 @@ import { MAX_NUMBERS, TOTAL_NUMBERS } from "@/lib/constants";
 import { wsClient } from "@/websocket";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { User } from "@/lib/interfaces";
+import { Icons } from "@/components/shared/icons";
 
 // Dynamically import Confetti to reduce bundle size
 const Confetti = React.lazy(() => import("react-confetti"));
@@ -236,7 +236,7 @@ export function TicketSubmission() {
         <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-grow">
             <CardTitle className="font-headline text-3xl flex items-center gap-2">
-              <Ticket className="h-8 w-8 text-primary" />
+              <Icons.ticket className="h-8 w-8 text-primary" />
               Pick Your Numbers
             </CardTitle>
             <CardDescription>
@@ -295,7 +295,7 @@ export function TicketSubmission() {
               <div className="flex justify-between items-center">
                 <Label htmlFor="bid-slider">Your Bid</Label>
                 <div className="flex items-center gap-2 font-bold text-primary">
-                  <Gem className="h-5 w-5" />
+                  <Icons.gem className="h-5 w-5" />
                   <span>{bidAmount[0].toLocaleString()} Coins</span>
                 </div>
               </div>
@@ -322,7 +322,7 @@ export function TicketSubmission() {
                 disabled={isSubmitting}
                 className="w-full animation-all hover:scale-105 active:scale-95"
               >
-                <Dices className="mr-2 h-4 w-4" />
+                <Icons.dices className="mr-2 h-4 w-4" />
                 Quick Pick
               </Button>
               <Button
@@ -332,7 +332,7 @@ export function TicketSubmission() {
                 }
                 className="w-full animation-all hover:scale-105 active:scale-95"
               >
-                <Sparkles className="mr-2 h-4 w-4" />
+                <Icons.sparkles className="mr-2 h-4 w-4" />
                 {isSubmitting ? "Submitting..." : "Submit Ticket & Bid"}
               </Button>
             </div>

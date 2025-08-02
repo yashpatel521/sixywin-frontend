@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Award, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { wsClient } from "@/websocket";
 import { differenceInSeconds } from "date-fns";
+import { Icons } from "../shared/icons";
 
 interface LatestDrawData {
   winningNumbers: number[];
@@ -173,7 +173,7 @@ export const LatestDrawNumbers = () => {
         {/* Next Draw Countdown */}
         <div className="text-center w-full md:w-auto">
           <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 mb-3">
-            <Clock className="h-4 w-4" />
+            <Icons.clock className="h-4 w-4" />
             Next Draw In
           </div>
 
@@ -203,7 +203,7 @@ export const LatestDrawNumbers = () => {
         {/* Latest Winning Numbers */}
         <div className="text-center w-full md:w-auto relative">
           <div className="text-sm font-semibold text-muted-foreground flex items-center justify-center gap-2 mb-3">
-            <Award className="h-4 w-4" />
+            <Icons.award className="h-4 w-4" />
             Latest Winning Numbers
           </div>
 

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/shared/icons";
-import { User, Lock, Gift, Eye, EyeOff } from "lucide-react";
 import { wsClient } from "@/websocket";
 import { UserType } from "@/types/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -124,7 +123,7 @@ export default function SignupPage() {
             </h2>
             <div className="grid gap-6">
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="username"
                   type="text"
@@ -137,7 +136,7 @@ export default function SignupPage() {
                 />
               </div>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -150,7 +149,7 @@ export default function SignupPage() {
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -166,11 +165,11 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                 >
-                  <Eye className="h-5 w-5" />
+                  <Icons.eye className="h-5 w-5" />
                 </button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
@@ -186,7 +185,7 @@ export default function SignupPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                 >
-                  <EyeOff className="h-5 w-5" />
+                  <Icons.eyeOff className="h-5 w-5" />
                 </button>
               </div>
               {!isPasswordValid &&
@@ -200,7 +199,7 @@ export default function SignupPage() {
                 <p className="text-red-500 text-sm mt-1 ml-3">{error}</p>
               )}
               <div className="relative">
-                <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.gift className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="referral-id"
                   type="text"

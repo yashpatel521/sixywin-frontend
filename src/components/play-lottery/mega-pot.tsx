@@ -4,12 +4,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Gem, Layers } from "lucide-react";
 import { useState, useEffect } from "react";
 import { wsClient } from "@/websocket";
 import { MegaPotType } from "@/types/interfaces";
 import { CountdownTimer } from "@/components/shared/countdown-timer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Icons } from "../shared/icons";
 
 export function MegaPot() {
   const [data, setData] = useState<MegaPotType | null>(null);
@@ -109,7 +109,7 @@ export function MegaPot() {
         <div className="grid grid-cols-1 md:grid-cols-3 items-center justify-items-center gap-4 md:gap-6 w-full">
           <div className="flex flex-col items-center justify-center text-center">
             <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
-              <Layers className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <Icons.layers className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Mega Pot
             </CardTitle>
           </div>
@@ -119,7 +119,7 @@ export function MegaPot() {
               isUpdating ? "scale-105 bg-primary/20" : ""
             }`}
           >
-            <Gem className="h-6 w-6 md:h-9 md:w-9" />
+            <Icons.gem className="h-6 w-6 md:h-9 md:w-9" />
             {isLoading ? (
               <Skeleton className="h-8 w-20 md:h-10 md:w-24" />
             ) : error ? (

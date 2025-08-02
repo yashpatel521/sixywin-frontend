@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Icons } from "./icons";
 
 export function StickyAdBanner() {
   const [isVisible, setIsVisible] = useState(true);
@@ -52,7 +52,7 @@ export function StickyAdBanner() {
             className="absolute top-1 right-1 h-6 w-6 rounded-full"
             onClick={() => setIsVisible(false)}
           >
-            <X className="h-4 w-4" />
+            <Icons.x className="h-4 w-4" />
             <span className="sr-only">Close Ad</span>
           </Button>
         </div>

@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Icons } from "../shared/icons";
 
 const sectionContent = {
   title: "Ready to Try Your Luck?",
@@ -24,7 +24,8 @@ export function CtaSection() {
         className="animation-all hover:scale-105 active:scale-95"
       >
         <Link to="/register">
-          {sectionContent.buttonText} <ArrowRight className="ml-2 h-5 w-5" />
+          {sectionContent.buttonText}{" "}
+          <Icons.arrowRight className="ml-2 h-5 w-5" />
         </Link>
       </Button>
     </section>

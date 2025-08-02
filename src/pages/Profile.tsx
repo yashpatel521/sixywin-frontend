@@ -7,22 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Gem,
-  User as UserIcon,
-  Gift,
-  Settings,
-  Users,
-  ShoppingCart,
-  Ticket,
-  BarChart,
-  Award,
-  Copy,
-  Check,
-  Share2,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Icons } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -91,11 +76,11 @@ export default function ProfilePage() {
             <div className="flex-grow text-center sm:text-left">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                 <CardTitle className="font-headline text-2xl md:text-3xl flex items-center gap-2">
-                  <UserIcon className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                  <Icons.user className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                   {user?.username || "User"}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-lg md:text-xl font-semibold text-primary">
-                  <Gem className="h-5 w-5 md:h-6 md:w-6" />
+                  <Icons.gem className="h-5 w-5 md:h-6 md:w-6" />
                   <span>
                     {(user?.coins || 0) + (user?.winningAmount || 0)} Coins
                   </span>
@@ -110,7 +95,7 @@ export default function ProfilePage() {
                     Tickets Played
                   </div>
                   <div className="text-lg md:text-2xl font-bold flex items-center justify-center gap-1 md:gap-2">
-                    <Ticket className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
+                    <Icons.ticket className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
                     {totalTickets}
                   </div>
                 </div>
@@ -119,7 +104,7 @@ export default function ProfilePage() {
                     Winning Amount
                   </div>
                   <div className="text-lg md:text-2xl font-bold flex items-center justify-center gap-1 md:gap-2">
-                    <BarChart className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
+                    <Icons.barChart className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
                     {(user?.winningAmount || 0).toLocaleString()}
                   </div>
                 </div>
@@ -128,7 +113,7 @@ export default function ProfilePage() {
                     Ad Earnings
                   </div>
                   <div className="text-lg md:text-2xl font-bold flex items-center justify-center gap-1 md:gap-2">
-                    <Gem className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
+                    <Icons.gem className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
                     {(user?.winningAmount || 0).toLocaleString()}
                   </div>
                 </div>
@@ -137,7 +122,7 @@ export default function ProfilePage() {
                     Total Winnings
                   </div>
                   <div className="text-lg md:text-2xl font-bold flex items-center justify-center gap-1 md:gap-2">
-                    <Award className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
+                    <Icons.award className="h-4 w-4 md:h-6 md:w-6 text-primary/80" />
                     {totalEarnings.toLocaleString()}
                   </div>
                 </div>
@@ -150,7 +135,7 @@ export default function ProfilePage() {
         <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
-              <Gift className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <Icons.gift className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Redeem Coins
             </CardTitle>
             <CardDescription className="text-sm md:text-base">
@@ -160,7 +145,7 @@ export default function ProfilePage() {
           <CardContent className="p-4 md:p-6">
             <div className="flex flex-col sm:flex-row items-center justify-between p-3 md:p-4 rounded-lg bg-secondary/30 gap-3">
               <div className="flex items-center gap-2 text-base md:text-lg font-semibold text-primary">
-                <Gem className="h-5 w-5 md:h-6 md:w-6" />
+                <Icons.gem className="h-5 w-5 md:h-6 md:w-6" />
                 <span>
                   {(user?.winningAmount || 0).toLocaleString()} Available Coins
                 </span>
@@ -182,7 +167,7 @@ export default function ProfilePage() {
         <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
-              <Settings className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <Icons.settings className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Profile Settings
             </CardTitle>
             <CardDescription className="text-sm md:text-base">
@@ -224,9 +209,9 @@ export default function ProfilePage() {
                       className="animation-all hover:scale-105 active:scale-95 h-8 w-8 md:h-10 md:w-10"
                     >
                       {isCopied ? (
-                        <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+                        <Icons.check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
                       ) : (
-                        <Copy className="h-3 w-3 md:h-4 md:w-4" />
+                        <Icons.copy className="h-3 w-3 md:h-4 md:w-4" />
                       )}
                       <span className="sr-only">Copy Referral Link</span>
                     </Button>
@@ -237,7 +222,7 @@ export default function ProfilePage() {
                       onClick={handleShare}
                       className="animation-all hover:scale-105 active:scale-95 h-8 w-8 md:h-10 md:w-10"
                     >
-                      <Share2 className="h-3 w-3 md:h-4 md:w-4" />
+                      <Icons.share2 className="h-3 w-3 md:h-4 md:w-4" />
                       <span className="sr-only">Share Referral Link</span>
                     </Button>
                   </div>
@@ -268,9 +253,9 @@ export default function ProfilePage() {
                       }
                     >
                       {showCurrentPassword ? (
-                        <EyeOff className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                        <Icons.eyeOff className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                        <Icons.eye className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                       )}
                       <span className="sr-only">
                         {showCurrentPassword
@@ -302,9 +287,9 @@ export default function ProfilePage() {
                       onClick={() => setShowNewPassword(!showNewPassword)}
                     >
                       {showNewPassword ? (
-                        <EyeOff className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                        <Icons.eyeOff className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                        <Icons.eye className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                       )}
                       <span className="sr-only">
                         {showNewPassword ? "Hide password" : "Show password"}
@@ -328,7 +313,7 @@ export default function ProfilePage() {
         <Card className="glassmorphism animation-all hover:shadow-2xl">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
-              <Users className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <Icons.users className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Your Referred Users (0)
             </CardTitle>
             <CardDescription className="text-sm md:text-base">
@@ -351,7 +336,7 @@ export default function ProfilePage() {
         <Card className="glassmorphism animation-all hover:shadow-2xl">
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <Icons.shoppingCart className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               Redeem History
             </CardTitle>
             <CardDescription className="text-sm md:text-base">

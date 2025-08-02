@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Ticket, Layers, Puzzle, Gamepad2 } from "lucide-react";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Icons } from "@/components/shared/icons";
 
 const games = [
   {
-    icon: <Ticket className="h-8 w-8" />,
+    icon: <Icons.ticket className="h-8 w-8" />,
     title: "Play Lottery",
     description:
       "The classic SixyWin experience. Pick your six lucky numbers for the daily draw, place your bid, and hope for a big win from the Mega Pot!",
@@ -16,7 +16,7 @@ const games = [
     buttonText: "Play Now",
   },
   {
-    icon: <Layers className="h-8 w-8" />,
+    icon: <Icons.layers className="h-8 w-8" />,
     title: "Double Trouble",
     description:
       "A fast-paced betting game where a new number is drawn every 30 seconds. Bet on a specific number, or bet on whether the number will be over or under 25. Quick rounds, quick wins!",
@@ -25,7 +25,7 @@ const games = [
     buttonText: "Play Now",
   },
   {
-    icon: <Puzzle className="h-8 w-8" />,
+    icon: <Icons.puzzle className="h-8 w-8" />,
     title: "More Games On The Way!",
     description:
       "We're always working on new and exciting games to add to the SixyWin lineup. Check back soon for more ways to test your luck and win!",
@@ -80,7 +80,7 @@ function GameCard({
             <span>{buttonText}</span>
           ) : (
             <Link to={href}>
-              {buttonText} <ArrowRight className="ml-2 h-4 w-4" />
+              {buttonText} <Icons.arrowRight className="ml-2 h-4 w-4" />
             </Link>
           )}
         </Button>
@@ -94,7 +94,7 @@ export default function GamesPage() {
     <div className="container mx-auto p-4 md:p-8">
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl font-bold flex items-center justify-center gap-3">
-          <Gamepad2 className="h-10 w-10 text-primary" />
+          <Icons.gamepad2 className="h-10 w-10 text-primary" />
           Choose Your Game
         </h1>
         <p className="text-muted-foreground mt-2 text-lg">

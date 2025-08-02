@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { differenceInSeconds } from "date-fns";
-import { Timer } from "lucide-react";
 import { CountdownTimerProps } from "@/lib/types";
+import { Icons } from "./icons";
 
 const formatTime = (time: number) => time.toString().padStart(2, "0");
 
@@ -43,7 +43,7 @@ export const CountdownTimer = ({
   return (
     <div className="flex-1 text-center">
       <div className="text-xs md:text-sm font-semibold text-muted-foreground flex items-center justify-center gap-1 md:gap-2">
-        <Timer className="h-3 w-3 md:h-4 md:w-4" />
+        <Icons.timer className="h-3 w-3 md:h-4 md:w-4" />
         {label}
       </div>
       <div className="flex justify-center items-center gap-1 mt-1 md:mt-2">
