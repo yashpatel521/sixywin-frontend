@@ -13,9 +13,16 @@ import {
   tokenStorage,
   userStorage,
 } from "@/lib/localStorage";
+import { UserType } from "@/types/interfaces";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export default function LoginPage() {
+  // if the user is already logged in, redirect to the home page
+  const [user] = useLocalStorage<UserType | null>("user", null);
   const navigate = useNavigate();
+  if (user) {
+    navigate("/games");
+  }
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [rememberMe, setRememberMeChecked] = useState(false);

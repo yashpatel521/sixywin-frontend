@@ -1,16 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { User, Lock, Gift, EyeIcon } from "lucide-react";
 import { Icons } from "@/components/shared/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { wsClient } from "@/websocket";
 import { tokenStorage, userStorage } from "@/lib/localStorage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { UserType } from "@/types/interfaces";
 
 export default function SignupPage() {
+  // if the user is already logged in, redirect to the home page
+  const [user] = useLocalStorage<UserType | null>("user", null);
   const navigate = useNavigate();
+  if (user) {
+    navigate("/games");
+  }
+
+  const query = new URLSearchParams(useLocation().search);
+  const ref = query.get("ref");
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -22,7 +32,7 @@ export default function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    referralId: "",
+    referralId: ref || "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });

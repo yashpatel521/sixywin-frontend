@@ -38,9 +38,7 @@ export default function ProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const { toast } = useToast();
 
-  const referralId = user?.refernceId
-    ? `ref-${user.refernceId.toLowerCase()}`
-    : "";
+  const referralId = user?.refernceId ? `${user.refernceId.toLowerCase()}` : "";
   const referralLink =
     typeof window !== "undefined"
       ? `${window.location.origin}/register?ref=${referralId}`
