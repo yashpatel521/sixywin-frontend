@@ -51,7 +51,7 @@ export function MegaPot() {
       }
 
       // For backward compatibility, also send the old format
-      // TODO: Update server to use the new get_mega_pot message type
+      // TODO: Update server to use the new megaPot message type
       wsClient.send({
         type: "megaPot",
         requestId,

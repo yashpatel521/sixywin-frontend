@@ -81,7 +81,7 @@ export default function UserProfilePage() {
 
     const sendUserProfileRequest = (requestId: string) => {
       const success = wsClient.send({
-        type: "get_user_profile",
+        type: "userProfile",
         requestId,
         payload: { id: userId },
         timestamp: new Date().toISOString(),
@@ -97,7 +97,7 @@ export default function UserProfilePage() {
 
       handleUserProfileResponse = (message: any) => {
         if (
-          message.type === "user_profile_response" &&
+          message.type === "userProfile_response" &&
           message.requestId === requestId
         ) {
           // Clear the timeout since we got a response
@@ -121,7 +121,7 @@ export default function UserProfilePage() {
         }
       };
 
-      wsClient.on("user_profile_response", handleUserProfileResponse);
+      wsClient.on("userProfile_response", handleUserProfileResponse);
 
       timeoutId = setTimeout(() => {
         setError("Request timeout. Please try again.");
@@ -138,7 +138,7 @@ export default function UserProfilePage() {
         clearTimeout(timeoutId);
       }
       if (handleUserProfileResponse) {
-        wsClient.off("user_profile_response", handleUserProfileResponse);
+        wsClient.off("userProfile_response", handleUserProfileResponse);
       }
     };
   }, [userId]);
