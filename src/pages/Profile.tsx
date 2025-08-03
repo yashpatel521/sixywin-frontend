@@ -314,21 +314,58 @@ export default function ProfilePage() {
           <CardHeader className="p-4 md:p-6">
             <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
               <Icons.users className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-              Your Referred Users (0)
+              Your Referred Users ({user?.referrals?.length || 0})
             </CardTitle>
             <CardDescription className="text-sm md:text-base">
               Users you've successfully referred.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 md:p-6">
-            <div className="text-center py-6 md:py-8 text-muted-foreground">
-              <p className="text-base md:text-lg font-medium">
-                No referrals yet!
-              </p>
-              <p className="text-xs md:text-sm">
-                Share your referral ID to bring friends.
-              </p>
-            </div>
+            {user?.referrals && user.referrals.length > 0 ? (
+              <div className="space-y-3">
+                {user.referrals.map((referral, index) => (
+                  <div
+                    key={referral.id || index}
+                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage
+                          src={`https://ui-avatars.com/api/?name=${referral.referred.username}&background=random`}
+                          alt={referral.referred.username || "Referred User"}
+                        />
+                        <AvatarFallback>
+                          {referral.referred.username
+                            ?.substring(0, 2)
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">
+                          {referral.referred.username}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Joined{" "}
+                          {new Date(referral.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-primary font-medium">
+                      Active
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 md:py-8 text-muted-foreground">
+                <p className="text-base md:text-lg font-medium">
+                  No referrals yet!
+                </p>
+                <p className="text-xs md:text-sm">
+                  Share your referral ID to bring friends.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

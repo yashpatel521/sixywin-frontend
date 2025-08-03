@@ -19,8 +19,15 @@ export interface User {
   // Leaderboard-specific fields
   todayTicketBuy?: string | number;
   todayBid?: string | number;
+  referrals?: Reference[];
 }
 
+export interface Reference {
+  id: number;
+  referrer: User;
+  referred: User;
+  createdAt: Date;
+}
 export interface Ticket {
   id: number;
   numbers: number[];
