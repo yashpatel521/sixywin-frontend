@@ -37,8 +37,13 @@ export function useMegaPot(): UseMegaPotReturn {
     let handleMegaPotResponse: (message: any) => void;
     let timeoutId: NodeJS.Timeout;
 
-    // Use the new convenience method
-    const success = wsClient.requestMegaPot();
+    // Send request manually with requestId instead of using convenience method
+    const success = wsClient.send({
+      type: "getMegaPot",
+      payload: {},
+      requestId: requestId,
+      timestamp: new Date().toISOString(),
+    });
 
     if (!success) {
       setError(
@@ -51,8 +56,8 @@ export function useMegaPot(): UseMegaPotReturn {
     handleMegaPotResponse = (message: any) => {
       if (message.type === "getMegaPot_response") {
         // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-        if (message.requestId && message.requestId === requestId) {
-          // This is a response to our request
+        if (message.requestId === requestId) {
+          // This is a response to our specific request
           if (timeoutId) {
             clearTimeout(timeoutId);
           }
@@ -65,6 +70,9 @@ export function useMegaPot(): UseMegaPotReturn {
             setError(message.payload.message || "Failed to fetch mega pot");
           }
           setIsLoading(false);
+
+          // Clean up listener after processing our response
+          wsClient.off("getMegaPot_response", handleMegaPotResponse);
         } else if (!message.requestId) {
           // This is a broadcast update - update data silently
           if (message.payload.success) {
@@ -80,9 +88,10 @@ export function useMegaPot(): UseMegaPotReturn {
     wsClient.on("getMegaPot_response", handleMegaPotResponse);
 
     timeoutId = setTimeout(() => {
-      setError("Request timeout");
+      setError("Request timeout. Please try again.");
       setIsLoading(false);
-    }, 10000);
+      wsClient.off("getMegaPot_response", handleMegaPotResponse);
+    }, 15000); // 15 second timeout
 
     // Cleanup function
     return () => {

@@ -34,8 +34,13 @@ export function useLeaderboard(): UseLeaderboardReturn {
     let handleLeaderboardResponse: (message: any) => void;
 
     const sendRequest = () => {
-      // Use the convenience method
-      const success = wsClient.requestLeaderboard();
+      // Send request manually with requestId instead of using convenience method
+      const success = wsClient.send({
+        type: "getLeaderboard",
+        payload: {},
+        requestId: requestId,
+        timestamp: new Date().toISOString(),
+      });
 
       if (!success) {
         setError(
@@ -48,8 +53,8 @@ export function useLeaderboard(): UseLeaderboardReturn {
       handleLeaderboardResponse = (message: any) => {
         if (message.type === "getLeaderboard_response") {
           // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-          if (message.requestId && message.requestId === requestId) {
-            // This is a response to our request
+          if (message.requestId === requestId) {
+            // This is a response to our specific request
             if (timeoutId) {
               clearTimeout(timeoutId);
             }
@@ -63,6 +68,9 @@ export function useLeaderboard(): UseLeaderboardReturn {
               );
             }
             setIsLoading(false);
+
+            // Clean up listener after processing our response
+            wsClient.off("getLeaderboard_response", handleLeaderboardResponse);
           } else if (!message.requestId) {
             // This is a broadcast update
             if (message.payload.success) {
@@ -81,7 +89,8 @@ export function useLeaderboard(): UseLeaderboardReturn {
       timeoutId = setTimeout(() => {
         setError("Request timeout. Please try again.");
         setIsLoading(false);
-      }, 10000);
+        wsClient.off("getLeaderboard_response", handleLeaderboardResponse);
+      }, 15000); // 15 second timeout
     };
 
     // Wait for WebSocket connection if not connected

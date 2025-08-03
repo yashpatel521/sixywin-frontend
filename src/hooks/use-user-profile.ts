@@ -22,6 +22,7 @@ export function useUserProfile(
 
   const fetchUserProfile = () => {
     if (!userId) {
+      setError("User ID is required to load profile.");
       setIsLoading(false);
       return;
     }
@@ -34,8 +35,14 @@ export function useUserProfile(
     let handleUserProfileResponse: (message: any) => void;
 
     const sendRequest = () => {
-      // Use the convenience method
-      const success = wsClient.requestUserProfile(userId);
+      // Send request manually with requestId
+      const requestId = Math.random().toString(36).substring(7);
+      const success = wsClient.send({
+        type: "getUserProfile",
+        payload: { id: userId }, // Backend expects 'id', not 'userId'
+        requestId: requestId,
+        timestamp: new Date().toISOString(),
+      });
 
       if (!success) {
         setError(
@@ -46,7 +53,10 @@ export function useUserProfile(
       }
 
       handleUserProfileResponse = (message: any) => {
-        if (message.type === "getUserProfile_response") {
+        if (
+          message.type === "getUserProfile_response" &&
+          message.requestId === requestId
+        ) {
           // Clear the timeout since we got a response
           if (timeoutId) {
             clearTimeout(timeoutId);
@@ -65,6 +75,9 @@ export function useUserProfile(
             }
           }
           setIsLoading(false);
+
+          // Clean up listener after processing our response
+          wsClient.off("getUserProfile_response", handleUserProfileResponse);
         }
       };
 
@@ -73,7 +86,8 @@ export function useUserProfile(
       timeoutId = setTimeout(() => {
         setError("Request timeout. Please try again.");
         setIsLoading(false);
-      }, 10000);
+        wsClient.off("getUserProfile_response", handleUserProfileResponse);
+      }, 15000); // 15 second timeout
     };
 
     // Wait for WebSocket connection if not connected

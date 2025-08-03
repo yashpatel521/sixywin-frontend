@@ -5,14 +5,14 @@
 
 export const APP_VERSION = {
   // Semantic versioning: MAJOR.MINOR.PATCH
-  VERSION: "1.2.0",
+  VERSION: "1.3.0",
 
   // Build information
   BUILD_DATE: "2025-08-03",
-  BUILD_NUMBER: "20250803-001",
+  BUILD_NUMBER: "20250803-002",
 
   // Git information (update manually or via CI/CD)
-  COMMIT_HASH: "4306dc5", // Latest frontend commit
+  COMMIT_HASH: "latest", // Will be updated after push
   BRANCH: "development",
 
   // Environment

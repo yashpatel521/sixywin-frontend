@@ -1,54 +1,17 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { prizes, segmentColors } from "@/lib/constants";
 import { Icons } from "@/components/shared/icons";
-import { wsClient } from "@/websocket";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import type { User } from "@/lib/interfaces";
+import { useSpinWheel } from "@/hooks/use-spin-wheel";
+import { Button } from "@/components/ui/button";
 
 export function SpinWheel() {
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [rotation, setRotation] = useState(0);
-  const { toast } = useToast();
-  const [user, setUser] = useLocalStorage<User | null>("user", null);
-
-  // Check if user has already spun today
-  const hasSpunToday = user?.isSpinned || false;
+  const { isSpinning, rotation, hasSpunToday, spin, setRotation } =
+    useSpinWheel();
 
   const handleSpin = () => {
-    if (hasSpunToday) {
-      toast({
-        variant: "destructive",
-        title: "Already Spun!",
-        description: "You can spin the wheel once per day. Come back tomorrow!",
-      });
-      return;
-    }
-
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "Please log in to spin the wheel.",
-      });
-      return;
-    }
-
-    if (!wsClient.isConnected()) {
-      toast({
-        variant: "destructive",
-        title: "Connection Error",
-        description: "Please check your connection and try again.",
-      });
-      return;
-    }
-
     const spinDegrees = Math.floor(Math.random() * 360) + 360 * 5; // Spin at least 5 times
     const finalRotation = rotation + spinDegrees;
 
-    setIsSpinning(true);
     setRotation(finalRotation);
 
     setTimeout(() => {
@@ -60,90 +23,8 @@ export function SpinWheel() {
         Math.floor(pointerAngle / segmentAngle) % prizes.length;
       const prize = prizes[segmentIndex];
 
-      // Send WebSocket message to backend
-      const requestId = Math.random().toString(36).substring(7);
-
-      wsClient.send({
-        type: "spinWheel",
-        payload: {
-          userId: user.id,
-          amount: prize.value,
-        },
-        requestId,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Handle the response
-      let handleSpinWheelResponse: (message: any) => void;
-      let timeoutId: NodeJS.Timeout;
-
-      handleSpinWheelResponse = (message: any) => {
-        if (
-          message.type === "spinWheel_response" &&
-          message.requestId === requestId
-        ) {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-
-          if (message.payload.success) {
-            const updatedUser = message.payload.data;
-
-            // Update user data directly
-            setUser(updatedUser);
-
-            // Dispatch custom event to notify other components
-            window.dispatchEvent(
-              new CustomEvent("userDataChanged", {
-                detail: updatedUser,
-              })
-            );
-
-            if (prize.value > 0) {
-              toast({
-                title: "You Won!",
-                description: `Congratulations! You won ${prize.value.toLocaleString()} coins.`,
-              });
-            } else {
-              toast({
-                variant: "destructive",
-                title: "Lose!",
-                description: "Try again tomorrow!",
-              });
-            }
-          } else {
-            // Spin failed, show error
-            toast({
-              variant: "destructive",
-              title: "Spin Failed",
-              description: message.payload.message || "Failed to process spin",
-            });
-          }
-
-          setIsSpinning(false);
-        }
-      };
-
-      wsClient.on("spinWheel_response", handleSpinWheelResponse);
-
-      timeoutId = setTimeout(() => {
-        setIsSpinning(false);
-        toast({
-          variant: "destructive",
-          title: "Timeout",
-          description: "Request timed out. Please try again.",
-        });
-      }, 10000);
-
-      // Cleanup function
-      return () => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        if (handleSpinWheelResponse) {
-          wsClient.off("spinWheel_response", handleSpinWheelResponse);
-        }
-      };
+      // Call the spin function from the hook with the calculated prize value
+      spin(prize.value);
     }, 4000);
   };
 

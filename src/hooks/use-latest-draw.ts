@@ -100,8 +100,13 @@ export function useLatestDraw(): UseLatestDrawReturn {
     let handleLatestDrawResponse: (message: any) => void;
     let timeoutId: NodeJS.Timeout;
 
-    // Use the convenience method
-    const success = wsClient.requestLatestDraw();
+    // Send request manually with requestId instead of using convenience method
+    const success = wsClient.send({
+      type: "getLatestDraw",
+      payload: {},
+      requestId: requestId,
+      timestamp: new Date().toISOString(),
+    });
 
     if (!success) {
       setError("Failed to request latest draw. Please check your connection.");
@@ -112,8 +117,8 @@ export function useLatestDraw(): UseLatestDrawReturn {
     handleLatestDrawResponse = (message: any) => {
       if (message.type === "getLatestDraw_response") {
         // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-        if (message.requestId && message.requestId === requestId) {
-          // This is a response to our request
+        if (message.requestId === requestId) {
+          // This is a response to our specific request
           if (timeoutId) {
             clearTimeout(timeoutId);
           }
@@ -146,6 +151,9 @@ export function useLatestDraw(): UseLatestDrawReturn {
             setError(message.payload?.message || "Failed to fetch latest draw");
           }
           setIsLoading(false);
+
+          // Clean up listener after processing our response
+          wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
         } else if (!message.requestId) {
           // This is a broadcast update - update data silently
           if (message.payload?.success) {
@@ -180,9 +188,10 @@ export function useLatestDraw(): UseLatestDrawReturn {
     wsClient.on("getLatestDraw_response", handleLatestDrawResponse);
 
     timeoutId = setTimeout(() => {
-      setError("Request timeout");
+      setError("Request timeout. Please try again.");
       setIsLoading(false);
-    }, 10000);
+      wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
+    }, 15000); // 15 second timeout
 
     // Cleanup function
     return () => {
@@ -193,9 +202,7 @@ export function useLatestDraw(): UseLatestDrawReturn {
         wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
       }
     };
-  };
-
-  // Initial fetch and periodic refresh
+  }; // Initial fetch and periodic refresh
   useEffect(() => {
     fetchLatestDraw();
 
