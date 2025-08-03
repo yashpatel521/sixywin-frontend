@@ -28,6 +28,9 @@ export class WebSocketClient {
     this.reconnectDelay =
       config?.reconnectDelay || WEBSOCKET_CONFIG.RECONNECT_DELAY;
 
+    // Log the WebSocket URL being used (helpful for debugging)
+    console.log(`WebSocket configured for: ${this.url}`);
+
     // DO NOT connect immediately in constructor
     // This prevents initialization issues in production builds
     // Connection will be initiated when needed
