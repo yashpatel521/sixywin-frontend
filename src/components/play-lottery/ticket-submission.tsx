@@ -8,14 +8,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useHistory } from "@/hooks/use-history";
-import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { LatestDrawNumbers } from "./latest-draw";
 import { MAX_NUMBERS, TOTAL_NUMBERS } from "@/lib/constants";
-import { wsClient } from "@/websocket";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useTicketSubmission } from "@/hooks/use-ticket-submission";
 import type { User } from "@/lib/interfaces";
 import { Icons } from "@/components/shared/icons";
 
@@ -25,13 +23,12 @@ const Confetti = React.lazy(() => import("react-confetti"));
 export function TicketSubmission() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [bidAmount, setBidAmount] = useState([10]);
-  const { addTicket } = useHistory();
-  const { toast } = useToast();
-  const [showConfetti, setShowConfetti] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [isClient, setIsClient] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useLocalStorage<User | null>("user", null);
+  const [user] = useLocalStorage<User | null>("user", null);
+
+  // Use the new WebSocket hook for cleaner logic
+  const { isSubmitting, submitTicket, showConfetti } = useTicketSubmission();
 
   useEffect(() => {
     setIsClient(true);
@@ -72,161 +69,14 @@ export function TicketSubmission() {
   };
 
   const handleSubmit = async () => {
-    if (!user) {
-      return;
-    }
-
     if (selectedNumbers.length !== MAX_NUMBERS) {
       return;
     }
 
-    // Check if user has enough coins
-    const totalFunds = (user.coins || 0) + (user.winningAmount || 0);
-    if (totalFunds < bidAmount[0]) {
-      return;
+    const success = await submitTicket(selectedNumbers, bidAmount[0]);
+    if (success) {
+      setSelectedNumbers([]);
     }
-
-    toast({
-      title: "🎫 Ticket Submitted!",
-      description: `Your ticket with numbers [${selectedNumbers.join(
-        ", "
-      )}] and bid of ${bidAmount[0].toLocaleString()} coins has been submitted successfully!`,
-      className:
-        "bg-green-500/20 backdrop-blur-md border-green-500/30 text-green-100 shadow-lg shadow-green-500/25",
-    });
-
-    setIsSubmitting(true);
-
-    try {
-      const requestId = Math.random().toString(36).substring(7);
-
-      // Wait for WebSocket connection if not connected
-      if (!wsClient.isConnected()) {
-        toast({
-          title: "Connection Error",
-          description: "Connecting to server...",
-          variant: "destructive",
-        });
-
-        const connectionTimeout = setTimeout(() => {
-          toast({
-            title: "Connection Failed",
-            description: "Please refresh the page and try again.",
-            variant: "destructive",
-          });
-          setIsSubmitting(false);
-        }, 5000);
-
-        const connectionCheckInterval = setInterval(() => {
-          if (wsClient.isConnected()) {
-            clearTimeout(connectionTimeout);
-            clearInterval(connectionCheckInterval);
-            sendTicketRequest(requestId);
-          }
-        }, 100);
-
-        return;
-      }
-
-      sendTicketRequest(requestId);
-    } catch (error) {
-      setIsSubmitting(false);
-    }
-  };
-
-  const sendTicketRequest = (requestId: string) => {
-    let handleCreateTicketResponse: (message: any) => void;
-    let timeoutId: NodeJS.Timeout;
-
-    // Use the new convenience method for ticket submission
-    const success = wsClient.submitTicket(selectedNumbers, bidAmount[0]);
-
-    if (!success) {
-      setIsSubmitting(false);
-      toast({
-        title: "❌ Submission Failed",
-        description:
-          "Failed to submit ticket. Please check your connection and try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // For backward compatibility, also listen for the old response format
-    // TODO: Update server to use the new submitTicket message type
-    wsClient.send({
-      type: "createTicket",
-      requestId,
-      payload: {
-        numbers: selectedNumbers,
-        bid: bidAmount[0],
-        userId: user?.id,
-      },
-      timestamp: new Date().toISOString(),
-    });
-
-    handleCreateTicketResponse = (message: any) => {
-      if (
-        message.type === "createTicket_response" &&
-        message.requestId === requestId
-      ) {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-
-        if (message.payload.success) {
-          const ticketData = message.payload.data;
-
-          // Update user data directly from response
-          if (ticketData.user) {
-            setUser(ticketData.user);
-
-            // Dispatch custom event to notify other components
-            window.dispatchEvent(
-              new CustomEvent("userDataChanged", {
-                detail: ticketData.user,
-              })
-            );
-          }
-
-          // Add ticket to local history
-          const historyTicket = {
-            userNumbers: selectedNumbers,
-            winningNumbers: ticketData.winningNumbers || [],
-            matches: ticketData.matchedNumbers?.length || 0,
-            coinsWon: ticketData.coinsWon || 0,
-            bid: bidAmount[0],
-          };
-
-          addTicket(historyTicket);
-
-          if (ticketData.coinsWon > 0) {
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 5000);
-          }
-
-          setSelectedNumbers([]);
-        }
-
-        setIsSubmitting(false);
-      }
-    };
-
-    wsClient.on("createTicket_response", handleCreateTicketResponse);
-
-    timeoutId = setTimeout(() => {
-      setIsSubmitting(false);
-    }, 10000);
-
-    // Cleanup function
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (handleCreateTicketResponse) {
-        wsClient.off("createTicket_response", handleCreateTicketResponse);
-      }
-    };
   };
 
   const numberGrid = useMemo(

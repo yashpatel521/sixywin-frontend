@@ -37,7 +37,8 @@ export const useWebSocket = (): UseWebSocketReturn => {
     forceReconnect: () => wsClient.forceReconnect(),
 
     // Lottery operations
-    submitTicket: (numbers, bid) => lotteryService.submitTicket(numbers, bid),
+    submitTicket: (numbers, bid, userId) =>
+      lotteryService.submitTicket(numbers, bid, userId),
     requestLeaderboard: () => lotteryService.requestLeaderboard(),
     requestMegaPot: () => lotteryService.requestMegaPot(),
 

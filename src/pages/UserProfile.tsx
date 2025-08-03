@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -22,126 +22,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { Link, useParams } from "react-router-dom";
-import { wsClient } from "@/websocket";
-import { UserType } from "@/types/interfaces";
 import TicketHistory from "@/components/shared/ticket-history";
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
-
-  const [userData, setUserData] = useState<UserType | null>(null);
-  const [referredUsers, setReferredUsers] = useState<UserType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isUserNotFound, setIsUserNotFound] = useState(false);
-
-  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+  const [isCopied, setIsCopied] = useState(false);
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let handleUserProfileResponse: (message: any) => void;
-
-    const fetchUserProfile = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        setIsUserNotFound(false);
-
-        const requestId = Math.random().toString(36).substring(7);
-
-        // Wait for WebSocket connection if not connected
-        if (!wsClient.isConnected()) {
-          setError("Connecting to server...");
-
-          const connectionTimeout = setTimeout(() => {
-            setError("Connection failed. Please refresh the page.");
-            setIsLoading(false);
-          }, 5000);
-
-          const connectionCheckInterval = setInterval(() => {
-            if (wsClient.isConnected()) {
-              clearTimeout(connectionTimeout);
-              clearInterval(connectionCheckInterval);
-              setError(null);
-              sendUserProfileRequest(requestId);
-            }
-          }, 100);
-
-          return;
-        }
-
-        sendUserProfileRequest(requestId);
-      } catch (err) {
-        setError("Failed to connect to server");
-        setIsLoading(false);
-      }
-    };
-
-    const sendUserProfileRequest = (requestId: string) => {
-      const success = wsClient.send({
-        type: "userProfile",
-        requestId,
-        payload: { id: userId },
-        timestamp: new Date().toISOString(),
-      });
-
-      if (!success) {
-        setError(
-          "Failed to send profile request. Please check your connection."
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      handleUserProfileResponse = (message: any) => {
-        if (
-          message.type === "userProfile_response" &&
-          message.requestId === requestId
-        ) {
-          // Clear the timeout since we got a response
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-
-          if (message.payload.success) {
-            setUserData(message?.payload?.data?.user);
-            setReferredUsers(message?.payload?.data?.referredUsers || []);
-          } else {
-            if (message.payload.message?.includes("not found")) {
-              setIsUserNotFound(true);
-            } else {
-              setError(
-                message.payload.message || "Failed to fetch user profile"
-              );
-            }
-          }
-          setIsLoading(false);
-        }
-      };
-
-      wsClient.on("userProfile_response", handleUserProfileResponse);
-
-      timeoutId = setTimeout(() => {
-        setError("Request timeout. Please try again.");
-        setIsLoading(false);
-      }, 10000);
-    };
-
-    if (userId) {
-      fetchUserProfile();
-    }
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (handleUserProfileResponse) {
-        wsClient.off("userProfile_response", handleUserProfileResponse);
-      }
-    };
-  }, [userId]);
+  // Use the new WebSocket hook for cleaner logic
+  const { userData, referredUsers, isLoading, error, isUserNotFound, refetch } =
+    useUserProfile(userId);
 
   const referralId = userData?.refernceId
     ? `ref-${userData.refernceId.toLowerCase()}`
@@ -264,10 +156,7 @@ export default function UserProfilePage() {
             </Button>
             <Button
               onClick={() => {
-                setError(null);
-                setIsLoading(true);
-                setUserData(null);
-                setReferredUsers([]);
+                refetch();
               }}
               variant="outline"
               size="sm"

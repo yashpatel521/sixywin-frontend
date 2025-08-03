@@ -25,8 +25,8 @@ export const MESSAGE_TYPES = {
   DISCONNECTED: "disconnected",
 
   // Lottery
-  SUBMIT_TICKET: "submit_ticket",
-  GET_LEADERBOARD: "get_leaderboard",
+  SUBMIT_TICKET: "createTicket",
+  GET_LEADERBOARD: "leaderboard",
   GET_MEGA_POT: "megaPot",
 
   // Game

@@ -13,14 +13,14 @@ export class LotteryWebSocketService {
   /**
    * Submit a lottery ticket
    */
-  submitTicket(numbers: number[], bid: number): boolean {
+  submitTicket(numbers: number[], bid: number, userId?: string): boolean {
     if (!MessageValidator.validateTicket(numbers, bid)) {
       return false;
     }
 
     return this.client.send({
       type: MESSAGE_TYPES.SUBMIT_TICKET,
-      payload: { numbers, bid },
+      payload: { numbers, bid, userId },
       timestamp: new Date().toISOString(),
     });
   }

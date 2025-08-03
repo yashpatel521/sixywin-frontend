@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { SEO, SEO_CONFIGS } from "@/components/shared/seo";
 import {
   Card,
@@ -20,19 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { wsClient } from "@/websocket";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useWebSocket } from "@/contexts/WebSocketContext";
-
-interface LeaderboardPlayer {
-  id: number;
-  username: string;
-  avatar: string;
-  coins: number;
-  totalWon: number;
-  todayBid: string;
-  todayTicketBuy: string;
-}
+import { useLeaderboard } from "@/hooks/use-leaderboard";
 
 const getRankClasses = (rank: number) => {
   if (rank === 1) return "text-yellow-400";
@@ -42,119 +30,8 @@ const getRankClasses = (rank: number) => {
 };
 
 export default function LeaderboardPage() {
-  const [players, setPlayers] = useState<LeaderboardPlayer[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { isConnected } = useWebSocket();
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let handleLeaderboardResponse: (message: any) => void;
-
-    const fetchLeaderboard = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const requestId = Math.random().toString(36).substring(7);
-
-        // Wait for WebSocket connection if not connected
-        if (!wsClient.isConnected()) {
-          setError("Connecting to server...");
-
-          const connectionTimeout = setTimeout(() => {
-            setError("Connection failed. Please refresh the page.");
-            setIsLoading(false);
-          }, 5000);
-
-          const connectionCheckInterval = setInterval(() => {
-            if (wsClient.isConnected()) {
-              clearTimeout(connectionTimeout);
-              clearInterval(connectionCheckInterval);
-              setError(null);
-              sendLeaderboardRequest(requestId);
-            }
-          }, 100);
-
-          return;
-        }
-
-        sendLeaderboardRequest(requestId);
-      } catch (err) {
-        setError("Failed to connect to server");
-        setIsLoading(false);
-      }
-    };
-
-    const sendLeaderboardRequest = (requestId: string) => {
-      // Use the new convenience method
-      const success = wsClient.requestLeaderboard();
-
-      if (!success) {
-        setError(
-          "Failed to request leaderboard. Please check your connection."
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // For backward compatibility, also send the old format
-      // TODO: Update server to use the new get_leaderboard message type
-      wsClient.send({
-        type: "leaderboard",
-        requestId,
-        payload: { limit: 10 },
-        timestamp: new Date().toISOString(),
-      });
-
-      handleLeaderboardResponse = (message: any) => {
-        if (message.type === "leaderboard_response") {
-          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-          if (message.requestId && message.requestId === requestId) {
-            // This is a response to our request
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-
-            if (message.payload.success) {
-              setPlayers(message.payload.data);
-              setError(null);
-            } else {
-              setError(
-                message.payload.message || "Failed to fetch leaderboard"
-              );
-            }
-            setIsLoading(false);
-          } else if (!message.requestId) {
-            // This is a broadcast update
-            if (message.payload.success) {
-              setPlayers(message.payload.data);
-              setError(null);
-              setIsLoading(false);
-            }
-          }
-        }
-      };
-
-      wsClient.on("leaderboard_response", handleLeaderboardResponse);
-
-      timeoutId = setTimeout(() => {
-        setError("Request timeout. Please try again.");
-        setIsLoading(false);
-      }, 10000);
-    };
-
-    fetchLeaderboard();
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (handleLeaderboardResponse) {
-        wsClient.off("leaderboard_response", handleLeaderboardResponse);
-      }
-    };
-  }, [isConnected]);
+  // Use the new WebSocket hook for cleaner logic
+  const { players, isLoading, error, refetch } = useLeaderboard();
 
   const renderSkeletonRows = () => {
     return Array.from({ length: 10 }).map((_, index) => (
@@ -206,9 +83,7 @@ export default function LeaderboardPage() {
                   </Button>
                   <Button
                     onClick={() => {
-                      setError(null);
-                      setIsLoading(true);
-                      setPlayers([]);
+                      refetch();
                     }}
                     variant="outline"
                     size="sm"

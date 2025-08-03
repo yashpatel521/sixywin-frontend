@@ -238,14 +238,18 @@ export class WebSocketClient {
   }
 
   // Convenience methods for backward compatibility
-  public submitTicket(numbers: number[], bid: number): boolean {
+  public submitTicket(
+    numbers: number[],
+    bid: number,
+    userId?: string
+  ): boolean {
     if (!MessageValidator.validateTicket(numbers, bid)) {
       return false;
     }
 
     return this.send({
       type: MESSAGE_TYPES.SUBMIT_TICKET,
-      payload: { numbers, bid },
+      payload: { numbers, bid, userId },
       timestamp: new Date().toISOString(),
     });
   }
@@ -262,6 +266,18 @@ export class WebSocketClient {
     return this.send({
       type: MESSAGE_TYPES.GET_MEGA_POT,
       payload: {},
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  public requestUserProfile(userId: string): boolean {
+    if (!userId || typeof userId !== "string") {
+      return false;
+    }
+
+    return this.send({
+      type: "userProfile",
+      payload: { id: userId },
       timestamp: new Date().toISOString(),
     });
   }

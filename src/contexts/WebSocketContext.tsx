@@ -16,7 +16,7 @@ interface WebSocketContextType {
   clearMessages: () => void;
   forceReconnect: () => void;
   // Enhanced convenience methods
-  submitTicket: (numbers: number[], bid: number) => boolean;
+  submitTicket: (numbers: number[], bid: number, userId?: string) => boolean;
   requestLeaderboard: () => boolean;
   requestMegaPot: () => boolean;
 }
@@ -103,8 +103,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   };
 
   // Enhanced convenience methods
-  const submitTicket = (numbers: number[], bid: number): boolean => {
-    return wsClient.submitTicket(numbers, bid);
+  const submitTicket = (
+    numbers: number[],
+    bid: number,
+    userId?: string
+  ): boolean => {
+    return wsClient.submitTicket(numbers, bid, userId);
   };
 
   const requestLeaderboard = (): boolean => {

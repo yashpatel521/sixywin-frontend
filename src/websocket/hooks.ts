@@ -17,7 +17,7 @@ export interface UseWebSocketReturn {
   forceReconnect: () => void;
 
   // Lottery-specific methods
-  submitTicket: (numbers: number[], bid: number) => boolean;
+  submitTicket: (numbers: number[], bid: number, userId?: string) => boolean;
   requestLeaderboard: () => boolean;
   requestMegaPot: () => boolean;
 

@@ -4,113 +4,14 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useState, useEffect } from "react";
-import { wsClient } from "@/websocket";
-import { MegaPotType } from "@/types/interfaces";
 import { CountdownTimer } from "@/components/shared/countdown-timer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icons } from "../shared/icons";
+import { useMegaPot } from "@/hooks/use-megapot";
 
 export function MegaPot() {
-  const [data, setData] = useState<MegaPotType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  // WebSocket logic for fetching mega pot data
-  useEffect(() => {
-    const fetchMegaPot = () => {
-      if (wsClient.isConnected()) {
-        sendMegaPotRequest();
-      } else {
-        setTimeout(() => {
-          if (wsClient.isConnected()) {
-            sendMegaPotRequest();
-          } else {
-            setError("WebSocket connection failed");
-            setIsLoading(false);
-          }
-        }, 2000);
-      }
-    };
-
-    const sendMegaPotRequest = () => {
-      const requestId = Math.random().toString(36).substring(7);
-      let handleMegaPotResponse: (message: any) => void;
-      let timeoutId: NodeJS.Timeout;
-
-      // Use the new convenience method
-      const success = wsClient.requestMegaPot();
-
-      if (!success) {
-        setError(
-          "Failed to request mega pot data. Please check your connection."
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // For backward compatibility, also send the old format
-      // TODO: Update server to use the new megaPot message type
-      wsClient.send({
-        type: "megaPot",
-        requestId,
-        payload: {},
-        timestamp: new Date().toISOString(),
-      });
-
-      handleMegaPotResponse = (message: any) => {
-        if (message.type === "megaPot_response") {
-          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-          if (message.requestId && message.requestId === requestId) {
-            // This is a response to our request
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-
-            if (message.payload.success) {
-              const megaPotData: MegaPotType = message.payload.data;
-              setData(megaPotData);
-              setError(null);
-              setIsLoading(false);
-            } else {
-              setError(message.payload.message || "Failed to fetch mega pot");
-            }
-            setIsLoading(false);
-          } else if (!message.requestId) {
-            // This is a broadcast update
-            if (message.payload.success) {
-              const megaPotData: MegaPotType = message.payload.data;
-              setData(megaPotData);
-              setError(null);
-              setIsLoading(false);
-              setIsUpdating(true);
-              setTimeout(() => setIsUpdating(false), 1000);
-            }
-          }
-        }
-      };
-
-      wsClient.on("megaPot_response", handleMegaPotResponse);
-
-      timeoutId = setTimeout(() => {
-        setError("Request timeout");
-        setIsLoading(false);
-      }, 10000);
-
-      // Cleanup function
-      return () => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        if (handleMegaPotResponse) {
-          wsClient.off("megaPot_response", handleMegaPotResponse);
-        }
-      };
-    };
-
-    fetchMegaPot();
-  }, []);
+  // Use the new WebSocket hook for cleaner logic
+  const { data, isLoading, error } = useMegaPot();
 
   // Extract values from data
   const amount = data?.amount || 0;
@@ -127,11 +28,7 @@ export function MegaPot() {
             </CardTitle>
           </div>
 
-          <div
-            className={`flex justify-center items-center gap-2 text-2xl md:text-4xl font-bold text-primary p-3 md:p-4 rounded-lg bg-primary/10 border-2 border-dashed border-primary/20 shadow-[0_0_15px_rgba(255,223,0,0.5)] drop-shadow-[0_2px_4px_hsl(var(--primary)/0.5)] transition-all duration-300 ${
-              isUpdating ? "scale-105 bg-primary/20" : ""
-            }`}
-          >
+          <div className="flex justify-center items-center gap-2 text-2xl md:text-4xl font-bold text-primary p-3 md:p-4 rounded-lg bg-primary/10 border-2 border-dashed border-primary/20 shadow-[0_0_15px_rgba(255,223,0,0.5)] drop-shadow-[0_2px_4px_hsl(var(--primary)/0.5)] transition-all duration-300">
             <Icons.gem className="h-6 w-6 md:h-9 md:w-9" />
             {isLoading ? (
               <Skeleton className="h-8 w-20 md:h-10 md:w-24" />
@@ -141,9 +38,6 @@ export function MegaPot() {
               <span className="text-sm md:text-base">
                 {amount.toLocaleString()}
               </span>
-            )}
-            {isUpdating && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             )}
           </div>
 
