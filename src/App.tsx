@@ -7,6 +7,7 @@ import { ROUTES } from "./constants/routes";
 import { Toaster } from "./components/ui/toaster";
 import { Header } from "./components/layout/header";
 import { Footer } from "./components/layout/footer";
+import { VersionInfo } from "./components/shared/version-info";
 
 // Lazy load pages for better performance
 const Login = React.lazy(() => import("./pages/Login"));
@@ -109,6 +110,8 @@ const App: React.FC = () => {
           </main>
         </WebSocketProvider>
         <Toaster />
+        {/* Development version info - only shows in development */}
+        {import.meta.env.DEV && <VersionInfo />}
         {/* <StickyAdBanner /> */}
       </div>
     </HelmetProvider>
