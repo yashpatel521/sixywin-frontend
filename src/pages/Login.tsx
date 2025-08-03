@@ -6,14 +6,10 @@ import { Link } from "react-router-dom";
 import { Icons } from "@/components/shared/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { wsClient } from "@/websocket";
-import {
-  rememberMeStorage,
-  tokenStorage,
-  userStorage,
-} from "@/lib/localStorage";
+import { rememberMeStorage } from "@/lib/localStorage";
 import { UserType } from "@/types/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useLogin } from "@/hooks/use-login";
 import { IMAGES } from "@/lib/constants";
 
 export default function LoginPage() {
@@ -23,8 +19,10 @@ export default function LoginPage() {
   if (user) {
     navigate("/games");
   }
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+
+  // Use the new login hook for cleaner logic
+  const { isLoading, error, login } = useLogin();
+
   const [rememberMe, setRememberMeChecked] = useState(false);
   const [formData, setFormData] = useState({
     emailOrUsername: "",
@@ -48,67 +46,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-
-    setIsLoading(true);
-    const requestId = Date.now().toString();
-
-    // Set up response handler
-    const handleResponse = (message: any) => {
-      if (message.requestId === requestId) {
-        wsClient.off("login_response", handleResponse);
-        setIsLoading(false);
-
-        if (message.payload.success) {
-          // Login successful
-          userStorage.setUser(message.payload.data.user);
-          tokenStorage.setToken(message.payload.data.token);
-
-          // Update remember me data after successful login if checkbox is checked
-          if (rememberMe) {
-            rememberMeStorage.setRememberData(
-              formData.emailOrUsername,
-              formData.password
-            );
-          } else {
-            rememberMeStorage.removeRememberData();
-          }
-
-          navigate("/games");
-        } else {
-          // Login failed
-          setError(message.payload.message);
-        }
-      }
-    };
-
-    // Listen for response
-    wsClient.on("login_response", handleResponse);
-
-    // Send login request via WebSocket
-    const success = wsClient.send({
-      type: "login",
-      payload: {
-        emailOrUsername: formData.emailOrUsername,
-        password: formData.password,
-      },
-      requestId: requestId,
-      timestamp: new Date().toISOString(),
-    });
-
-    if (!success) {
-      setError("Failed to send login request. Please check your connection.");
-      setIsLoading(false);
-      wsClient.off("login_response", handleResponse);
-      return;
-    }
-
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      wsClient.off("login_response", handleResponse);
-      setIsLoading(false);
-      setError("Login timeout. Please try again.");
-    }, 10000);
+    await login(formData, rememberMe);
   };
 
   return (

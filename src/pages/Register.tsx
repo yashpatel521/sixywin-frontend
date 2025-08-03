@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/shared/icons";
-import { wsClient } from "@/websocket";
 import { UserType } from "@/types/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { tokenStorage, userStorage } from "@/lib/localStorage";
+import { useRegister } from "@/hooks/use-register";
 import { IMAGES } from "@/lib/constants";
 
 export default function SignupPage() {
@@ -20,9 +19,11 @@ export default function SignupPage() {
 
   const query = new URLSearchParams(useLocation().search);
   const ref = query.get("ref");
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+
+  // Use the new register hook for cleaner logic
+  const { isLoading, error, isPasswordValid, register, validatePasswords } =
+    useRegister();
+
   // see password
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -39,77 +40,13 @@ export default function SignupPage() {
 
   // check if the password and confirm password are the same
   useEffect(() => {
-    if (userData.password === "" || userData.confirmPassword === "") {
-      setIsPasswordValid(true);
-      return;
-    }
-    if (userData.password !== userData.confirmPassword) {
-      setIsPasswordValid(false);
-    } else {
-      setIsPasswordValid(true);
-    }
-  }, [userData.password, userData.confirmPassword]);
+    validatePasswords(userData.password, userData.confirmPassword);
+  }, [userData.password, userData.confirmPassword, validatePasswords]);
 
   // take all the data from the form and send it to the backend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-
-    if (!isPasswordValid) {
-      return; // Password validation error is handled by the form
-    }
-
-    setIsLoading(true);
-    const requestId = Date.now().toString();
-
-    // Set up response handler
-    const handleResponse = (message: any) => {
-      if (message.requestId === requestId) {
-        wsClient.off("register_response", handleResponse);
-        setIsLoading(false);
-
-        if (message.payload.success) {
-          // Registration successful
-          tokenStorage.setToken(message.payload.data.token);
-          userStorage.setUser(message.payload.data.user);
-          navigate("/games");
-        } else {
-          // Registration failed
-          setError(message.payload.message);
-        }
-      }
-    };
-
-    // Listen for response
-    wsClient.on("register_response", handleResponse);
-
-    // Send register request via WebSocket
-    const success = wsClient.send({
-      type: "register",
-      payload: {
-        username: userData.username,
-        email: userData.email,
-        password: userData.password,
-      },
-      requestId: requestId,
-      timestamp: new Date().toISOString(),
-    });
-
-    if (!success) {
-      setError(
-        "Failed to send registration request. Please check your connection."
-      );
-      setIsLoading(false);
-      wsClient.off("register_response", handleResponse);
-      return;
-    }
-
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      wsClient.off("register_response", handleResponse);
-      setIsLoading(false);
-      setError("Registration timeout. Please try again.");
-    }, 10000);
+    await register(userData);
   };
   return (
     <div className="relative flex min-h-dvh items-center justify-center p-4 bg-gradient-to-br from-yellow-900/80 via-background/80 to-background">
