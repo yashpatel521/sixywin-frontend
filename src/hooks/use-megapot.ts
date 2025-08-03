@@ -48,17 +48,8 @@ export function useMegaPot(): UseMegaPotReturn {
       return;
     }
 
-    // For backward compatibility, also send the old format
-    // TODO: Update server to use the new megaPot message type
-    wsClient.send({
-      type: "megaPot",
-      requestId,
-      payload: {},
-      timestamp: new Date().toISOString(),
-    });
-
     handleMegaPotResponse = (message: any) => {
-      if (message.type === "megaPot_response") {
+      if (message.type === "getMegaPot_response") {
         // Handle both regular responses (with requestId) and broadcast updates (without requestId)
         if (message.requestId && message.requestId === requestId) {
           // This is a response to our request
@@ -86,7 +77,7 @@ export function useMegaPot(): UseMegaPotReturn {
       }
     };
 
-    wsClient.on("megaPot_response", handleMegaPotResponse);
+    wsClient.on("getMegaPot_response", handleMegaPotResponse);
 
     timeoutId = setTimeout(() => {
       setError("Request timeout");
@@ -99,7 +90,7 @@ export function useMegaPot(): UseMegaPotReturn {
         clearTimeout(timeoutId);
       }
       if (handleMegaPotResponse) {
-        wsClient.off("megaPot_response", handleMegaPotResponse);
+        wsClient.off("getMegaPot_response", handleMegaPotResponse);
       }
     };
   };

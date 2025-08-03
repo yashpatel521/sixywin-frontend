@@ -46,7 +46,7 @@ export function useUserProfile(
       }
 
       handleUserProfileResponse = (message: any) => {
-        if (message.type === "userProfile_response") {
+        if (message.type === "getUserProfile_response") {
           // Clear the timeout since we got a response
           if (timeoutId) {
             clearTimeout(timeoutId);
@@ -68,7 +68,7 @@ export function useUserProfile(
         }
       };
 
-      wsClient.on("userProfile_response", handleUserProfileResponse);
+      wsClient.on("getUserProfile_response", handleUserProfileResponse);
 
       timeoutId = setTimeout(() => {
         setError("Request timeout. Please try again.");
@@ -103,7 +103,7 @@ export function useUserProfile(
         clearTimeout(timeoutId);
       }
       if (handleUserProfileResponse) {
-        wsClient.off("userProfile_response", handleUserProfileResponse);
+        wsClient.off("getUserProfile_response", handleUserProfileResponse);
       }
     };
   };

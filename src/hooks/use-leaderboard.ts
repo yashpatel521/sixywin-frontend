@@ -46,7 +46,7 @@ export function useLeaderboard(): UseLeaderboardReturn {
       }
 
       handleLeaderboardResponse = (message: any) => {
-        if (message.type === "leaderboard_response") {
+        if (message.type === "getLeaderboard_response") {
           // Handle both regular responses (with requestId) and broadcast updates (without requestId)
           if (message.requestId && message.requestId === requestId) {
             // This is a response to our request
@@ -76,7 +76,7 @@ export function useLeaderboard(): UseLeaderboardReturn {
         }
       };
 
-      wsClient.on("leaderboard_response", handleLeaderboardResponse);
+      wsClient.on("getLeaderboard_response", handleLeaderboardResponse);
 
       timeoutId = setTimeout(() => {
         setError("Request timeout. Please try again.");
@@ -111,7 +111,7 @@ export function useLeaderboard(): UseLeaderboardReturn {
         clearTimeout(timeoutId);
       }
       if (handleLeaderboardResponse) {
-        wsClient.off("leaderboard_response", handleLeaderboardResponse);
+        wsClient.off("getLeaderboard_response", handleLeaderboardResponse);
       }
     };
   };

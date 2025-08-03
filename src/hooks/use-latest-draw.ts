@@ -100,16 +100,17 @@ export function useLatestDraw(): UseLatestDrawReturn {
     let handleLatestDrawResponse: (message: any) => void;
     let timeoutId: NodeJS.Timeout;
 
-    // Send the request
-    wsClient.send({
-      type: "latestDraw",
-      requestId,
-      payload: {},
-      timestamp: new Date().toISOString(),
-    });
+    // Use the convenience method
+    const success = wsClient.requestLatestDraw();
+
+    if (!success) {
+      setError("Failed to request latest draw. Please check your connection.");
+      setIsLoading(false);
+      return;
+    }
 
     handleLatestDrawResponse = (message: any) => {
-      if (message.type === "latestDraw_response") {
+      if (message.type === "getLatestDraw_response") {
         // Handle both regular responses (with requestId) and broadcast updates (without requestId)
         if (message.requestId && message.requestId === requestId) {
           // This is a response to our request
@@ -176,7 +177,7 @@ export function useLatestDraw(): UseLatestDrawReturn {
       }
     };
 
-    wsClient.on("latestDraw_response", handleLatestDrawResponse);
+    wsClient.on("getLatestDraw_response", handleLatestDrawResponse);
 
     timeoutId = setTimeout(() => {
       setError("Request timeout");
@@ -189,7 +190,7 @@ export function useLatestDraw(): UseLatestDrawReturn {
         clearTimeout(timeoutId);
       }
       if (handleLatestDrawResponse) {
-        wsClient.off("latestDraw_response", handleLatestDrawResponse);
+        wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
       }
     };
   };

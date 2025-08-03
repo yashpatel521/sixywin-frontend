@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { wsClient } from "@/websocket";
+import { MESSAGE_TYPES } from "@/websocket/constants";
 import { tokenStorage, userStorage } from "@/lib/localStorage";
 
 interface RegisterFormData {
@@ -119,7 +120,7 @@ export function useRegister(): UseRegisterReturn {
 
       // Send register request via WebSocket
       const success = wsClient.send({
-        type: "register",
+        type: MESSAGE_TYPES.REGISTER,
         payload: {
           username: formData.username,
           email: formData.email,

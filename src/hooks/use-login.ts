@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { wsClient } from "@/websocket";
+import { MESSAGE_TYPES } from "@/websocket/constants";
 import {
   rememberMeStorage,
   tokenStorage,
@@ -118,7 +119,7 @@ export function useLogin(): UseLoginReturn {
 
       // Send login request via WebSocket
       const success = wsClient.send({
-        type: "login",
+        type: MESSAGE_TYPES.LOGIN,
         payload: {
           emailOrUsername: formData.emailOrUsername,
           password: formData.password,

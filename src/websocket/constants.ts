@@ -24,10 +24,17 @@ export const MESSAGE_TYPES = {
   CONNECTED: "connected",
   DISCONNECTED: "disconnected",
 
+  // User Actions
+  LOGIN: "login",
+  REGISTER: "register",
+  GET_USER_PROFILE: "getUserProfile",
+  SPIN_WHEEL: "spinWheel",
+
   // Lottery
   SUBMIT_TICKET: "createTicket",
-  GET_LEADERBOARD: "leaderboard",
-  GET_MEGA_POT: "megaPot",
+  GET_LEADERBOARD: "getLeaderboard",
+  GET_MEGA_POT: "getMegaPot",
+  GET_LATEST_DRAW: "getLatestDraw",
 
   // Game
   GAME_ACTION: "game_action",

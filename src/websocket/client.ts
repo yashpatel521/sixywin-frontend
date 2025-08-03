@@ -270,13 +270,21 @@ export class WebSocketClient {
     });
   }
 
+  public requestLatestDraw(): boolean {
+    return this.send({
+      type: MESSAGE_TYPES.GET_LATEST_DRAW,
+      payload: {},
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   public requestUserProfile(userId: string): boolean {
     if (!userId || typeof userId !== "string") {
       return false;
     }
 
     return this.send({
-      type: "userProfile",
+      type: MESSAGE_TYPES.GET_USER_PROFILE,
       payload: { id: userId },
       timestamp: new Date().toISOString(),
     });
