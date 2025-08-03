@@ -6,15 +6,9 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Gem,
-  Info,
-  ListChecks,
-  ArrowUp,
-  ArrowDown,
-  Target,
-} from "lucide-react";
+
 import { CurrentBetsProps } from "@/lib/types";
+import { Icons } from "../shared/icons";
 
 export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
   const noBetsPlaced = overUnderBets.length === 0 && numberBets.length === 0;
@@ -23,7 +17,7 @@ export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
     <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
       <CardHeader>
         <CardTitle className="font-headline text-2xl flex items-center gap-2">
-          <ListChecks className="h-6 w-6 text-primary" />
+          <Icons.listChecks className="h-6 w-6 text-primary" />
           Your Bets for Next Round
         </CardTitle>
         <CardDescription>
@@ -33,7 +27,7 @@ export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
       <CardContent>
         {noBetsPlaced ? (
           <div className="flex flex-col items-center justify-center text-center p-8 rounded-lg bg-secondary/30">
-            <Info className="h-10 w-10 text-muted-foreground mb-4" />
+            <Icons.info className="h-10 w-10 text-muted-foreground mb-4" />
             <p className="font-semibold text-lg">No Bets Placed</p>
             <p className="text-muted-foreground">
               Use the controls above to place your bets before the next draw!
@@ -44,8 +38,8 @@ export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
             {overUnderBets.length > 0 && (
               <div className="p-4 rounded-lg bg-secondary/30 space-y-2">
                 <div className="flex items-center gap-3">
-                  <ArrowUp className="h-5 w-5 text-green-500" />
-                  <ArrowDown className="h-5 w-5 text-red-500" />
+                  <Icons.arrowUp className="h-5 w-5 text-green-500" />
+                  <Icons.arrowDown className="h-5 w-5 text-red-500" />
                   <p className="font-semibold">Range Bets</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -61,7 +55,7 @@ export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
                         {bet.direction} 25
                       </Badge>
                       <div className="flex items-center gap-1 font-semibold text-primary text-sm">
-                        <Gem className="h-4 w-4" />
+                        <Icons.gem className="h-4 w-4" />
                         <span>{bet.bid.toLocaleString()}</span>
                       </div>
                     </div>
@@ -72,7 +66,7 @@ export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
             {numberBets.length > 0 && (
               <div className="p-4 rounded-lg bg-secondary/30 space-y-2">
                 <div className="flex items-center gap-3">
-                  <Target className="h-6 w-6 text-blue-500" />
+                  <Icons.target className="h-6 w-6 text-blue-500" />
                   <p className="font-semibold">Number Bets</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -88,7 +82,7 @@ export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {
                         {bet.number}
                       </Badge>
                       <div className="flex items-center gap-1 font-semibold text-primary text-sm">
-                        <Gem className="h-4 w-4" />
+                        <Icons.gem className="h-4 w-4" />
                         <span>{bet.bid.toLocaleString()}</span>
                       </div>
                     </div>

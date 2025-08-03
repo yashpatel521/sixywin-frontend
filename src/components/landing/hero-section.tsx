@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BouncingBalls } from "@/components/shared/bouncing-balls";
-import { Trophy } from "lucide-react";
+import { IMAGES } from "@/lib/constants";
+import { Icons } from "../shared/icons";
 
 const sectionContent = {
   welcome: "Welcome to",
@@ -11,7 +11,7 @@ const sectionContent = {
     "Your daily dose of fun and excitement! Pick your lucky numbers, win virtual coins, and climb the leaderboard. No risk, all fun.",
   buttonText: "Get Started for Free",
   image: {
-    src: "/img1.png",
+    src: IMAGES.hero,
     alt: "Joyful cartoon person celebrating with playing cards",
     width: 400,
     height: 400,
@@ -36,7 +36,7 @@ const TierCard = ({
 }) => (
   <div className="bg-card/50 backdrop-blur-lg border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center animation-all hover:shadow-2xl hover:-translate-y-2 fade-in-up">
     <div className="bg-primary/20 text-primary rounded-full p-2 mb-2">
-      <Trophy className="h-5 w-5" />
+      <Icons.trophy className="h-5 w-5" />
     </div>
     <h4 className="text-md font-bold text-foreground">{title}</h4>
     <p className="text-2xl font-bold text-primary">{multiplier}</p>
@@ -64,7 +64,7 @@ export function HeroSection() {
           >
             <Link to="/register">
               {sectionContent.buttonText}{" "}
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <Icons.arrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
         </div>

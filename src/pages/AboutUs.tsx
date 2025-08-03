@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Gift, Ticket, Gem, History } from "lucide-react";
+import { Icons } from "@/components/shared/icons";
 
 export default function AboutUsPage() {
   return (
@@ -7,7 +7,7 @@ export default function AboutUsPage() {
       <Card className="glassmorphism">
         <CardHeader>
           <CardTitle className="font-headline text-3xl flex items-center gap-2">
-            <Users className="h-8 w-8 text-primary" />
+            <Icons.users className="h-8 w-8 text-primary" />
             About SixyWin
           </CardTitle>
         </CardHeader>
@@ -26,7 +26,7 @@ export default function AboutUsPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <Ticket className="h-6 w-6" />
+              <Icons.ticket className="h-6 w-6" />
               How It Works
             </h2>
             <p>
@@ -39,7 +39,7 @@ export default function AboutUsPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <Gem className="h-6 w-6" />
+              <Icons.gem className="h-6 w-6" />
               Winning Rules
             </h2>
             <p>
@@ -63,7 +63,7 @@ export default function AboutUsPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <History className="h-6 w-6" />
+              <Icons.history className="h-6 w-6" />
               Your Game History
             </h2>
             <p>
@@ -74,7 +74,7 @@ export default function AboutUsPage() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <Gift className="h-6 w-6" />
+              <Icons.gift className="h-6 w-6" />
               No Gambling, Just Fun and Coupons
             </h2>
             <p>

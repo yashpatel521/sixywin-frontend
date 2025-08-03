@@ -1,69 +1,43 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Gift, RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { prizes, segmentColors } from "@/lib/constants";
+import { Icons } from "@/components/shared/icons";
+import { useSpinWheel } from "@/hooks/use-spin-wheel";
+import { Button } from "@/components/ui/button";
 
 export function SpinWheel() {
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [spun, setSpun] = useState(false);
-  const [rotation, setRotation] = useState(0);
-  const { toast } = useToast();
+  const { isSpinning, rotation, hasSpunToday, spin, setRotation } =
+    useSpinWheel();
 
   const handleSpin = () => {
-    if (spun) {
-      toast({
-        variant: "destructive",
-        title: "Already Spun!",
-        description: "You can spin the wheel once per day. Come back tomorrow!",
-      });
-      return;
-    }
-
     const spinDegrees = Math.floor(Math.random() * 360) + 360 * 5; // Spin at least 5 times
     const finalRotation = rotation + spinDegrees;
 
-    setIsSpinning(true);
     setRotation(finalRotation);
 
     setTimeout(() => {
       const segmentAngle = 360 / prizes.length;
       const normalizedRotation = finalRotation % 360;
-      const pointerAngle = (270 - normalizedRotation + 360) % 360;
-      const segmentIndex = Math.floor(pointerAngle / segmentAngle);
+      // Since pointer is at top (0 degrees), we need to calculate which segment it points to
+      const pointerAngle = (360 - normalizedRotation) % 360;
+      const segmentIndex =
+        Math.floor(pointerAngle / segmentAngle) % prizes.length;
       const prize = prizes[segmentIndex];
 
-      setIsSpinning(false);
-      setSpun(true);
-
-      if (prize.value > 0) {
-        toast({
-          title: "You Won!",
-          description: `Congratulations! You won ${
-            prize.label === "JACKPOT" ? "the JACKPOT" : ""
-          } ${prize.value.toLocaleString()} coins.`,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "So close!",
-          description: "Better luck next time. Try again tomorrow!",
-        });
-      }
+      // Call the spin function from the hook with the calculated prize value
+      spin(prize.value);
     }, 4000);
   };
 
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-8">
       <div className="relative w-80 h-80 flex items-center justify-center">
-        {/* Pointer */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-primary z-20 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]" />
+        {/* Pointer make it inverse of the wheel bring it little bit down */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2  w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-white z-20 drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] rotate-180 translate-y-2 shadow-inner" />
 
         {/* Wheel */}
         <div
           className={cn(
-            "relative w-72 h-72 rounded-full border-[10px] border-yellow-300 bg-yellow-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5),0_0_20px_rgba(255,255,0,0.5)] transition-transform ease-out overflow-hidden",
+            "relative w-72 h-72 rounded-full border-[5px] border-red-500 bg-yellow-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5),0_0_20px_rgba(255,255,0,0.5)] transition-transform ease-out overflow-hidden",
             isSpinning && "duration-4000"
           )}
           style={{ transform: `rotate(${rotation}deg)` }}
@@ -98,7 +72,7 @@ export function SpinWheel() {
             {prizes.map((prize, index) => {
               const angle =
                 (360 / prizes.length) * index + 360 / prizes.length / 2;
-              const labelColor = index % 2 === 0 ? "#dc2626" : "#fde047";
+              const labelColor = index % 2 != 0 ? "#dc2626" : "#fde047";
               return (
                 <div
                   key={`label-${index}`}
@@ -107,8 +81,9 @@ export function SpinWheel() {
                     transform: `rotate(${angle}deg)`,
                   }}
                 >
+                  {/* make label little bit inside the segment */}
                   <span
-                    className="text-lg font-bold"
+                    className="text-md font-bold"
                     style={{
                       color: labelColor,
                       textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
@@ -117,7 +92,7 @@ export function SpinWheel() {
                       transform: `rotate(-${angle}deg)`,
                     }}
                   >
-                    {prize.label}
+                    {prize.text}
                   </span>
                 </div>
               );
@@ -134,16 +109,16 @@ export function SpinWheel() {
       <div className="w-full max-w-sm">
         <Button
           onClick={handleSpin}
-          disabled={isSpinning || spun}
+          disabled={isSpinning || hasSpunToday}
           size="lg"
           className="w-full animation-all hover:scale-105 active:scale-95 text-lg font-bold py-6"
         >
           {isSpinning ? (
-            <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+            <Icons.rotateCcw className="mr-2 h-5 w-5 animate-spin" />
           ) : (
-            <Gift className="mr-2 h-5 w-5" />
+            <Icons.gift className="mr-2 h-5 w-5" />
           )}
-          {spun ? "Spun Today" : "Spin to Win!"}
+          {hasSpunToday ? "Already Spun Today" : "Spin to Win!"}
         </Button>
       </div>
     </div>

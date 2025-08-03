@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -7,16 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Gem,
-  User,
-  Ticket,
-  BarChart,
-  Copy,
-  Check,
-  Users,
-  Award,
-} from "lucide-react";
+import { Icons } from "@/components/shared/icons";
 import {
   Table,
   TableBody,
@@ -31,118 +22,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { Link, useParams } from "react-router-dom";
-import { wsClient } from "@/websocket";
-import { UserType } from "@/types/interfaces";
 import TicketHistory from "@/components/shared/ticket-history";
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
-
-  const [userData, setUserData] = useState<UserType | null>(null);
-  const [referredUsers, setReferredUsers] = useState<UserType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isUserNotFound, setIsUserNotFound] = useState(false);
-
-  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+  const [isCopied, setIsCopied] = useState(false);
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let handleUserProfileResponse: (message: any) => void;
-
-    const fetchUserProfile = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        setIsUserNotFound(false);
-
-        const requestId = Math.random().toString(36).substring(7);
-
-        // Wait for WebSocket connection if not connected
-        if (!wsClient.isConnected()) {
-          setError("Connecting to server...");
-
-          const connectionTimeout = setTimeout(() => {
-            setError("Connection failed. Please refresh the page.");
-            setIsLoading(false);
-          }, 5000);
-
-          const connectionCheckInterval = setInterval(() => {
-            if (wsClient.isConnected()) {
-              clearTimeout(connectionTimeout);
-              clearInterval(connectionCheckInterval);
-              setError(null);
-              sendUserProfileRequest(requestId);
-            }
-          }, 100);
-
-          return;
-        }
-
-        sendUserProfileRequest(requestId);
-      } catch (err) {
-        setError("Failed to connect to server");
-        setIsLoading(false);
-      }
-    };
-
-    const sendUserProfileRequest = (requestId: string) => {
-      wsClient.send({
-        type: "get_user_profile",
-        requestId,
-        payload: { id: userId },
-        timestamp: new Date().toISOString(),
-      });
-
-      handleUserProfileResponse = (message: any) => {
-        if (
-          message.type === "user_profile_response" &&
-          message.requestId === requestId
-        ) {
-          // Clear the timeout since we got a response
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-
-          if (message.payload.success) {
-            setUserData(message?.payload?.data?.user);
-            setReferredUsers(message?.payload?.data?.referredUsers || []);
-          } else {
-            if (message.payload.message?.includes("not found")) {
-              setIsUserNotFound(true);
-            } else {
-              setError(
-                message.payload.message || "Failed to fetch user profile"
-              );
-            }
-          }
-          setIsLoading(false);
-        }
-      };
-
-      wsClient.on("user_profile_response", handleUserProfileResponse);
-
-      timeoutId = setTimeout(() => {
-        setError("Request timeout. Please try again.");
-        setIsLoading(false);
-      }, 10000);
-    };
-
-    if (userId) {
-      fetchUserProfile();
-    }
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (handleUserProfileResponse) {
-        wsClient.off("user_profile_response", handleUserProfileResponse);
-      }
-    };
-  }, [userId]);
+  // Use the new WebSocket hook for cleaner logic
+  const { userData, referredUsers, isLoading, error, isUserNotFound, refetch } =
+    useUserProfile(userId);
 
   const referralId = userData?.refernceId
     ? `ref-${userData.refernceId.toLowerCase()}`
@@ -265,10 +156,7 @@ export default function UserProfilePage() {
             </Button>
             <Button
               onClick={() => {
-                setError(null);
-                setIsLoading(true);
-                setUserData(null);
-                setReferredUsers([]);
+                refetch();
               }}
               variant="outline"
               size="sm"
@@ -300,11 +188,11 @@ export default function UserProfilePage() {
             <div className="flex-grow text-center sm:text-left">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                 <CardTitle className="font-headline text-3xl flex items-center gap-2">
-                  <User className="h-8 w-8 text-primary" />
+                  <Icons.user className="h-8 w-8 text-primary" />
                   {userData.username}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-xl font-semibold text-primary">
-                  <Gem className="h-6 w-6" />
+                  <Icons.gem className="h-6 w-6" />
                   <span>
                     {(userData.coins || 0) + (userData.winningAmount || 0)}{" "}
                     Coins
@@ -334,9 +222,9 @@ export default function UserProfilePage() {
                     className="animation-all hover:scale-105 active:scale-95"
                   >
                     {isCopied ? (
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Icons.check className="h-4 w-4 text-green-500" />
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <Icons.copy className="h-4 w-4" />
                     )}
                     <span className="sr-only">Copy Referral Link</span>
                   </Button>
@@ -349,7 +237,7 @@ export default function UserProfilePage() {
                     Tickets Played
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Ticket className="h-6 w-6 text-primary/80" />
+                    <Icons.ticket className="h-6 w-6 text-primary/80" />
                     {totalTickets}
                   </div>
                 </div>
@@ -358,7 +246,7 @@ export default function UserProfilePage() {
                     Winning Amount
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <BarChart className="h-6 w-6 text-primary/80" />
+                    <Icons.barChart className="h-6 w-6 text-primary/80" />
                     {userData.winningAmount.toLocaleString()}
                   </div>
                 </div>
@@ -367,7 +255,7 @@ export default function UserProfilePage() {
                     Ad Earnings
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Gem className="h-6 w-6 text-primary/80" />
+                    <Icons.gem className="h-6 w-6 text-primary/80" />
                     {(userData.winningAmount || 0).toLocaleString()}
                   </div>
                 </div>
@@ -376,7 +264,7 @@ export default function UserProfilePage() {
                     Total Winnings
                   </div>
                   <div className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Award className="h-6 w-6 text-primary/80" />
+                    <Icons.award className="h-6 w-6 text-primary/80" />
                     {userData.totalWon.toLocaleString()}
                   </div>
                 </div>
@@ -389,7 +277,7 @@ export default function UserProfilePage() {
         <Card className="glassmorphism animation-all hover:shadow-2xl">
           <CardHeader>
             <CardTitle className="font-headline text-3xl flex items-center gap-2">
-              <Users className="h-8 w-8 text-primary" />
+              <Icons.users className="h-8 w-8 text-primary" />
               Referred Users ({referredUsers.length})
             </CardTitle>
             <CardDescription>

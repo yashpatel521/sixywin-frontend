@@ -1,19 +1,29 @@
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { User, Lock, Gift, EyeIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/shared/icons";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { wsClient } from "@/websocket";
-import { tokenStorage, userStorage } from "@/lib/localStorage";
+import { UserType } from "@/types/interfaces";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useRegister } from "@/hooks/use-register";
+import { IMAGES } from "@/lib/constants";
 
 export default function SignupPage() {
+  // if the user is already logged in, redirect to the home page
+  const [user] = useLocalStorage<UserType | null>("user", null);
   const navigate = useNavigate();
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  if (user) {
+    navigate("/games");
+  }
+
+  const query = new URLSearchParams(useLocation().search);
+  const ref = query.get("ref");
+
+  // Use the new register hook for cleaner logic
+  const { isLoading, error, isPasswordValid, register, validatePasswords } =
+    useRegister();
+
   // see password
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -22,7 +32,7 @@ export default function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    referralId: "",
+    referralId: ref || "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -30,68 +40,13 @@ export default function SignupPage() {
 
   // check if the password and confirm password are the same
   useEffect(() => {
-    if (userData.password === "" || userData.confirmPassword === "") {
-      setIsPasswordValid(true);
-      return;
-    }
-    if (userData.password !== userData.confirmPassword) {
-      setIsPasswordValid(false);
-    } else {
-      setIsPasswordValid(true);
-    }
-  }, [userData.password, userData.confirmPassword]);
+    validatePasswords(userData.password, userData.confirmPassword);
+  }, [userData.password, userData.confirmPassword, validatePasswords]);
 
   // take all the data from the form and send it to the backend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-
-    if (!isPasswordValid) {
-      return; // Password validation error is handled by the form
-    }
-
-    setIsLoading(true);
-    const requestId = Date.now().toString();
-
-    // Set up response handler
-    const handleResponse = (message: any) => {
-      if (message.requestId === requestId) {
-        wsClient.off("register_response", handleResponse);
-        setIsLoading(false);
-
-        if (message.payload.success) {
-          // Registration successful
-          tokenStorage.setToken(message.payload.data.token);
-          userStorage.setUser(message.payload.data.user);
-          navigate("/games");
-        } else {
-          // Registration failed
-          setError(message.payload.message);
-        }
-      }
-    };
-
-    // Listen for response
-    wsClient.on("register_response", handleResponse);
-
-    // Send register request via WebSocket
-    wsClient.send({
-      type: "register",
-      payload: {
-        username: userData.username,
-        email: userData.email,
-        password: userData.password,
-      },
-      requestId: requestId,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      wsClient.off("register_response", handleResponse);
-      setIsLoading(false);
-      setError("Registration timeout. Please try again.");
-    }, 10000);
+    await register(userData);
   };
   return (
     <div className="relative flex min-h-dvh items-center justify-center p-4 bg-gradient-to-br from-yellow-900/80 via-background/80 to-background">
@@ -102,15 +57,19 @@ export default function SignupPage() {
               to="/"
               className="flex justify-center items-center gap-3 mb-6"
             >
-              <Icons.logo className="h-8 w-8 text-primary" />
-              <h1 className="font-headline text-3xl font-bold">SixyWin</h1>
+              <div className="flex items-center space-x-2">
+                <Icons.logo className="h-8 w-8" />
+                <span className="font-headline text-2xl font-bold">
+                  SixyWin
+                </span>
+              </div>
             </Link>
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
               Sign Up
             </h2>
             <div className="grid gap-6">
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="username"
                   type="text"
@@ -123,7 +82,7 @@ export default function SignupPage() {
                 />
               </div>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -136,7 +95,7 @@ export default function SignupPage() {
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -152,11 +111,11 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <Icons.eye className="h-5 w-5" />
                 </button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
@@ -172,7 +131,7 @@ export default function SignupPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <Icons.eyeOff className="h-5 w-5" />
                 </button>
               </div>
               {!isPasswordValid &&
@@ -186,7 +145,7 @@ export default function SignupPage() {
                 <p className="text-red-500 text-sm mt-1 ml-3">{error}</p>
               )}
               <div className="relative">
-                <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.gift className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="referral-id"
                   type="text"
@@ -240,7 +199,7 @@ export default function SignupPage() {
         <div className="hidden md:flex flex-col justify-center items-center p-12 bg-primary/10 relative overflow-hidden text-center">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-yellow-900/50 opacity-50 shapes" />
           <img
-            src="/img1.png"
+            src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
             className="rounded-full object-cover mb-6 shadow-2xl animation-all hover:scale-105"
             data-ai-hint="cartoon winner"

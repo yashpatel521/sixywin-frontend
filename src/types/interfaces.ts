@@ -7,6 +7,7 @@ export interface UserType {
   totalWon: number;
   winningAmount: number;
   refernceId: string;
+  isSpinned: boolean;
   avatar?: string;
   createdAt: string;
 }

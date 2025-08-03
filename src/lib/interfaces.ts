@@ -12,14 +12,22 @@ export interface User {
   totalWon: number;
   winningAmount: number;
   isBot: boolean;
+  isSpinned?: boolean;
   createdAt: Date;
   updatedAt: Date;
   token?: string;
   // Leaderboard-specific fields
   todayTicketBuy?: string | number;
   todayBid?: string | number;
+  referrals?: Reference[];
 }
 
+export interface Reference {
+  id: number;
+  referrer: User;
+  referred: User;
+  createdAt: Date;
+}
 export interface Ticket {
   id: number;
   numbers: number[];

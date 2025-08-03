@@ -4,20 +4,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { Icons } from "@/components/shared/icons";
-import { User, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { wsClient } from "@/websocket";
-import {
-  rememberMeStorage,
-  tokenStorage,
-  userStorage,
-} from "@/lib/localStorage";
+import { rememberMeStorage } from "@/lib/localStorage";
+import { UserType } from "@/types/interfaces";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useLogin } from "@/hooks/use-login";
+import { IMAGES } from "@/lib/constants";
 
 export default function LoginPage() {
+  // if the user is already logged in, redirect to the home page
+  const [user] = useLocalStorage<UserType | null>("user", null);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  if (user) {
+    navigate("/games");
+  }
+
+  // Use the new login hook for cleaner logic
+  const { isLoading, error, login } = useLogin();
+
   const [rememberMe, setRememberMeChecked] = useState(false);
   const [formData, setFormData] = useState({
     emailOrUsername: "",
@@ -41,60 +46,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-
-    setIsLoading(true);
-    const requestId = Date.now().toString();
-
-    // Set up response handler
-    const handleResponse = (message: any) => {
-      if (message.requestId === requestId) {
-        wsClient.off("login_response", handleResponse);
-        setIsLoading(false);
-
-        if (message.payload.success) {
-          // Login successful
-          userStorage.setUser(message.payload.data.user);
-          tokenStorage.setToken(message.payload.data.token);
-
-          // Update remember me data after successful login if checkbox is checked
-          if (rememberMe) {
-            rememberMeStorage.setRememberData(
-              formData.emailOrUsername,
-              formData.password
-            );
-          } else {
-            rememberMeStorage.removeRememberData();
-          }
-
-          navigate("/games");
-        } else {
-          // Login failed
-          setError(message.payload.message);
-        }
-      }
-    };
-
-    // Listen for response
-    wsClient.on("login_response", handleResponse);
-
-    // Send login request via WebSocket
-    wsClient.send({
-      type: "login",
-      payload: {
-        emailOrUsername: formData.emailOrUsername,
-        password: formData.password,
-      },
-      requestId: requestId,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      wsClient.off("login_response", handleResponse);
-      setIsLoading(false);
-      setError("Login timeout. Please try again.");
-    }, 10000);
+    await login(formData, rememberMe);
   };
 
   return (
@@ -103,7 +55,7 @@ export default function LoginPage() {
         <div className="hidden md:flex flex-col justify-center items-center p-12 bg-primary/10 relative overflow-hidden text-center">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-yellow-900/50 opacity-50 shapes" />
           <img
-            src="/img1.png"
+            src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
             className="rounded-full object-cover mb-6 shadow-2xl animation-all hover:scale-105"
             data-ai-hint="cartoon winner"
@@ -125,15 +77,15 @@ export default function LoginPage() {
               to="/"
               className="flex justify-center items-center gap-3 mb-6"
             >
-              <Icons.logo className="h-8 w-8 text-primary" />
-              <h1 className="font-headline text-3xl font-bold">SixyWin</h1>
+              <Icons.logo className="h-8 w-8" />
+              <span className="font-headline text-2xl font-bold">SixyWin</span>
             </Link>
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
               User Login
             </h2>
             <div className="grid gap-6">
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="emailOrUsername"
                   type="text"
@@ -146,7 +98,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"

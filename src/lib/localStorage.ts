@@ -145,7 +145,6 @@ export const rememberMeStorage = {
 export const clearAuthData = (): void => {
   userStorage.removeUser();
   tokenStorage.removeToken();
-  rememberMeStorage.removeRememberData();
 };
 
 // Check if user is authenticated

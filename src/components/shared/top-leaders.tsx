@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -6,14 +6,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Crown, Gem, Trophy } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { useLeaderboard } from "@/hooks/use-leaderboard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { wsClient } from "@/websocket";
-import { UserType } from "@/types/interfaces";
+import { Icons } from "@/components/shared/icons";
 
 const getRankClasses = (rank: number) => {
   if (rank === 1) return "text-yellow-400";
@@ -26,7 +24,13 @@ const PodiumPlace = ({
   leader,
   rank,
 }: {
-  leader: UserType & { rank: number };
+  leader: {
+    id: number;
+    username: string;
+    avatar: string;
+    coins: number;
+    rank: number;
+  };
   rank: number;
 }) => {
   const isFirst = rank === 1;
@@ -60,15 +64,18 @@ const PodiumPlace = ({
             </AvatarFallback>
           </Avatar>
           <div className="absolute -top-3 -right-3">
-            <Crown className={cn("h-8 w-8", getRankClasses(leader.rank))} />
+            <Icons.crown
+              className={cn("h-8 w-8", getRankClasses(leader.rank))}
+            />
           </div>
         </div>
-        <span className="font-bold text-lg group-hover:text-primary group-hover:underline">
-          {leader.username}
-        </span>
+        <div className="flex flex-col items-center text-center">
+          <h3 className="font-semibold text-sm">{leader.username}</h3>
+          <p className="text-xs text-muted-foreground">Rank #{leader.rank}</p>
+        </div>
       </Link>
       <div className="flex items-center gap-1 text-sm text-primary font-semibold">
-        <Gem className="h-4 w-4" />
+        <Icons.gem className="h-4 w-4" />
         {leader.coins.toLocaleString()}
       </div>
       <div
@@ -84,111 +91,23 @@ const PodiumPlace = ({
 };
 
 export function TopLeaders() {
-  const [leaders, setLeaders] = useState<(UserType & { rank: number })[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { players, isLoading, error } = useLeaderboard();
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let handleLeaderboardResponse: (message: any) => void;
+  // Get top 3 players and add rank
+  const topThree = players.slice(0, 3).map((player, index) => ({
+    ...player,
+    rank: index + 1,
+  }));
 
-    const fetchTopLeaders = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const requestId = Math.random().toString(36).substring(7);
-
-        // Wait for WebSocket connection if not connected
-        if (!wsClient.isConnected()) {
-          setError("Connecting to server...");
-
-          const connectionTimeout = setTimeout(() => {
-            setError("Connection failed. Please refresh the page.");
-            setIsLoading(false);
-          }, 5000);
-
-          const connectionCheckInterval = setInterval(() => {
-            if (wsClient.isConnected()) {
-              clearTimeout(connectionTimeout);
-              clearInterval(connectionCheckInterval);
-              setError(null);
-              sendLeaderboardRequest(requestId);
-            }
-          }, 100);
-
-          return;
-        }
-
-        sendLeaderboardRequest(requestId);
-      } catch (err) {
-        setError("Failed to connect to server");
-        setIsLoading(false);
-      }
-    };
-
-    const sendLeaderboardRequest = (requestId: string) => {
-      wsClient.send({
-        type: "leaderboard",
-        requestId,
-        payload: { limit: 3 }, // Limit to top 3 leaders
-        timestamp: new Date().toISOString(),
-      });
-
-      handleLeaderboardResponse = (message: any) => {
-        if (
-          message.type === "leaderboard_response" &&
-          message.requestId === requestId
-        ) {
-          // Clear the timeout since we got a response
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-
-          if (message.payload.success) {
-            // Add rank to each leader based on their position
-            const serverData: UserType[] = message.payload.data || [];
-            const leadersWithRank = serverData.map((leader, index) => ({
-              ...leader,
-              rank: index + 1,
-            }));
-            setLeaders(leadersWithRank);
-          } else {
-            setError(message.payload.message || "Failed to fetch leaderboard");
-          }
-          setIsLoading(false);
-        }
-      };
-
-      wsClient.on("leaderboard_response", handleLeaderboardResponse);
-
-      timeoutId = setTimeout(() => {
-        setError("Request timeout. Please try again.");
-        setIsLoading(false);
-      }, 10000);
-    };
-
-    fetchTopLeaders();
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (handleLeaderboardResponse) {
-        wsClient.off("leaderboard_response", handleLeaderboardResponse);
-      }
-    };
-  }, []);
-
-  const first = leaders.find((l) => l.rank === 1);
-  const second = leaders.find((l) => l.rank === 2);
-  const third = leaders.find((l) => l.rank === 3);
+  const first = topThree.find((l) => l.rank === 1);
+  const second = topThree.find((l) => l.rank === 2);
+  const third = topThree.find((l) => l.rank === 3);
 
   return (
     <Card className="glassmorphism animation-all hover:shadow-2xl">
       <CardHeader className="text-center">
         <CardTitle className="font-headline text-2xl flex items-center justify-center gap-2">
-          <Trophy className="h-6 w-6 text-primary" />
+          <Icons.trophy className="h-6 w-6 text-primary" />
           Top Leaders
         </CardTitle>
         <CardDescription>The top players this week.</CardDescription>
@@ -219,7 +138,7 @@ export function TopLeaders() {
               </div>
             ))}
           </div>
-        ) : leaders.length === 0 ? (
+        ) : topThree.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p className="text-lg font-medium">No leaders found</p>
             <p className="text-sm">Start playing to see the top players!</p>

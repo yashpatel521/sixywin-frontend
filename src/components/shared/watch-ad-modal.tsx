@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Gem, Film, PlayCircle, CheckCircle, Hourglass } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { AD_DURATION, REWARD_AMOUNT } from "@/lib/constants";
+import { Icons } from "./icons";
 
 export function WatchAd() {
   const [adState, setAdState] = useState<"idle" | "playing" | "finished">(
@@ -36,7 +36,7 @@ export function WatchAd() {
       <div className="relative w-full aspect-video rounded-lg bg-black overflow-hidden flex items-center justify-center border-2 border-primary/50 shadow-lg">
         {adState === "idle" && (
           <div className="text-center text-white">
-            <PlayCircle className="h-16 w-16 mx-auto mb-4 text-primary" />
+            <Icons.playCircle className="h-16 w-16 mx-auto mb-4 text-primary" />
             <h3 className="text-xl font-bold">Ad Ready to Play</h3>
           </div>
         )}
@@ -54,7 +54,7 @@ export function WatchAd() {
         )}
         {adState === "finished" && (
           <div className="text-center text-white">
-            <CheckCircle className="h-16 w-16 mx-auto mb-4 text-green-500" />
+            <Icons.checkCircle className="h-16 w-16 mx-auto mb-4 text-green-500" />
             <h3 className="text-xl font-bold">Ad Finished!</h3>
             <p className="text-muted-foreground">Your reward has been added.</p>
           </div>
@@ -63,7 +63,7 @@ export function WatchAd() {
 
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 text-lg font-semibold text-primary mb-4">
-          <Gem className="h-6 w-6" />
+          <Icons.gem className="h-6 w-6" />
           <span>Earn {REWARD_AMOUNT.toLocaleString()} Coins</span>
         </div>
         <Button
@@ -74,17 +74,18 @@ export function WatchAd() {
         >
           {adState === "idle" && (
             <>
-              <Film className="mr-2 h-5 w-5" /> Watch Ad
+              <Icons.film className="mr-2 h-5 w-5" /> Watch Ad
             </>
           )}
           {adState === "playing" && (
             <>
-              <Hourglass className="mr-2 h-5 w-5 animate-spin" /> Watching...
+              <Icons.hourglass className="mr-2 h-5 w-5 animate-spin" />{" "}
+              Watching...
             </>
           )}
           {adState === "finished" && (
             <>
-              <CheckCircle className="mr-2 h-5 w-5" /> Reward Claimed
+              <Icons.checkCircle className="mr-2 h-5 w-5" /> Reward Claimed
             </>
           )}
         </Button>

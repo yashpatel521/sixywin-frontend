@@ -1,14 +1,15 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Mail, User, MessageSquare, VenetianMask } from "lucide-react";
+import { Icons } from "@/components/shared/icons";
+import { IMAGES } from "@/lib/constants";
 
 export default function ContactUsPage() {
   return (
@@ -18,7 +19,7 @@ export default function ContactUsPage() {
           <div className="p-8 space-y-6">
             <CardHeader className="p-0 text-left">
               <CardTitle className="font-headline text-3xl flex items-center gap-2">
-                <Mail className="h-8 w-8 text-primary" />
+                <Icons.mail className="h-8 w-8 text-primary" />
                 Get in Touch
               </CardTitle>
               <CardDescription>
@@ -31,7 +32,7 @@ export default function ContactUsPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="name">Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="name"
                       type="text"
@@ -44,7 +45,7 @@ export default function ContactUsPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Icons.mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
@@ -59,7 +60,7 @@ export default function ContactUsPage() {
               <div className="grid gap-2">
                 <Label htmlFor="subject">Subject</Label>
                 <div className="relative">
-                  <VenetianMask className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Icons.venetianMask className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     id="subject"
                     type="text"
@@ -73,7 +74,7 @@ export default function ContactUsPage() {
               <div className="grid gap-2">
                 <Label htmlFor="message">Message</Label>
                 <div className="relative">
-                  <MessageSquare className="absolute left-3 top-4 h-5 w-5 text-muted-foreground" />
+                  <Icons.messageSquare className="absolute left-3 top-4 h-5 w-5 text-muted-foreground" />
                   <Textarea
                     id="message"
                     placeholder="Type your message here..."
@@ -102,7 +103,7 @@ export default function ContactUsPage() {
               </p>
             </div>
             <img
-              src="/img1.png"
+              src={IMAGES.loginImage}
               alt="Customer support person"
               className="relative z-10 mx-auto rounded-full object-cover animation-all hover:scale-105"
               data-ai-hint="customer support"
