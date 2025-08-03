@@ -77,6 +77,18 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     setIsConnected(wsClient.isConnected());
     setConnectionStatus(wsClient.getConnectionStatus());
 
+    // Manually trigger connection in production builds
+    // This ensures the connection happens after React is fully initialized
+    if (!import.meta.env?.DEV) {
+      setTimeout(() => {
+        try {
+          wsClient.forceReconnect();
+        } catch (error) {
+          console.warn("Failed to establish WebSocket connection:", error);
+        }
+      }, 200);
+    }
+
     return () => {
       // Clean up event listeners
       wsClient.off("connection", handleConnection);

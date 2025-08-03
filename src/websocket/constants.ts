@@ -3,7 +3,7 @@
  */
 
 export const WEBSOCKET_CONFIG = {
-  DEFAULT_URL: import.meta.env.VITE_WS_URL || "ws://localhost:5000",
+  DEFAULT_URL: "ws://localhost:5000", // Use static URL for now to avoid build issues
   MAX_RECONNECT_ATTEMPTS: 5,
   RECONNECT_DELAY: 1000,
 } as const;
