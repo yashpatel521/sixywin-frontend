@@ -2,8 +2,25 @@
  * WebSocket Constants
  */
 
+// Environment-based WebSocket URL configuration
+const getWebSocketURL = (): string => {
+  // Check if we're in production mode
+  const isProduction =
+    import.meta.env.MODE === "production" || import.meta.env.PROD;
+
+  // Use environment variable if available, otherwise fallback to defaults
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+
+  // Default URLs based on environment
+  return isProduction
+    ? "wss://your-production-server.com" // Replace with your production WebSocket URL
+    : "ws://localhost:5000";
+};
+
 export const WEBSOCKET_CONFIG = {
-  DEFAULT_URL: import.meta.env.VITE_WS_URL || "ws://localhost:5000",
+  DEFAULT_URL: getWebSocketURL(),
   MAX_RECONNECT_ATTEMPTS: 5,
   RECONNECT_DELAY: 1000,
 } as const;

@@ -22,16 +22,18 @@ export class WebSocketClient {
   private connectionStatus: ConnectionStatus = "disconnected";
 
   constructor(config?: Partial<WebSocketConfig>) {
-    this.url =
-      config?.url ||
-      import.meta.env.VITE_WS_URL ||
-      WEBSOCKET_CONFIG.DEFAULT_URL;
+    this.url = config?.url || WEBSOCKET_CONFIG.DEFAULT_URL;
     this.maxReconnectAttempts =
       config?.maxReconnectAttempts || WEBSOCKET_CONFIG.MAX_RECONNECT_ATTEMPTS;
     this.reconnectDelay =
       config?.reconnectDelay || WEBSOCKET_CONFIG.RECONNECT_DELAY;
 
-    this.connect();
+    // Log the WebSocket URL being used (helpful for debugging)
+    console.log(`WebSocket configured for: ${this.url}`);
+
+    // DO NOT connect immediately in constructor
+    // This prevents initialization issues in production builds
+    // Connection will be initiated when needed
   }
 
   // Connection Management
@@ -42,13 +44,27 @@ export class WebSocketClient {
 
     try {
       this.connectionStatus = "connecting";
-      this.ws = new WebSocket(this.url);
 
+      // Additional safety check for WebSocket availability
+      if (typeof WebSocket === "undefined") {
+        console.warn("WebSocket not available in this environment");
+        this.connectionStatus = "disconnected";
+        return;
+      }
+
+      this.ws = new WebSocket(this.url);
       this.setupEventHandlers();
     } catch (error) {
-      console.error("Failed to create WebSocket connection:", error);
-      this.connectionStatus = "error";
-      this.handleReconnect();
+      console.warn("WebSocket connection failed:", error);
+      this.connectionStatus = "disconnected";
+
+      // Don't immediately retry in case of connection issues
+      // Let the application start normally
+      setTimeout(() => {
+        if (this.connectionStatus === "disconnected") {
+          this.handleReconnect();
+        }
+      }, this.reconnectDelay);
     }
   }
 
