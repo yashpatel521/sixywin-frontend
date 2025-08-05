@@ -18,9 +18,10 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps for production
     assetsDir: "assets",
     chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
+    copyPublicDir: true, // Explicitly copy public directory
     rollupOptions: {
       output: {
         manualChunks: {
