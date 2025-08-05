@@ -57,18 +57,12 @@ export default function LoginPage() {
           <img
             src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
-            className="rounded-full object-cover mb-6 shadow-2xl animation-all hover:scale-105"
+            className=" object-cover"
             data-ai-hint="cartoon winner"
           />
-          <h1 className="font-headline text-4xl font-bold text-foreground">
-            Welcome to SixyWin
-          </h1>
           <p className="text-muted-foreground mt-2 max-w-sm">
-            Play daily, pick your lucky numbers, and win virtual coins!
-            <br />
-            SixyWin is a fun, secure, and easy-to-use lottery app where you can
-            test your luck, compete on the leaderboard, and enjoy the thrill of
-            the draw every day. Join now and see if today is your lucky day!
+            Welcome back to SixyWin! Log in to spin, earn coins, and track your
+            lucky streak.
           </p>
         </div>
         <div className="p-8 md:p-12 flex flex-col justify-center">
@@ -77,11 +71,10 @@ export default function LoginPage() {
               to="/"
               className="flex justify-center items-center gap-3 mb-6"
             >
-              <Icons.logo className="h-8 w-8" />
-              <span className="font-headline text-2xl font-bold">SixyWin</span>
+              <Icons.logo />
             </Link>
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
-              User Login
+              Login to Your Account
             </h2>
             <div className="grid gap-6">
               <div className="relative">

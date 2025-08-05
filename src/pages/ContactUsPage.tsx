@@ -105,7 +105,7 @@ export default function ContactUsPage() {
             <img
               src={IMAGES.loginImage}
               alt="Customer support person"
-              className="relative z-10 mx-auto rounded-full object-cover animation-all hover:scale-105"
+              className="relative z-10 mx-auto  object-cover "
               data-ai-hint="customer support"
             />
           </div>

@@ -59,81 +59,87 @@ export default function SignupPage() {
             >
               <div className="flex items-center space-x-2">
                 <Icons.logo className="h-8 w-8" />
-                <span className="font-headline text-2xl font-bold">
-                  SixyWin
-                </span>
               </div>
             </Link>
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
               Sign Up
             </h2>
             <div className="grid gap-6">
-              <div className="relative">
-                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Username"
-                  required
-                  className="pl-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
-                  name="username"
-                  value={userData.username}
-                  onChange={handleChange}
-                />
+              {/* First row - Username and Email in two columns on large screens */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="relative">
+                  <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Username"
+                    required
+                    className="pl-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
+                    name="username"
+                    value={userData.username}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="relative">
+                  <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Email"
+                    required
+                    className="pl-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
+                    name="email"
+                    value={userData.email}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email"
-                  required
-                  className="pl-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
-                  name="email"
-                  value={userData.email}
-                  onChange={handleChange}
-                />
+
+              {/* Second row - Password and Confirm Password in two columns on large screens */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="relative">
+                  <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    className="pl-10 pr-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
+                    name="password"
+                    value={userData.password}
+                    onChange={handleChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
+                  >
+                    <Icons.eye className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="relative">
+                  <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    required
+                    className="pl-10 pr-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
+                    name="confirmPassword"
+                    value={userData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
+                  >
+                    <Icons.eyeOff className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
-              <div className="relative">
-                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  className="pl-10 pr-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
-                  name="password"
-                  value={userData.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
-                >
-                  <Icons.eye className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="relative">
-                <Icons.lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="confirm-password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm Password"
-                  required
-                  className="pl-10 pr-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
-                  name="confirmPassword"
-                  value={userData.confirmPassword}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
-                >
-                  <Icons.eyeOff className="h-5 w-5" />
-                </button>
-              </div>
+
+              {/* Password validation error */}
               {!isPasswordValid &&
                 userData.password &&
                 userData.confirmPassword && (
@@ -144,6 +150,8 @@ export default function SignupPage() {
               {error && (
                 <p className="text-red-500 text-sm mt-1 ml-3">{error}</p>
               )}
+
+              {/* Referral ID - Full width */}
               <div className="relative">
                 <Icons.gift className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -156,6 +164,8 @@ export default function SignupPage() {
                   onChange={handleChange}
                 />
               </div>
+
+              {/* Submit Button - Full width */}
               <Button
                 onClick={(e) =>
                   handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)
@@ -176,10 +186,7 @@ export default function SignupPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                className="h-12 animation-all hover:scale-105 active:scale-95 bg-white text-black hover:bg-gray-200"
-              >
+              <Button className="h-12 animation-all hover:scale-105 active:scale-95 bg-red-600 text-white hover:bg-red-600/90">
                 <Icons.google className="mr-2 h-5 w-5" />
                 Google
               </Button>
@@ -201,18 +208,12 @@ export default function SignupPage() {
           <img
             src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
-            className="rounded-full object-cover mb-6 shadow-2xl animation-all hover:scale-105"
+            className="object-cover"
             data-ai-hint="cartoon winner"
           />
-          <h1 className="font-headline text-4xl font-bold text-foreground">
-            Create Your Account
-          </h1>
           <p className="text-muted-foreground mt-2 max-w-sm">
-            Register to play daily, pick your lucky numbers, and win virtual
-            coins!
-            <br />
-            Join the fun, compete on the leaderboard, and enjoy the thrill of
-            the draw every day. Sign up now and see if today is your lucky day!
+            Join SixyWin and start spinning! Pick your lucky numbers, earn
+            coins, and climb the leaderboard — all for free.
           </p>
         </div>
       </Card>

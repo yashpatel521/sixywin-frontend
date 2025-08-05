@@ -20,8 +20,8 @@ export const segmentColors = ["#fde047", "#dc2626"];
 
 // Image assets
 export const IMAGES = {
-  logo: "/logo.png",
-  hero: "/img1.png",
+  logo: "/logo/logo7.png",
+  hero: "/landing/landing1.png",
   redeem: "/img2.png",
-  loginImage: "/img1.png",
+  loginImage: "/auth/auth1.png",
 } as const;

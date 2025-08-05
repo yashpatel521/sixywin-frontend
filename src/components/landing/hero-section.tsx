@@ -75,7 +75,7 @@ export function HeroSection() {
           alt={sectionContent.image.alt}
           width={sectionContent.image.width}
           height={sectionContent.image.height}
-          className="rounded-full object-cover mx-auto shadow-2xl animation-all hover:scale-105 object-center border-4 border-primary/90 h-96 w-full "
+          className="object-cover mx-auto object-center h-full w-full "
           data-ai-hint={sectionContent.image["data-ai-hint"]}
         />
       </div>
