@@ -57,10 +57,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link to="/" className="mr-6 flex items-center space-x-2">
-            <Icons.logo className="h-6 w-6" />
-            <span className="hidden font-headline font-bold sm:inline-block">
-              SixyWin
-            </span>
+            <Icons.logo />
           </Link>
           {isLoggedIn && (
             <nav className="flex items-center space-x-6 text-sm font-medium">

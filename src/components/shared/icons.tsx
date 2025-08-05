@@ -59,12 +59,7 @@ import { IMAGES } from "@/lib/constants";
 export const Icons = {
   //logo image
   logo: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img
-      src={IMAGES.logo}
-      alt="SixyWin Logo"
-      {...props}
-      className="w-10 h-10"
-    />
+    <img src={IMAGES.logo} alt="SixyWin Logo" {...props} className="h-14" />
   ),
   ticket: (props: LucideProps) => <TicketIcon {...props} />,
   user: (props: LucideProps) => <User {...props} />,
