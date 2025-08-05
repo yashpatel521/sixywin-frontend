@@ -21,7 +21,7 @@ export const segmentColors = ["#fde047", "#dc2626"];
 // Image assets with fallbacks for Vercel deployment
 export const IMAGES = {
   logo: "/logo/logo7.png",
-  hero: "/landing/landing1.png", 
+  hero: "/landing/landing1.png",
   redeem: "/img2.png",
   loginImage: "/auth/auth1.png",
 } as const;
