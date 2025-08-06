@@ -1,6 +1,7 @@
 /**
  * Google AdSense Advertisement Component
  * Reusable component for displaying Google Ads throughout the website
+ * Works with Google's built-in consent management
  */
 
 import { useEffect, useRef } from "react";

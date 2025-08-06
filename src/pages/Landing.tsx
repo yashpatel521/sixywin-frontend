@@ -13,7 +13,7 @@ export default function LandingPage() {
     <>
       <SEO {...SEO_CONFIGS.home} />
       <main className="flex-1 pb-20">
-        <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="container mx-auto px-4">
           <HeroSection />
 
           {/* First ad after hero section */}

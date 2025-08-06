@@ -47,7 +47,7 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <div className="fixed inset-0 -z-10 h-full w-full bg-gradient-to-br from-yellow-900/80 via-background/80 to-background" />
-      <div className="relative flex min-h-dvh flex-col pb-24">
+      <div className="relative flex min-h-dvh flex-col">
         <WebSocketProvider>
           <main className="flex-1">
             <Suspense fallback={<PageLoader />}>
@@ -112,7 +112,6 @@ const App: React.FC = () => {
         <Toaster />
         {/* Development version info - only shows in development */}
         {import.meta.env.DEV && <VersionInfo />}
-        {/* <StickyAdBanner /> */}
       </div>
     </HelmetProvider>
   );
