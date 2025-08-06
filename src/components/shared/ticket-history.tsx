@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,30 +14,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format, parseISO, startOfDay, endOfDay } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useHistory } from "@/hooks/use-history";
+import { useTicketHistory } from "@/hooks/use-ticket-history";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { User } from "@/lib/interfaces";
 import { Icons } from "./icons";
-export default function TicketHistory() {
-  return <div></div>;
-  const { history, isLoaded } = useHistory();
-  const [date, setDate] = useState<Date | undefined>();
 
-  const filteredHistory = history.filter((ticket) => {
-    if (!date) return true;
-    const ticketDate = parseISO(ticket.date);
-    const dayStart = startOfDay(date);
-    const dayEnd = endOfDay(date);
-    return ticketDate >= dayStart && ticketDate <= dayEnd;
-  });
+interface TicketHistoryProps {
+  userId?: number; // Optional userId prop for viewing other users' tickets
+}
+
+export default function TicketHistory({ userId }: TicketHistoryProps) {
+  const { history, isLoaded, refreshTickets } = useTicketHistory(userId);
+  const [currentUser] = useLocalStorage<User | null>("user", null);
+
+  // Determine if we're viewing another user's tickets
+  const isViewingOtherUser = userId && userId !== currentUser?.id;
+  const titleText = isViewingOtherUser
+    ? "User's Ticket History"
+    : "Ticket History";
+  const descriptionText = isViewingOtherUser
+    ? "Review this user's past plays and winnings."
+    : "Review your past plays and winnings.";
 
   const renderNumbers = (numbers: number[], userNumbers?: number[]) => (
     <div className="flex gap-1 flex-wrap max-w-xs">
@@ -61,48 +60,74 @@ export default function TicketHistory() {
     </div>
   );
 
+  const renderStatus = (result: string) => {
+    const statusConfig = {
+      win: {
+        label: "Win",
+        variant: "default" as const,
+        className:
+          "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30",
+      },
+      loss: {
+        label: "Loss",
+        variant: "secondary" as const,
+        className:
+          "bg-red-500/20 text-red-300 border-red-500/30 hover:bg-red-500/30",
+      },
+      pending: {
+        label: "Pending",
+        variant: "outline" as const,
+        className:
+          "bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30",
+      },
+      megaPot: {
+        label: "MegaPot",
+        variant: "default" as const,
+        className:
+          "bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30",
+      },
+    };
+
+    const config =
+      statusConfig[result as keyof typeof statusConfig] || statusConfig.pending;
+
+    return (
+      <Badge
+        variant={config.variant}
+        className={cn("animation-all hover:scale-110", config.className)}
+      >
+        {config.label}
+      </Badge>
+    );
+  };
+
   return (
     <Card className="glassmorphism animation-all hover:shadow-2xl">
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="space-y-1.5">
           <CardTitle className="font-headline text-3xl flex items-center gap-2">
             <Icons.history className="h-8 w-8 text-primary" />
-            Ticket History
+            {titleText}
           </CardTitle>
-          <CardDescription>
-            Review your past plays and winnings.
-          </CardDescription>
+          <CardDescription>{descriptionText}</CardDescription>
         </div>
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="date"
-                variant={"outline"}
-                className={cn(
-                  "w-full sm:w-[240px] justify-start text-left font-normal animation-all hover:scale-105 active:scale-95",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <Icons.calendar className="mr-2 h-4 w-4" />
-                {date ? (
-                  format(date || new Date(), "PPP")
-                ) : (
-                  <span>Pick a date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                initialFocus
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                disabled={{ after: new Date() }}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        {!isViewingOtherUser && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refreshTickets}
+              disabled={!isLoaded}
+              className={cn(
+                "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
+                "h-9 px-3 bg-primary text-primary-foreground shadow hover:bg-primary/90",
+                "animation-all hover:scale-105 active:scale-95",
+                !isLoaded && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <Icons.rotateCcw className="mr-2 h-4 w-4" />
+              Refresh
+            </button>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {!isLoaded ? (
@@ -111,7 +136,7 @@ export default function TicketHistory() {
               <Skeleton key={i} className="h-12 w-full bg-muted/50" />
             ))}
           </div>
-        ) : filteredHistory.length === 0 ? (
+        ) : history.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <div className="text-xl font-medium">
               No tickets found for this user.
@@ -123,24 +148,44 @@ export default function TicketHistory() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Draw #</TableHead>
                   <TableHead>Your Numbers</TableHead>
                   <TableHead>Winning Numbers</TableHead>
                   <TableHead className="text-center">Bid</TableHead>
                   <TableHead className="text-center">Matches</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-right">Coins Won</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredHistory.map((ticket) => (
+                {history.map((ticket) => (
                   <TableRow key={ticket.id} className="hover:bg-muted/30">
                     <TableCell className="font-medium whitespace-nowrap">
                       {format(parseISO(ticket.date), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {ticket.drawId ? (
+                        <Badge variant="outline" className="text-xs">
+                          #{ticket.drawId}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">
+                          Pending
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {renderNumbers(ticket.userNumbers, ticket.winningNumbers)}
                     </TableCell>
                     <TableCell>
-                      {renderNumbers(ticket.winningNumbers, ticket.userNumbers)}
+                      {ticket.winningNumbers &&
+                      ticket.winningNumbers.length > 0 ? (
+                        renderNumbers(ticket.winningNumbers, ticket.userNumbers)
+                      ) : (
+                        <span className="text-muted-foreground text-sm">
+                          No winning numbers matched
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center font-semibold">
                       {ticket.bid}
@@ -155,6 +200,9 @@ export default function TicketHistory() {
                       >
                         {ticket.matches}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {renderStatus(ticket.result || "pending")}
                     </TableCell>
                     <TableCell className="text-right font-semibold flex items-center justify-end gap-1 whitespace-nowrap">
                       <Icons.gem className="h-4 w-4 text-primary" />

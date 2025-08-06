@@ -21,6 +21,34 @@
         ad_personalization: "denied",
         analytics_storage: "denied",
       });
+
+      // Global error handler to prevent external script errors
+      window.addEventListener("error", function (event) {
+        // Check if error is from external scripts we don't control
+        if (event.filename && event.filename.includes("share-modal")) {
+          console.warn(
+            "External script error caught and ignored:",
+            event.message
+          );
+          event.preventDefault();
+          return true;
+        }
+      });
+
+      // Handle unhandled promise rejections from external scripts
+      window.addEventListener("unhandledrejection", function (event) {
+        if (
+          event.reason &&
+          typeof event.reason === "string" &&
+          event.reason.includes("share-modal")
+        ) {
+          console.warn(
+            "External script promise rejection caught and ignored:",
+            event.reason
+          );
+          event.preventDefault();
+        }
+      });
     </script>
     <script
       async
@@ -110,5 +138,7 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Local share modal script to prevent external script errors -->
+    <script src="/share-modal.js"></script>
   </body>
 </html>

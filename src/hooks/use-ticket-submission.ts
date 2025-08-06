@@ -2,19 +2,7 @@ import { useState, useEffect } from "react";
 import { wsClient } from "@/websocket";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useToast } from "@/hooks/use-toast";
-import { useHistory } from "@/hooks/use-history";
 import type { User } from "@/lib/interfaces";
-
-interface TicketSubmissionData {
-  ticketId?: string;
-  userNumbers: number[];
-  winningNumbers: number[];
-  matchedNumbers?: number[];
-  matches: number;
-  coinsWon: number;
-  bid: number;
-  user?: User;
-}
 
 interface UseTicketSubmissionReturn {
   isSubmitting: boolean;
@@ -28,7 +16,6 @@ export function useTicketSubmission(): UseTicketSubmissionReturn {
   const [showConfetti, setShowConfetti] = useState(false);
   const [user, setUser] = useLocalStorage<User | null>("user", null);
   const { toast } = useToast();
-  const { addTicket } = useHistory();
 
   const submitTicket = async (
     numbers: number[],
@@ -108,12 +95,17 @@ export function useTicketSubmission(): UseTicketSubmissionReturn {
       let handleCreateTicketResponse: (message: any) => void;
       let timeoutId: NodeJS.Timeout;
 
-      // Use the new convenience method for ticket submission
-      const success = wsClient.submitTicket(
-        numbers,
-        bidAmount,
-        user?.id?.toString()
-      );
+      // Send only one request - use the standard format
+      const success = wsClient.send({
+        type: "createTicket",
+        requestId,
+        payload: {
+          numbers: numbers,
+          bid: bidAmount,
+          userId: user?.id,
+        },
+        timestamp: new Date().toISOString(),
+      });
 
       if (!success) {
         setIsSubmitting(false);
@@ -126,19 +118,6 @@ export function useTicketSubmission(): UseTicketSubmissionReturn {
         resolve(false);
         return;
       }
-
-      // For backward compatibility, also send the old format
-      // TODO: Update server to use the new submitTicket message type
-      wsClient.send({
-        type: "createTicket",
-        requestId,
-        payload: {
-          numbers: numbers,
-          bid: bidAmount,
-          userId: user?.id,
-        },
-        timestamp: new Date().toISOString(),
-      });
 
       handleCreateTicketResponse = (message: any) => {
         if (message.type === "createTicket_response") {
@@ -164,16 +143,16 @@ export function useTicketSubmission(): UseTicketSubmissionReturn {
                 );
               }
 
-              // Add ticket to local history
-              const historyTicket: TicketSubmissionData = {
-                userNumbers: numbers,
-                winningNumbers: ticketData.winningNumbers || [],
-                matches: ticketData.matchedNumbers?.length || 0,
-                coinsWon: ticketData.coinsWon || 0,
-                bid: bidAmount,
-              };
-
-              addTicket(historyTicket);
+              // Dispatch event to refresh ticket history
+              window.dispatchEvent(
+                new CustomEvent("ticketSubmitted", {
+                  detail: {
+                    ticketData,
+                    userNumbers: numbers,
+                    bidAmount,
+                  },
+                })
+              );
 
               // Show confetti if user won
               if (ticketData.coinsWon > 0) {

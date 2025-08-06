@@ -343,7 +343,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* Ticket History - Using Shared Component */}
-      <TicketHistory />
+      <TicketHistory userId={userData?.id ? Number(userData.id) : undefined} />
       <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </div>
   );

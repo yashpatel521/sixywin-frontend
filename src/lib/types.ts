@@ -6,6 +6,9 @@ export interface Ticket {
   matches: number;
   coinsWon: number;
   bid: number;
+  result?: "win" | "loss" | "pending" | "megaPot";
+  drawId?: number;
+  drawDate?: string;
 }
 
 export interface Leader {

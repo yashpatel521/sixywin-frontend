@@ -45,15 +45,23 @@ export function GoogleAd({
     }
 
     try {
-      // Check if adsbygoogle is available
-      if (typeof window !== "undefined" && window.adsbygoogle) {
-        // Push the ad for rendering
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      // Check if adsbygoogle is available and the ad hasn't been loaded yet
+      if (
+        typeof window !== "undefined" &&
+        window.adsbygoogle &&
+        adRef.current
+      ) {
+        // Check if this ad element already has ads loaded
+        const hasAds = adRef.current.querySelector("ins[data-ad-status]");
+        if (!hasAds) {
+          // Push the ad for rendering only if not already loaded
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
       }
     } catch (error) {
       console.error("Error loading Google Ad:", error);
     }
-  }, [adsEnabled, isDevelopment]);
+  }, [adsEnabled, isDevelopment, adSlot]); // Add adSlot to dependencies
 
   // Don't render ads if disabled
   if (!adsEnabled && !isDevelopment) {
@@ -79,6 +87,7 @@ export function GoogleAd({
   return (
     <div className={`google-ad-container ${className}`} ref={adRef}>
       <ins
+        key={`ad-${adSlot}-${Date.now()}`} // Unique key to prevent reuse
         className="adsbygoogle"
         style={style}
         data-ad-client={clientId}

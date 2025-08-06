@@ -42,15 +42,28 @@ export default function ProfilePage() {
     }, 2000);
   }, [referralLink, toast]);
 
-  const handleShare = useCallback(() => {
-    if (navigator.share) {
-      navigator.share({
-        title: "Join me on SixyWin!",
-        text: "Use my referral link to get started:",
-        url: referralLink,
-      });
-    } else {
-      handleCopy();
+  const handleShare = useCallback(async () => {
+    try {
+      if (navigator.share && navigator.canShare) {
+        // Check if sharing is supported and available
+        const shareData = {
+          title: "Join me on SixyWin!",
+          text: "Use my referral link to get started:",
+          url: referralLink,
+        };
+
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+        } else {
+          handleCopy();
+        }
+      } else {
+        handleCopy();
+      }
+    } catch (error) {
+      // User cancelled sharing or sharing failed
+      console.log("Sharing cancelled or failed:", error);
+      handleCopy(); // Fallback to copy
     }
   }, [referralLink, handleCopy]);
 
