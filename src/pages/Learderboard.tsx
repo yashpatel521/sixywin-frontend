@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLeaderboard } from "@/hooks/use-leaderboard";
+import { TopBanner } from "@/components/ads/BannerAds";
 
 const getRankClasses = (rank: number) => {
   if (rank === 1) return "text-yellow-400";
@@ -185,6 +186,7 @@ export default function LeaderboardPage() {
           </CardContent>
         </Card>
       </div>
+      <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </>
   );
 }

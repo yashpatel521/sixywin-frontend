@@ -2,6 +2,7 @@ import { SEO, SEO_CONFIGS } from "@/components/shared/seo";
 import { TicketSubmission } from "@/components/play-lottery/ticket-submission";
 import { TopLeaders } from "@/components/shared/top-leaders";
 import { MegaPot } from "@/components/play-lottery/mega-pot";
+import { TopBanner } from "@/components/ads/BannerAds";
 
 export default function PlayLotteryPage() {
   return (
@@ -15,6 +16,9 @@ export default function PlayLotteryPage() {
           </div>
           <div className="space-y-8">
             <TopLeaders />
+            <div className="my-12">
+              <TopBanner title="Advertisement" />
+            </div>
           </div>
         </div>
       </div>

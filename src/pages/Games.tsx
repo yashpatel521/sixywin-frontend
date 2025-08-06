@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/shared/icons";
+import { TopBanner } from "@/components/ads/BannerAds";
 
 const games = [
   {
@@ -114,6 +115,9 @@ export default function GamesPage() {
             {game.description}
           </GameCard>
         ))}
+      </div>
+      <div className="my-12">
+        <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
       </div>
     </div>
   );
