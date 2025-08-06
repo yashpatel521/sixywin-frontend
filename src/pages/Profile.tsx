@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import TicketHistory from "@/components/shared/ticket-history";
 import type { User } from "@/lib/interfaces";
+import { TopBanner } from "@/components/ads";
 
 export default function ProfilePage() {
   const [user] = useLocalStorage<User | null>("user", null);
@@ -395,6 +396,7 @@ export default function ProfilePage() {
 
       {/* Ticket History - Using Shared Component */}
       <TicketHistory />
+      <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </div>
   );
 }

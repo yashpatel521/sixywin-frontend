@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { Link, useParams } from "react-router-dom";
 import TicketHistory from "@/components/shared/ticket-history";
+import { TopBanner } from "@/components/ads/BannerAds";
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
@@ -343,6 +344,7 @@ export default function UserProfilePage() {
 
       {/* Ticket History - Using Shared Component */}
       <TicketHistory />
+      <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </div>
   );
 }
