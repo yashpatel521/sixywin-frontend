@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -330,7 +330,7 @@ export default function UserProfilePage() {
                           </Link>
                         </TableCell>
                         <TableCell className="text-right font-medium whitespace-nowrap">
-                          {format(parseISO(referral.createdAt), "MMM d, yyyy")}
+                          {format(referral.createdAt, "MMM d, yyyy")}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -343,7 +343,18 @@ export default function UserProfilePage() {
       </div>
 
       {/* Ticket History - Using Shared Component */}
-      <TicketHistory userId={userData?.id ? Number(userData.id) : undefined} />
+      {userData?.id && <TicketHistory userId={Number(userData.id)} />}
+      {!userData?.id && !isLoading && (
+        <Card className="w-full max-w-4xl mx-auto mt-8">
+          <CardContent className="p-6">
+            <p className="text-center text-muted-foreground">
+              {isUserNotFound
+                ? "User not found - tickets unavailable"
+                : "Loading user data..."}
+            </p>
+          </CardContent>
+        </Card>
+      )}
       <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </div>
   );

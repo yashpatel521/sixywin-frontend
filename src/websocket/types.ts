@@ -2,7 +2,7 @@
  * WebSocket Types and Interfaces
  */
 
-import { WebSocketMessage } from "../types/interfaces";
+import { WebSocketMessage } from "@/lib/interfaces";
 
 export interface ValidatedMessage {
   type: string;

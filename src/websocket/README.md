@@ -9,10 +9,12 @@ src/websocket/
 ├── services.ts       # Specialized service classes  
 ├── validators.ts     # Message validation utilities
 ├── constants.ts      # WebSocket configuration constants
-├── types.ts          # TypeScript interfaces
+├── types.ts          # TypeScript interfaces for WebSocket
 ├── hooks.ts          # React hook type definitions
 └── README.md         # This documentation
 ```
+
+Note: Main application types are now centralized in `/lib/interfaces.ts`
 
 ## 🏗️ Architecture Overview
 

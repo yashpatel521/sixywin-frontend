@@ -1,30 +1,25 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { wsClient } from "@/websocket";
 import { MESSAGE_TYPES } from "@/websocket/constants";
 import { tokenStorage, userStorage } from "@/lib/localStorage";
-
-interface RegisterFormData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  referralId?: string;
-}
-
-interface UseRegisterReturn {
-  isLoading: boolean;
-  error: string;
-  isPasswordValid: boolean;
-  register: (formData: RegisterFormData) => Promise<boolean>;
-  validatePasswords: (password: string, confirmPassword: string) => void;
-}
+import { useToast } from "@/hooks/use-toast";
+import type { RegisterFormData, UseRegisterReturn } from "@/lib/interfaces";
 
 export function useRegister(): UseRegisterReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Refs to prevent stale closures in timeouts
+  const isLoadingRef = useRef(isLoading);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   const register = async (formData: RegisterFormData): Promise<boolean> => {
     setError("");
@@ -47,19 +42,39 @@ export function useRegister(): UseRegisterReturn {
       if (!wsClient.isConnected()) {
         setError("Connecting to server...");
 
-        const connectionTimeout = setTimeout(() => {
-          setError("Connection failed. Please refresh the page and try again.");
-          setIsLoading(false);
-        }, 5000);
+        let connectionRetryCount = 0;
+        const maxRetries = 3;
 
-        const connectionCheckInterval = setInterval(() => {
+        const attemptRegister = () => {
           if (wsClient.isConnected()) {
-            clearTimeout(connectionTimeout);
-            clearInterval(connectionCheckInterval);
             sendRegisterRequest(formData);
+            return;
           }
-        }, 100);
 
+          if (connectionRetryCount >= maxRetries) {
+            setError(
+              "Unable to connect to server. Please check your internet connection and try again."
+            );
+            setIsLoading(false);
+            toast({
+              variant: "destructive",
+              title: "Connection Error",
+              description: "Please check your connection and try again.",
+            });
+            return;
+          }
+
+          connectionRetryCount++;
+
+          // Try to force reconnect
+          wsClient.forceReconnect();
+
+          setTimeout(() => {
+            attemptRegister();
+          }, 2000 * connectionRetryCount); // Exponential backoff
+        };
+
+        attemptRegister();
         return false;
       }
 
@@ -75,48 +90,84 @@ export function useRegister(): UseRegisterReturn {
     formData: RegisterFormData
   ): Promise<boolean> => {
     return new Promise((resolve) => {
-      const requestId = Date.now().toString();
+      const requestId = Math.random().toString(36).substring(7);
       let handleRegisterResponse: (message: any) => void;
       let timeoutId: NodeJS.Timeout;
 
       handleRegisterResponse = (message: any) => {
-        if (message.type === "register_response") {
-          // Handle both regular responses (with requestId) and broadcast updates (without requestId)
-          if (message.requestId && message.requestId === requestId) {
-            // This is a response to our request
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-
-            if (message.payload.success) {
-              // Registration successful
-              tokenStorage.setToken(message.payload.data.token);
-              userStorage.setUser(message.payload.data.user);
-
-              setIsLoading(false);
-              navigate("/games");
-              resolve(true);
-            } else {
-              // Registration failed
-              setError(
-                message.payload.message ||
-                  "Registration failed. Please try again."
-              );
-              setIsLoading(false);
-              resolve(false);
-            }
-
-            // Cleanup
-            wsClient.off("register_response", handleRegisterResponse);
-          } else if (!message.requestId) {
-            // This is a broadcast update - we don't need to handle this for registration
-            // but we should not interfere with it either
+        // Handle error responses from WebSocket server
+        if (message.type === "error" && message.requestId === requestId) {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
           }
+
+          setError(message.message || "Registration failed. Please try again.");
+          setIsLoading(false);
+          wsClient.off("register_response", handleRegisterResponse);
+          wsClient.off("error", handleRegisterResponse);
+
+          toast({
+            variant: "destructive",
+            title: "Registration Failed",
+            description:
+              message.message || "Registration failed. Please try again.",
+          });
+
+          resolve(false);
+          return;
+        }
+
+        if (
+          message.type === "register_response" &&
+          message.requestId === requestId
+        ) {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+
+          if (message.payload?.success) {
+            // Registration successful
+            tokenStorage.setToken(message.payload.data.token);
+            userStorage.setUser(message.payload.data.user);
+
+            setIsLoading(false);
+            setError("");
+
+            toast({
+              title: "Registration Successful!",
+              description: "Welcome! You have been successfully registered.",
+            });
+
+            navigate("/games");
+            resolve(true);
+          } else {
+            // Registration failed
+            setError(
+              message.payload?.message ||
+                "Registration failed. Please try again."
+            );
+            setIsLoading(false);
+
+            toast({
+              variant: "destructive",
+              title: "Registration Failed",
+              description:
+                message.payload?.message ||
+                "Registration failed. Please try again.",
+            });
+
+            resolve(false);
+          }
+
+          // Cleanup
+          wsClient.off("register_response", handleRegisterResponse);
+          wsClient.off("error", handleRegisterResponse);
         }
       };
 
-      // Listen for response
+      // Listen for both response types
       wsClient.on("register_response", handleRegisterResponse);
+      wsClient.on("error", handleRegisterResponse);
 
       // Send register request via WebSocket
       const success = wsClient.send({
@@ -137,17 +188,37 @@ export function useRegister(): UseRegisterReturn {
         );
         setIsLoading(false);
         wsClient.off("register_response", handleRegisterResponse);
+        wsClient.off("error", handleRegisterResponse);
+
+        toast({
+          variant: "destructive",
+          title: "Connection Error",
+          description:
+            "Failed to send registration request. Please check your connection.",
+        });
+
         resolve(false);
         return;
       }
 
-      // Timeout after 10 seconds
+      // Timeout after 15 seconds
       timeoutId = setTimeout(() => {
         wsClient.off("register_response", handleRegisterResponse);
+        wsClient.off("error", handleRegisterResponse);
         setError("Registration timeout. Please try again.");
-        setIsLoading(false);
+        // Use ref to check current loading state instead of stale closure
+        if (isLoadingRef.current) {
+          setIsLoading(false);
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Request Timeout",
+          description: "Registration timed out. Please try again.",
+        });
+
         resolve(false);
-      }, 10000);
+      }, 15000);
     });
   };
 

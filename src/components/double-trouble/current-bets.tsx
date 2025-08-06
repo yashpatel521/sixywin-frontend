@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-import { CurrentBetsProps } from "@/lib/types";
+import { CurrentBetsProps } from "@/lib/interfaces";
 import { Icons } from "../shared/icons";
 
 export function CurrentBets({ overUnderBets, numberBets }: CurrentBetsProps) {

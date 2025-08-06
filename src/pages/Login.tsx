@@ -7,14 +7,14 @@ import { Icons } from "@/components/shared/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { rememberMeStorage } from "@/lib/localStorage";
-import { UserType } from "@/types/interfaces";
+import { User } from "@/lib/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useLogin } from "@/hooks/use-login";
 import { IMAGES } from "@/lib/constants";
 
 export default function LoginPage() {
   // if the user is already logged in, redirect to the home page
-  const [user] = useLocalStorage<UserType | null>("user", null);
+  const [user] = useLocalStorage<User | null>("user", null);
   const navigate = useNavigate();
   if (user) {
     navigate("/games");

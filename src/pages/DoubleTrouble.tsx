@@ -15,7 +15,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { CurrentBets } from "@/components/double-trouble/current-bets";
-import { PlacedBet, PlacedNumberBet, DrawResult } from "@/lib/types";
+import {
+  PlacedBet,
+  PlacedNumberBet,
+  LegacyDrawResult as DrawResult,
+} from "@/lib/interfaces";
 import { TOTAL_NUMBERS, DRAW_INTERVAL_SECONDS } from "@/lib/constants";
 
 // Dynamically import Confetti to reduce bundle size

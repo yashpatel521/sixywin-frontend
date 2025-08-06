@@ -44,6 +44,7 @@ export const MESSAGE_TYPES = {
   // User Actions
   LOGIN: "login",
   REGISTER: "register",
+  AUTHENTICATE: "authenticate", // Token-based authentication
   GET_USER_PROFILE: "getUserProfile",
   SPIN_WHEEL: "spinWheel",
 

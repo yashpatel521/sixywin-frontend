@@ -27,7 +27,8 @@ interface TicketHistoryProps {
 }
 
 export default function TicketHistory({ userId }: TicketHistoryProps) {
-  const { history, isLoaded, refreshTickets } = useTicketHistory(userId);
+  const { history, isLoading, error, refreshTickets } =
+    useTicketHistory(userId);
   const [currentUser] = useLocalStorage<User | null>("user", null);
 
   // Determine if we're viewing another user's tickets
@@ -115,12 +116,12 @@ export default function TicketHistory({ userId }: TicketHistoryProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={refreshTickets}
-              disabled={!isLoaded}
+              disabled={isLoading}
               className={cn(
                 "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
                 "h-9 px-3 bg-primary text-primary-foreground shadow hover:bg-primary/90",
                 "animation-all hover:scale-105 active:scale-95",
-                !isLoaded && "opacity-50 cursor-not-allowed"
+                isLoading && "opacity-50 cursor-not-allowed"
               )}
             >
               <Icons.rotateCcw className="mr-2 h-4 w-4" />
@@ -130,11 +131,24 @@ export default function TicketHistory({ userId }: TicketHistoryProps) {
         )}
       </CardHeader>
       <CardContent>
-        {!isLoaded ? (
+        {isLoading ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
               <Skeleton key={i} className="h-12 w-full bg-muted/50" />
             ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-16 text-red-400">
+            <div className="text-xl font-medium mb-2">
+              Failed to load ticket history
+            </div>
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <button
+              onClick={refreshTickets}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         ) : history.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
@@ -148,7 +162,6 @@ export default function TicketHistory({ userId }: TicketHistoryProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Draw #</TableHead>
                   <TableHead>Your Numbers</TableHead>
                   <TableHead>Winning Numbers</TableHead>
                   <TableHead className="text-center">Bid</TableHead>
@@ -161,26 +174,28 @@ export default function TicketHistory({ userId }: TicketHistoryProps) {
                 {history.map((ticket) => (
                   <TableRow key={ticket.id} className="hover:bg-muted/30">
                     <TableCell className="font-medium whitespace-nowrap">
-                      {format(parseISO(ticket.date), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {ticket.drawId ? (
-                        <Badge variant="outline" className="text-xs">
-                          #{ticket.drawId}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">
-                          Pending
-                        </span>
+                      {format(
+                        parseISO(
+                          ticket.date ||
+                            ticket.createdAt?.toString() ||
+                            new Date().toISOString()
+                        ),
+                        "MMM d, yyyy"
                       )}
                     </TableCell>
                     <TableCell>
-                      {renderNumbers(ticket.userNumbers, ticket.winningNumbers)}
+                      {renderNumbers(
+                        ticket.userNumbers || ticket.numbers,
+                        ticket.winningNumbers || []
+                      )}
                     </TableCell>
                     <TableCell>
                       {ticket.winningNumbers &&
                       ticket.winningNumbers.length > 0 ? (
-                        renderNumbers(ticket.winningNumbers, ticket.userNumbers)
+                        renderNumbers(
+                          ticket.winningNumbers,
+                          ticket.userNumbers || ticket.numbers
+                        )
                       ) : (
                         <span className="text-muted-foreground text-sm">
                           No winning numbers matched
@@ -192,13 +207,15 @@ export default function TicketHistory({ userId }: TicketHistoryProps) {
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge
-                        variant={ticket.matches > 0 ? "default" : "secondary"}
+                        variant={
+                          (ticket.matches || 0) > 0 ? "default" : "secondary"
+                        }
                         className={cn(
-                          ticket.matches > 0 &&
+                          (ticket.matches || 0) > 0 &&
                             "bg-accent text-accent-foreground hover:bg-accent/80 animation-all hover:scale-110"
                         )}
                       >
-                        {ticket.matches}
+                        {ticket.matches || 0}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">

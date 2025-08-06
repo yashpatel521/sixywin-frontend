@@ -119,7 +119,7 @@ export default function LeaderboardPage() {
                 ) : (
                   players.map((player, index) => {
                     const rank = index + 1;
-                    const todayBid = parseFloat(player.todayBid || "0");
+                    const todayBid = parseFloat(String(player.todayBid || "0"));
 
                     return (
                       <TableRow

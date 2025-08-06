@@ -2,7 +2,7 @@
  * WebSocket Client Core Implementation
  */
 
-import { WEBSOCKET_MESSAGES } from "../constants/messages";
+import { WEBSOCKET_MESSAGES } from "../lib/messages";
 import { MessageValidator } from "./validators";
 import { WEBSOCKET_CONFIG, WEBSOCKET_EVENTS, MESSAGE_TYPES } from "./constants";
 import type {
