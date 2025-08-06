@@ -49,6 +49,7 @@ export const MESSAGE_TYPES = {
 
   // Lottery
   SUBMIT_TICKET: "createTicket",
+  GET_TICKETS: "getTickets",
   GET_LEADERBOARD: "getLeaderboard",
   GET_MEGA_POT: "getMegaPot",
   GET_LATEST_DRAW: "getLatestDraw",
