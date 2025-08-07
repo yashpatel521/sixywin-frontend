@@ -228,6 +228,9 @@ export interface MegaPotData {
   isWon: boolean;
   winnerId: number;
   nextDrawDate: string;
+  // 24-hour statistics
+  todayBids?: number;
+  todayWinnings?: number;
 }
 
 export interface UseMegaPotReturn extends BaseHookWithDataReturn<MegaPotData> {
@@ -276,7 +279,7 @@ export interface DoubleTroubleDrawResult {
 
 export interface CountdownTimerProps {
   nextDrawDate: Date;
-  label: string;
+  label?: string;
 }
 
 export type LegacyDrawResult = {

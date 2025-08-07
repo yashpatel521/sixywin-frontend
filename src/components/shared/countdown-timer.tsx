@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { differenceInSeconds } from "date-fns";
 import { CountdownTimerProps } from "@/lib/interfaces";
-import { Icons } from "./icons";
 
 const formatTime = (time: number) => time.toString().padStart(2, "0");
 
@@ -42,10 +41,12 @@ export const CountdownTimer = ({
 
   return (
     <div className="flex-1 text-center">
-      <div className="text-xs md:text-sm font-semibold text-muted-foreground flex items-center justify-center gap-1 md:gap-2">
-        <Icons.timer className="h-3 w-3 md:h-4 md:w-4" />
-        {label}
-      </div>
+      {label && (
+        <div className="text-sm font-semibold text-muted-foreground mb-1">
+          {label}
+        </div>
+      )}
+
       <div className="flex justify-center items-center gap-1 mt-1 md:mt-2">
         <span className="h-6 w-6 md:h-8 md:w-8 flex items-center justify-center font-bold text-xs md:text-sm rounded-full bg-secondary text-secondary-foreground shadow-inner">
           {formatTime(timeLeft.hours)}
