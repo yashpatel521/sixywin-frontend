@@ -1,28 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { wsClient } from "@/websocket";
+import { MESSAGE_TYPES } from "@/websocket/constants";
 import { differenceInSeconds } from "date-fns";
-
-interface LatestDrawData {
-  winningNumbers: number[];
-  drawDate: string;
-  totalWinners: number;
-  totalPrize: number;
-  nextDrawTime: string | Date;
-}
-
-interface CountdownState {
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
-interface UseLatestDrawReturn {
-  latestDraw: LatestDrawData | null;
-  isLoading: boolean;
-  error: string | null;
-  countdown: CountdownState;
-  refetch: () => void;
-}
+import { tokenStorage } from "@/lib/localStorage";
+import type {
+  LatestDrawData,
+  CountdownState,
+  UseLatestDrawReturn,
+} from "@/lib/interfaces";
 
 export function useLatestDraw(): UseLatestDrawReturn {
   const [latestDraw, setLatestDraw] = useState<LatestDrawData | null>(null);
@@ -35,6 +20,20 @@ export function useLatestDraw(): UseLatestDrawReturn {
   });
 
   const countdownCleanupRef = useRef<(() => void) | null>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectionRetryCount = useRef(0);
+  const maxConnectionRetries = 5;
+  const isLoadingRef = useRef(isLoading);
+  const latestDrawRef = useRef(latestDraw);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
+
+  useEffect(() => {
+    latestDrawRef.current = latestDraw;
+  }, [latestDraw]);
 
   const startCountdown = useCallback((nextDrawTime: string | Date) => {
     const updateCountdown = () => {
@@ -81,28 +80,132 @@ export function useLatestDraw(): UseLatestDrawReturn {
     setIsLoading(true);
     setError(null);
 
-    if (wsClient.isConnected()) {
+    // Clear any existing retry timeout
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+
+    const attemptRequest = () => {
+      if (wsClient.isConnected()) {
+        connectionRetryCount.current = 0; // Reset retry count on successful connection
+
+        // Check if we have a token and should authenticate first
+        const token = tokenStorage.getToken();
+        if (token) {
+          // First try to authenticate, then make the request
+          authenticateAndRequest();
+        } else {
+          // No token, just make the request (will likely fail with AUTH_REQUIRED)
+          sendLatestDrawRequest();
+        }
+      } else {
+        // WebSocket not connected, try to establish connection and retry
+        if (connectionRetryCount.current < maxConnectionRetries) {
+          connectionRetryCount.current++;
+          console.log(
+            `WebSocket not connected. Retry attempt ${connectionRetryCount.current}/${maxConnectionRetries}`
+          );
+
+          // Try to force reconnect
+          wsClient.forceReconnect();
+
+          retryTimeoutRef.current = setTimeout(() => {
+            attemptRequest();
+          }, 2000 * connectionRetryCount.current); // Exponential backoff
+        } else {
+          setError(
+            "Unable to connect to server. Please check your internet connection and try again."
+          );
+          setIsLoading(false);
+          connectionRetryCount.current = 0; // Reset for next attempt
+        }
+      }
+    };
+
+    attemptRequest();
+  }, [maxConnectionRetries]); // Add maxConnectionRetries as dependency
+
+  const authenticateAndRequest = () => {
+    const token = tokenStorage.getToken();
+    if (!token) {
       sendLatestDrawRequest();
-    } else {
-      setTimeout(() => {
-        if (wsClient.isConnected()) {
+      return;
+    }
+
+    const authRequestId = Math.random().toString(36).substring(7);
+
+    // Send authenticate message first
+    const authSuccess = wsClient.send({
+      type: MESSAGE_TYPES.AUTHENTICATE,
+      payload: { token },
+      requestId: authRequestId,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (!authSuccess) {
+      setError("Failed to authenticate. Please check your connection.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Listen for authenticate response
+    const handleAuthResponse = (authMessage: any) => {
+      if (
+        authMessage.type === "authenticate_response" &&
+        authMessage.requestId === authRequestId
+      ) {
+        wsClient.off("authenticate_response", handleAuthResponse);
+        wsClient.off("error", handleAuthResponse);
+
+        if (authMessage.payload?.success) {
+          // Authentication successful, now make the original request
           sendLatestDrawRequest();
         } else {
-          setError("WebSocket connection failed");
+          // Authentication failed, remove invalid token
+          tokenStorage.removeToken();
+          setError("Session expired. Please log in again.");
           setIsLoading(false);
         }
-      }, 2000);
-    }
-  }, []);
+      } else if (
+        authMessage.type === "error" &&
+        authMessage.requestId === authRequestId
+      ) {
+        wsClient.off("authenticate_response", handleAuthResponse);
+        wsClient.off("error", handleAuthResponse);
 
+        // Authentication failed, remove invalid token
+        tokenStorage.removeToken();
+        setError("Session expired. Please log in again.");
+        setIsLoading(false);
+      }
+    };
+
+    wsClient.on("authenticate_response", handleAuthResponse);
+    wsClient.on("error", handleAuthResponse);
+
+    // Set timeout for auth request - use ref to avoid stale closure
+    const authTimeoutId = setTimeout(() => {
+      wsClient.off("authenticate_response", handleAuthResponse);
+      wsClient.off("error", handleAuthResponse);
+      // Check current loading state using ref instead of stale closure
+      if (isLoadingRef.current) {
+        setError("Authentication timeout. Please try again.");
+        setIsLoading(false);
+      }
+    }, 10000);
+
+    // Store timeout ID for cleanup if needed
+    return authTimeoutId;
+  };
   const sendLatestDrawRequest = () => {
     const requestId = Math.random().toString(36).substring(7);
     let handleLatestDrawResponse: (message: any) => void;
     let timeoutId: NodeJS.Timeout;
 
-    // Send request manually with requestId instead of using convenience method
+    // Send request directly - no authentication required
     const success = wsClient.send({
-      type: "getLatestDraw",
+      type: MESSAGE_TYPES.GET_LATEST_DRAW,
       payload: {},
       requestId: requestId,
       timestamp: new Date().toISOString(),
@@ -115,6 +218,32 @@ export function useLatestDraw(): UseLatestDrawReturn {
     }
 
     handleLatestDrawResponse = (message: any) => {
+      // Handle error responses from WebSocket server
+      if (message.type === "error" && message.requestId === requestId) {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+
+        // Handle authentication errors (fallback case)
+        if (message.code === "AUTH_REQUIRED") {
+          // This shouldn't happen often since we authenticate proactively
+          setError(
+            "Authentication required. Please refresh the page or log in again."
+          );
+        } else if (message.code === "TOKEN_INVALID") {
+          // Remove invalid token
+          tokenStorage.removeToken();
+          setError("Session expired. Please log in again.");
+        } else {
+          setError(message.message || "Failed to fetch latest draw");
+        }
+
+        setIsLoading(false);
+        wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
+        wsClient.off("error", handleLatestDrawResponse);
+        return;
+      }
+
       if (message.type === "getLatestDraw_response") {
         // Handle both regular responses (with requestId) and broadcast updates (without requestId)
         if (message.requestId === requestId) {
@@ -154,6 +283,7 @@ export function useLatestDraw(): UseLatestDrawReturn {
 
           // Clean up listener after processing our response
           wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
+          wsClient.off("error", handleLatestDrawResponse);
         } else if (!message.requestId) {
           // This is a broadcast update - update data silently
           if (message.payload?.success) {
@@ -186,11 +316,16 @@ export function useLatestDraw(): UseLatestDrawReturn {
     };
 
     wsClient.on("getLatestDraw_response", handleLatestDrawResponse);
+    wsClient.on("error", handleLatestDrawResponse);
 
     timeoutId = setTimeout(() => {
       setError("Request timeout. Please try again.");
-      setIsLoading(false);
+      // Use ref to check current loading state instead of stale closure
+      if (isLoadingRef.current) {
+        setIsLoading(false);
+      }
       wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
+      wsClient.off("error", handleLatestDrawResponse);
     }, 15000); // 15 second timeout
 
     // Cleanup function
@@ -200,10 +335,31 @@ export function useLatestDraw(): UseLatestDrawReturn {
       }
       if (handleLatestDrawResponse) {
         wsClient.off("getLatestDraw_response", handleLatestDrawResponse);
+        wsClient.off("error", handleLatestDrawResponse);
       }
     };
-  }; // Initial fetch and periodic refresh
+  };
+
+  // Connection listener effect
   useEffect(() => {
+    const handleConnection = () => {
+      // Use refs to avoid stale closure
+      if (isLoadingRef.current && !latestDrawRef.current) {
+        console.log("WebSocket connected, retrying latest draw request...");
+        fetchLatestDraw();
+      }
+    };
+
+    wsClient.on("connected", handleConnection);
+
+    return () => {
+      wsClient.off("connected", handleConnection);
+    };
+  }, [fetchLatestDraw]);
+
+  // Initial fetch and periodic refresh
+  useEffect(() => {
+    // Initial fetch
     fetchLatestDraw();
 
     // Set up periodic refresh every minute
@@ -215,18 +371,31 @@ export function useLatestDraw(): UseLatestDrawReturn {
 
     return () => {
       clearInterval(refreshInterval);
+
+      // Cleanup retry timeout
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+
       // Cleanup countdown when component unmounts
       if (countdownCleanupRef.current) {
         countdownCleanupRef.current();
       }
     };
+  }, [fetchLatestDraw]); // Keep fetchLatestDraw dependency for initial setup
+
+  const refetchLatestDraw = useCallback(() => {
+    // Reset retry count for manual refetch
+    connectionRetryCount.current = 0;
+    fetchLatestDraw();
   }, [fetchLatestDraw]);
 
   return {
     latestDraw,
+    data: latestDraw, // Required by BaseHookWithDataReturn
     isLoading,
     error,
     countdown,
-    refetch: fetchLatestDraw,
+    refetch: refetchLatestDraw,
   };
 }

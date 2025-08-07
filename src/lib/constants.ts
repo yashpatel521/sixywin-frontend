@@ -30,3 +30,55 @@ export const IMAGES = {
 export const getImageSrc = (imageKey: keyof typeof IMAGES): string => {
   return IMAGES[imageKey];
 };
+
+// Application routes
+export const ROUTES = {
+  HOME: "/",
+  ABOUT: "/about",
+  CONTACT: "/contact",
+  PrivacyPolicyPage: "/privacy",
+  TermsOfServicePage: "/terms",
+  LOGIN: "/login",
+  REGISTER: "/register",
+  GAMES: "/games",
+  PLAY_LOTTERY: "/play-lottery",
+  DOUBLE_TROUBLE: "/double-trouble",
+  LEADERBOARD: "/leaderboard",
+  PROFILE: "/profile",
+  USER_PROFILE: "/user/:userId",
+} as const;
+
+/**
+ * Application Version Information
+ * Update this file on every release/deployment
+ */
+
+export const APP_VERSION = {
+  VERSION: "1.4.0",
+
+  BUILD_DATE: "2025-08-06",
+  BUILD_NUMBER: "20250806-001",
+  COMMIT_HASH: "latest", // Will be updated after push
+  BRANCH: "development",
+  ENVIRONMENT: import.meta.env.MODE || "development",
+  WEBSOCKET_VERSION: "2.0", // Updated message type system
+  API_VERSION: "v1",
+  get FULL_VERSION() {
+    return `${this.VERSION}-${this.BUILD_NUMBER}`;
+  },
+
+  get VERSION_INFO() {
+    return {
+      version: this.VERSION,
+      buildDate: this.BUILD_DATE,
+      environment: this.ENVIRONMENT,
+      commit: this.COMMIT_HASH,
+      websocketVersion: this.WEBSOCKET_VERSION,
+    };
+  },
+} as const;
+
+// Console log version info in development
+if (import.meta.env.DEV) {
+  console.log("🚀 SixyWin Frontend", APP_VERSION.VERSION_INFO);
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { differenceInSeconds } from "date-fns";
-import { CountdownTimerProps } from "@/lib/types";
+import { CountdownTimerProps } from "@/lib/interfaces";
 import { Icons } from "./icons";
 
 const formatTime = (time: number) => time.toString().padStart(2, "0");

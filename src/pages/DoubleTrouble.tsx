@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import { SEO, SEO_CONFIGS } from "@/components/shared/seo";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,22 +8,33 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Icons } from "@/components/shared/icons";
+import {
+  Gem,
+  ArrowDown,
+  ArrowUp,
+  Hourglass,
+  Timer,
+  Target,
+  Dot,
+} from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import Confetti from "react-confetti";
 import { cn } from "@/lib/utils";
 import { CurrentBets } from "@/components/double-trouble/current-bets";
-import { PlacedBet, PlacedNumberBet, DrawResult } from "@/lib/types";
+import {
+  PlacedBet,
+  PlacedNumberBet,
+  BetDirection,
+  DoubleTroubleDrawResult,
+} from "@/lib/interfaces";
 import { TOTAL_NUMBERS, DRAW_INTERVAL_SECONDS } from "@/lib/constants";
 
-// Dynamically import Confetti to reduce bundle size
-const Confetti = React.lazy(() => import("react-confetti"));
-
-const initialHistory: DrawResult[] = [
+const initialHistory: DoubleTroubleDrawResult[] = [
   { number: 12, outcome: "win" },
   { number: 35, outcome: "loss" },
-  { number: 25, outcome: "jackpot" },
+  { number: 25, outcome: "win" },
   { number: 4, outcome: "win" },
   { number: 48, outcome: "loss" },
   { number: 18, outcome: "win" },
@@ -32,16 +42,6 @@ const initialHistory: DrawResult[] = [
   { number: 41, outcome: "loss" },
   { number: 3, outcome: "win" },
   { number: 22, outcome: "win" },
-  { number: 38, outcome: "loss" },
-  { number: 1, outcome: "win" },
-  { number: 49, outcome: "loss" },
-  { number: 15, outcome: "win" },
-  { number: 33, outcome: "loss" },
-  { number: 25, outcome: "jackpot" },
-  { number: 7, outcome: "win" },
-  { number: 30, outcome: "loss" },
-  { number: 11, outcome: "win" },
-  { number: 42, outcome: "loss" },
 ];
 
 const numberGrid = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1);
@@ -49,9 +49,7 @@ const numberGrid = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1);
 export default function DoubleTroublePage() {
   const [overUnderBid, setOverUnderBid] = useState([10]);
   const [numberBid, setNumberBid] = useState([10]);
-  const [betDirection, setBetDirection] = useState<"under" | "over" | null>(
-    null
-  );
+  const [betDirection, setBetDirection] = useState<BetDirection | null>(null);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
 
   const [placedOverUnderBets, setPlacedOverUnderBets] = useState<PlacedBet[]>([
@@ -62,7 +60,8 @@ export default function DoubleTroublePage() {
     { number: 13, bid: 20 },
   ]);
 
-  const [drawHistory, setDrawHistory] = useState<DrawResult[]>(initialHistory);
+  const [drawHistory, setDrawHistory] =
+    useState<DoubleTroubleDrawResult[]>(initialHistory);
   const [showConfetti, setShowConfetti] = useState(false);
   const [countdown, setCountdown] = useState(DRAW_INTERVAL_SECONDS);
 
@@ -90,12 +89,11 @@ export default function DoubleTroublePage() {
           if (userOverUnderBets && userOverUnderBets.length > 0) {
             for (const bet of userOverUnderBets) {
               if (
-                (bet.direction === "under" && drawnNumber < 25) ||
-                (bet.direction === "over" && drawnNumber > 25)
+                (bet.direction === "under" && drawnNumber < 15) ||
+                (bet.direction === "over" && drawnNumber > 15)
               ) {
                 outcome = "win";
-                break;
-              } else if (drawnNumber === 25) {
+              } else if (bet.direction === "exact" && drawnNumber === 15) {
                 outcome = "jackpot";
                 setShowConfetti(true);
                 setTimeout(() => setShowConfetti(false), 5000);
@@ -106,16 +104,19 @@ export default function DoubleTroublePage() {
 
           if (userNumberBets && userNumberBets.length > 0) {
             const winningBet = userNumberBets.find(
-              (bet: PlacedNumberBet) => bet.number === drawnNumber
+              (bet) => bet.number === drawnNumber
             );
             if (winningBet) {
               if (outcome === "loss") outcome = "win";
             }
           }
 
-          const newResult: DrawResult = { number: drawnNumber, outcome };
+          const newResult: DoubleTroubleDrawResult = {
+            number: drawnNumber,
+            outcome,
+          };
           setDrawHistory((prevHistory) =>
-            [newResult, ...prevHistory].slice(0, 20)
+            [newResult, ...prevHistory].slice(0, 10)
           );
 
           // Reset placed bets after draw
@@ -136,7 +137,7 @@ export default function DoubleTroublePage() {
       toast({
         variant: "destructive",
         title: "No Selection",
-        description: 'Please select "Under" or "Over" first.',
+        description: 'Please select "Under", "Over", or "Exact" first.',
       });
       return;
     }
@@ -171,19 +172,17 @@ export default function DoubleTroublePage() {
     setSelectedNumbers([]);
   };
 
+  const lastDraw = drawHistory.length > 0 ? drawHistory[0] : null;
+  const previousDraws = drawHistory.length > 1 ? drawHistory.slice(1, 10) : [];
+
   return (
     <>
-      {showConfetti && (
-        <React.Suspense fallback={null}>
-          <Confetti recycle={false} numberOfPieces={600} />
-        </React.Suspense>
-      )}
-      <SEO {...SEO_CONFIGS.doubleTrouble} />
+      {showConfetti && <Confetti recycle={false} numberOfPieces={600} />}
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         <Card className="w-full glassmorphism">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl flex items-center justify-center gap-2">
-              <Icons.hourglass className="h-8 w-8 text-primary" />
+              <Hourglass className="h-8 w-8 text-primary" />
               Double Trouble
             </CardTitle>
             <CardDescription>
@@ -198,45 +197,70 @@ export default function DoubleTroublePage() {
                   Next draw in...
                 </div>
                 <div className="flex items-center gap-2 text-6xl">
-                  <Icons.timer className="h-14 w-14 animate-pulse text-primary" />
+                  <Timer className="h-14 w-14 animate-pulse text-primary" />
                   <span className="font-bold text-primary">{countdown}</span>
                 </div>
               </div>
 
-              <div className="text-center animate-in fade-in">
-                <p className="text-sm text-muted-foreground">Last draws:</p>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-2 mt-2">
-                  {drawHistory.map((result, index) => (
+              <div className="text-center animate-in fade-in flex items-center gap-4">
+                {lastDraw && (
+                  <div className="flex flex-col items-center">
+                    <p className="text-sm text-muted-foreground">Last Draw</p>
                     <div
-                      key={index}
                       className={cn(
-                        "h-10 w-10 flex items-center justify-center rounded-full text-sm font-semibold animation-all",
-                        result.outcome === "jackpot"
+                        "h-20 w-20 flex items-center justify-center rounded-full text-3xl font-bold animation-all",
+                        lastDraw.outcome === "jackpot"
                           ? "bg-yellow-400 text-black"
-                          : result.number < 25
+                          : lastDraw.number < 15
                           ? "bg-red-500/80 text-white"
-                          : "bg-green-500/80 text-white"
+                          : lastDraw.number > 15
+                          ? "bg-green-500/80 text-white"
+                          : "bg-blue-500/80 text-white"
                       )}
                     >
-                      {result.number}
+                      {lastDraw.number}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+                {previousDraws.length > 0 && (
+                  <div className="flex flex-col items-center">
+                    <p className="text-sm text-muted-foreground">Previous</p>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {previousDraws.map((result, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "h-8 w-8 flex items-center justify-center rounded-full text-xs font-semibold animation-all",
+                            result.outcome === "jackpot"
+                              ? "bg-yellow-400 text-black"
+                              : result.number < 15
+                              ? "bg-red-500/80 text-white"
+                              : result.number > 15
+                              ? "bg-green-500/80 text-white"
+                              : "bg-blue-500/80 text-white"
+                          )}
+                        >
+                          {result.number}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <Card className="w-full glassmorphism animation-all hover:shadow-2xl lg:col-span-1">
             <CardHeader>
               <CardTitle className="font-headline text-2xl flex items-center justify-center gap-2">
-                <Icons.arrowDown className="h-6 w-6" />
-                <Icons.arrowUp className="h-6 w-6" />
+                <ArrowDown className="h-6 w-6" />
+                <ArrowUp className="h-6 w-6" />
                 Bet on the Range
               </CardTitle>
               <CardDescription className="text-center">
-                Win 2x for a correct range, or 50x if the number is 25!
+                Win 2x for a correct range, or 50x for an exact guess of 15!
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -244,7 +268,7 @@ export default function DoubleTroublePage() {
                 <div className="flex justify-between items-center">
                   <Label htmlFor="bid-slider-range">Range Bid</Label>
                   <div className="flex items-center gap-2 font-bold text-primary">
-                    <Icons.gem className="h-5 w-5" />
+                    <Gem className="h-5 w-5" />
                     <span>{overUnderBid[0].toLocaleString()} Coins</span>
                   </div>
                 </div>
@@ -258,20 +282,27 @@ export default function DoubleTroublePage() {
                   className="w-full"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-2">
                 <Button
                   variant={betDirection === "under" ? "default" : "outline"}
                   onClick={() => setBetDirection("under")}
-                  className="h-16 text-lg animation-all hover:scale-105 active:scale-95"
+                  className="h-16 text-base flex-col animation-all hover:scale-105 active:scale-95"
                 >
-                  <Icons.arrowDown className="mr-2" /> Under 25
+                  <ArrowDown className="mb-1" /> Under 15
+                </Button>
+                <Button
+                  variant={betDirection === "exact" ? "default" : "outline"}
+                  onClick={() => setBetDirection("exact")}
+                  className="h-16 text-base flex-col animation-all hover:scale-105 active:scale-95"
+                >
+                  <Dot className="mb-1" /> Exact 15
                 </Button>
                 <Button
                   variant={betDirection === "over" ? "default" : "outline"}
                   onClick={() => setBetDirection("over")}
-                  className="h-16 text-lg animation-all hover:scale-105 active:scale-95"
+                  className="h-16 text-base flex-col animation-all hover:scale-105 active:scale-95"
                 >
-                  <Icons.arrowUp className="mr-2" /> Over 25
+                  <ArrowUp className="mb-1" /> Over 15
                 </Button>
               </div>
             </CardContent>
@@ -285,10 +316,10 @@ export default function DoubleTroublePage() {
             </CardFooter>
           </Card>
 
-          <Card className="w-full glassmorphism animation-all hover:shadow-2xl">
+          <Card className="w-full glassmorphism animation-all hover:shadow-2xl lg:col-span-2">
             <CardHeader>
               <CardTitle className="font-headline text-2xl flex items-center justify-center gap-2">
-                <Icons.target className="h-6 w-6" />
+                <Target className="h-6 w-6" />
                 Bet on a Specific Number
               </CardTitle>
               <CardDescription className="text-center">
@@ -302,7 +333,7 @@ export default function DoubleTroublePage() {
                     Number Bid (per number)
                   </Label>
                   <div className="flex items-center gap-2 font-bold text-primary">
-                    <Icons.gem className="h-5 w-5" />
+                    <Gem className="h-5 w-5" />
                     <span>{numberBid[0].toLocaleString()} Coins</span>
                   </div>
                 </div>

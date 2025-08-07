@@ -3,29 +3,44 @@ import { prizes, segmentColors } from "@/lib/constants";
 import { Icons } from "@/components/shared/icons";
 import { useSpinWheel } from "@/hooks/use-spin-wheel";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export function SpinWheel() {
-  const { isSpinning, rotation, hasSpunToday, spin, setRotation } =
+  const { isSpinning, rotation, hasSpunToday, error, spin, setRotation } =
     useSpinWheel();
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleSpin = () => {
-    const spinDegrees = Math.floor(Math.random() * 360) + 360 * 5; // Spin at least 5 times
-    const finalRotation = rotation + spinDegrees;
+    // First, calculate the target segment and prize
+    const segmentAngle = 360 / prizes.length;
+    const randomSegment = Math.floor(Math.random() * prizes.length);
 
+    // Calculate the angle where this segment should stop under the pointer
+    // The pointer is at the top (0 degrees), so we want the CENTER of the target segment there
+    const segmentCenter = randomSegment * segmentAngle + segmentAngle / 2;
+
+    // Calculate final rotation (multiple full spins + adjustment to land on target)
+    const extraSpins = Math.floor(Math.random() * 5) + 5; // 5-10 full rotations
+    // We need to rotate so the segment center ends up at 0 degrees (top)
+    // Since we're rotating the wheel clockwise, we subtract the segment center angle
+    const finalRotation = rotation + 360 * extraSpins + (360 - segmentCenter);
+
+    // Get the prize value for this segment
+    const prize = prizes[randomSegment];
+
+    // Start the visual rotation and animation state
+    setIsAnimating(true);
     setRotation(finalRotation);
 
+    // Wait for the rotation animation to complete before calling the server
     setTimeout(() => {
-      const segmentAngle = 360 / prizes.length;
-      const normalizedRotation = finalRotation % 360;
-      // Since pointer is at top (0 degrees), we need to calculate which segment it points to
-      const pointerAngle = (360 - normalizedRotation) % 360;
-      const segmentIndex =
-        Math.floor(pointerAngle / segmentAngle) % prizes.length;
-      const prize = prizes[segmentIndex];
-
-      // Call the spin function from the hook with the calculated prize value
       spin(prize.value);
-    }, 4000);
+    }, 4000); // Match the animation duration
+
+    // Reset animation state after animation completes
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 4200); // Slightly longer than animation to ensure it completes
   };
 
   return (
@@ -38,7 +53,7 @@ export function SpinWheel() {
         <div
           className={cn(
             "relative w-72 h-72 rounded-full border-[5px] border-red-500 bg-yellow-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5),0_0_20px_rgba(255,255,0,0.5)] transition-transform ease-out overflow-hidden",
-            isSpinning && "duration-4000"
+            isAnimating && "duration-4000"
           )}
           style={{ transform: `rotate(${rotation}deg)` }}
         >
@@ -106,19 +121,28 @@ export function SpinWheel() {
         </div>
       </div>
 
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm space-y-3">
+        {error && (
+          <div className="p-3 rounded-md bg-red-500/20 border border-red-500/30 text-red-300 text-sm text-center">
+            {error}
+          </div>
+        )}
         <Button
           onClick={handleSpin}
-          disabled={isSpinning || hasSpunToday}
+          disabled={isSpinning || hasSpunToday || isAnimating}
           size="lg"
           className="w-full animation-all hover:scale-105 active:scale-95 text-lg font-bold py-6"
         >
-          {isSpinning ? (
+          {isSpinning || isAnimating ? (
             <Icons.rotateCcw className="mr-2 h-5 w-5 animate-spin" />
           ) : (
             <Icons.gift className="mr-2 h-5 w-5" />
           )}
-          {hasSpunToday ? "Already Spun Today" : "Spin to Win!"}
+          {hasSpunToday
+            ? "Already Spun Today"
+            : isAnimating
+            ? "Spinning..."
+            : "Spin to Win!"}
         </Button>
       </div>
     </div>

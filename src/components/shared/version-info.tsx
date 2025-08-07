@@ -1,4 +1,4 @@
-import { APP_VERSION } from "@/constants/version";
+import { APP_VERSION } from "@/lib/constants";
 
 export function VersionInfo({ className }: { className?: string }) {
   if (import.meta.env.PROD) {

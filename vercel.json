@@ -1,12 +1,9 @@
 {
-  "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!.*\\.(?:js|css|png|jpg|jpeg|gif|svg|ico|webp|woff2?|ttf|eot|json|txt|xml|map)).*)",
+      "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }
   ]

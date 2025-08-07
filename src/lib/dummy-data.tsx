@@ -1,4 +1,4 @@
-import { Coupon } from "@/lib/types";
+import { Coupon } from "@/lib/interfaces";
 import { Icons } from "@/components/shared/icons";
 
 export const availableCoupons: Coupon[] = [

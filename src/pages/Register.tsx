@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/shared/icons";
-import { UserType } from "@/types/interfaces";
+import { User } from "@/lib/interfaces";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useRegister } from "@/hooks/use-register";
 import { IMAGES } from "@/lib/constants";
 
 export default function SignupPage() {
   // if the user is already logged in, redirect to the home page
-  const [user] = useLocalStorage<UserType | null>("user", null);
+  const [user] = useLocalStorage<User | null>("user", null);
   const navigate = useNavigate();
   if (user) {
     navigate("/games");
