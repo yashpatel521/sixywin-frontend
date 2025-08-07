@@ -4,6 +4,17 @@ import CryptoJS from "crypto-js";
 const SECRET_KEY =
   import.meta.env.VITE_HMAC_SECRET || "sixywin-development-secret-key-2025";
 
+// Debug function to check what secret is being used (remove in production)
+export function getSecretInfo() {
+  return {
+    envVar: import.meta.env.VITE_HMAC_SECRET,
+    secretKey: SECRET_KEY,
+    secretLength: SECRET_KEY.length,
+    mode: import.meta.env.MODE,
+    allEnvVars: import.meta.env
+  };
+}
+
 /**
  * Hash password with HMAC secret as salt for secure transmission
  * This prevents plain text passwords from being visible in network traffic
