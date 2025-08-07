@@ -4,6 +4,7 @@ import { wsClient } from "@/websocket";
 import { MESSAGE_TYPES } from "@/websocket/constants";
 import { tokenStorage, userStorage } from "@/lib/localStorage";
 import { useToast } from "@/hooks/use-toast";
+import { createSignedMessage, hashPassword } from "@/lib/crypto";
 import type { RegisterFormData, UseRegisterReturn } from "@/lib/interfaces";
 
 export function useRegister(): UseRegisterReturn {
@@ -169,18 +170,20 @@ export function useRegister(): UseRegisterReturn {
       wsClient.on("register_response", handleRegisterResponse);
       wsClient.on("error", handleRegisterResponse);
 
-      // Send register request via WebSocket
-      const success = wsClient.send({
-        type: MESSAGE_TYPES.REGISTER,
-        payload: {
+      // Send register request via WebSocket with salted hash password
+      const hashedPassword = hashPassword(formData.password);
+      const signedMessage = createSignedMessage(
+        MESSAGE_TYPES.REGISTER,
+        {
           username: formData.username,
           email: formData.email,
-          password: formData.password,
+          password: hashedPassword, // Send salted hash instead of plain text
           referralId: formData.referralId,
         },
-        requestId: requestId,
-        timestamp: new Date().toISOString(),
-      });
+        requestId
+      );
+
+      const success = wsClient.send(signedMessage);
 
       if (!success) {
         setError(

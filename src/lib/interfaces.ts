@@ -3,7 +3,7 @@
 // =================================================================
 
 export type GameResult = "win" | "loss" | "pending" | "megaPot";
-export type BetDirection = "under" | "over";
+export type BetDirection = "under" | "over" | "exact";
 
 // =================================================================
 // Core User and Game Interfaces
@@ -259,14 +259,20 @@ export interface UseSpinWheelReturn extends BaseHookReturn {
 // WebSocket related interfaces
 export interface WebSocketMessage {
   type: string;
-  payload: any;
+  payload: unknown;
   timestamp: string;
   requestId?: string;
+  signature?: string; // HMAC signature for message integrity
 }
 
 // =================================================================
 // Component Props and Double Trouble Game Types
 // =================================================================
+
+export interface DoubleTroubleDrawResult {
+  number: number;
+  outcome: "win" | "loss" | "jackpot";
+}
 
 export interface CountdownTimerProps {
   nextDrawDate: Date;
