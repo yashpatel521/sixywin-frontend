@@ -11,7 +11,6 @@ import {
   createSignedMessage,
   verifyMessageSignature,
   hashPassword,
-  getSecretInfo,
 } from "@/lib/crypto";
 import type { LoginFormData, UseLoginReturn } from "@/lib/interfaces";
 
@@ -199,9 +198,6 @@ export function useLogin(): UseLoginReturn {
       // Create signed login request message with hashed password
       const hashedPassword = hashPassword(formData.password);
       
-      // Debug info for production troubleshooting
-      console.log("Debug - Login:", getSecretInfo());
-      
       const signedMessage = createSignedMessage(
         MESSAGE_TYPES.LOGIN,
         {
@@ -210,8 +206,6 @@ export function useLogin(): UseLoginReturn {
         },
         requestId
       );
-
-      console.log("Debug - Signed message:", signedMessage);
 
       // Send signed login request via WebSocket
       const success = wsClient.send(signedMessage);
