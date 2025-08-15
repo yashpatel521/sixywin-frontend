@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Icons } from "./icons";
+import { cn } from "@/libs/utils";
+import { Icons } from "@/components/ui/icons";
 
 export function StickyAdBanner() {
   const [isVisible, setIsVisible] = useState(true);

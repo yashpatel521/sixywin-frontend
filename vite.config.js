@@ -6,7 +6,7 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   base: "/",
-  publicDir: "public", // Ensure public directory is served
+  publicDir: "public",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -18,32 +18,22 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    sourcemap: false, // Disable sourcemaps for production
+    sourcemap: false,
     assetsDir: "assets",
-    chunkSizeWarningLimit: 1000, // Increase warning limit to 1MB
-    copyPublicDir: true, // Explicitly copy public directory
+    chunkSizeWarningLimit: 1000,
+    copyPublicDir: true,
     rollupOptions: {
       output: {
+        // Only external/vendor libraries in manualChunks
         manualChunks: {
-          // Vendor chunks
           vendor: ["react", "react-dom"],
           router: ["react-router-dom"],
           ui: ["lucide-react"],
-          // Feature chunks
-          auth: ["./src/pages/Login.tsx", "./src/pages/Register.tsx"],
-          games: [
-            "./src/pages/PlayLottery.tsx",
-            "./src/pages/DoubleTrouble.tsx",
-          ],
-          landing: ["./src/pages/Landing.tsx"],
-          // Utility chunks
-          utils: ["./src/libs/utils.ts", "./src/libs/constants.ts"],
-          websocket: ["./src/websocket/index.ts"],
         },
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split(".");
-          const ext = info[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+          const info = assetInfo.name?.split(".");
+          const ext = info?.[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || "")) {
             return `assets/images/[name]-[hash][extname]`;
           }
           return `assets/[name]-[hash][extname]`;

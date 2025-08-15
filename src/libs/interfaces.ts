@@ -90,10 +90,12 @@ export interface Ticket {
   createdAt: string;
   result: "win" | "loss" | "pending";
   matchedNumbers: number[];
-  bidAmount: number;
+  bid: number;
   coinsWon: number;
   drawDate: string;
-  drawResult?: unknown;
+  drawResult?: {
+    winningNumbers?: number[];
+  };
 }
 
 export interface GetTicketsResponsePayload {

@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { AD_DURATION, REWARD_AMOUNT } from "@/libs/constants";
 import { Icons } from "@/components/ui/icons";
+import { toast } from "@/hooks/use-toast";
 
 export function WatchAd() {
   const [adState, setAdState] = useState<"idle" | "playing" | "finished">(
     "idle"
   );
   const [progress, setProgress] = useState(0);
-  const { toast } = useToast();
 
   const handleWatchAd = () => {
     setAdState("playing");

@@ -146,7 +146,7 @@ export default function TicketHistory({ userId }: { userId: number }) {
                       )}
                     </TableCell>
                     <TableCell className="text-center font-semibold">
-                      {ticket.bidAmount}
+                      {ticket.bid}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge
