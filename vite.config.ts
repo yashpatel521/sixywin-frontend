@@ -38,7 +38,6 @@ export default defineConfig({
           landing: ["./src/pages/Landing.tsx"],
           // Utility chunks
           utils: ["./src/libs/utils.ts", "./src/libs/constants.ts"],
-          websocket: ["./src/websocket/index.ts"],
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split(".");
