@@ -1,0 +1,225 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 45 93% 47%;
+    --primary-foreground: 24 9.8% 10%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 45 93% 47%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --success: 142 76% 36%; /* #16A34A (Tailwind green-600) */
+    --success-foreground: 144 61% 96%; /* #F0FDF4 (Tailwind green-50) */
+    --info: 217 91% 60%; /* #2B91F7 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 45 93% 47%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 45 93% 47%;
+    --primary-foreground: 24 9.8% 10%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 45 93% 47%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --success: 142 76% 36%; /* #16A34A (Tailwind green-600) */
+    --success-foreground: 144 61% 96%; /* #F0FDF4 (Tailwind green-50) */
+    /* Info: blue */
+    --info: 217 91% 60%; /* #2B91F7 */
+    --info-foreground: 0 0% 100%; /* #FFFFFF */
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 45 93% 47%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .glassmorphism {
+    @apply bg-card/10 backdrop-blur-lg border border-white/10 shadow-lg;
+  }
+}
+
+@layer utilities {
+  .animation-all {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  .animation-down {
+    @apply transition-transform duration-300 ease-out;
+  }
+  .animation-up {
+    @apply transition-transform duration-300 ease-in;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .bouncing-ball {
+    @apply absolute flex items-center justify-center font-bold text-sm rounded-full bg-primary/30 text-primary-foreground backdrop-blur-sm border border-primary/50;
+    width: 2.5rem;
+    height: 2.5rem;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: linear;
+  }
+
+  .spin-wheel div {
+    transform-style: preserve-3d;
+  }
+
+  .duration-4000 {
+    transition-duration: 4000ms;
+  }
+
+  @keyframes bounce-1 {
+    from {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(150px, -80px) rotate(90deg);
+    }
+    50% {
+      transform: translate(50px, 120px) rotate(180deg);
+    }
+    75% {
+      transform: translate(-100px, -50px) rotate(270deg);
+    }
+    to {
+      transform: translate(0, 0) rotate(360deg);
+    }
+  }
+
+  @keyframes bounce-2 {
+    from {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(-120px, 100px) rotate(-90deg);
+    }
+    50% {
+      transform: translate(80px, -150px) rotate(-180deg);
+    }
+    75% {
+      transform: translate(150px, 50px) rotate(-270deg);
+    }
+    to {
+      transform: translate(0, 0) rotate(-360deg);
+    }
+  }
+
+  @keyframes bounce-3 {
+    from {
+      transform: translate(0, 0) scale(1);
+    }
+    25% {
+      transform: translate(80px, 150px) scale(1.2);
+    }
+    50% {
+      transform: translate(-150px, -80px) scale(0.8);
+    }
+    75% {
+      transform: translate(20px, -100px) scale(1.1);
+    }
+    to {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes bounce-4 {
+    from {
+      transform: translate(0, 0) skew(0, 0);
+    }
+    25% {
+      transform: translate(-150px, -150px) skew(-15deg, -15deg);
+    }
+    50% {
+      transform: translate(100px, 100px) skew(0, 0);
+    }
+    75% {
+      transform: translate(-50px, 80px) skew(15deg, 15deg);
+    }
+    to {
+      transform: translate(0, 0) skew(0, 0);
+    }
+  }
+
+  @keyframes bounce-5 {
+    from {
+      transform: translateY(0px);
+    }
+    to {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes bounce-6 {
+    from {
+      transform: translateX(0px);
+    }
+    to {
+      transform: translateX(20px);
+    }
+  }
+
+  .animate-aviator-fly {
+    animation: aviator-fly 2s ease-in-out infinite;
+  }
+
+  @keyframes aviator-fly {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg) translateX(0);
+    }
+    25% {
+      transform: translateY(-5px) rotate(-2deg) translateX(3px);
+    }
+    50% {
+      transform: translateY(0px) rotate(2deg) translateX(-3px);
+    }
+    75% {
+      transform: translateY(5px) rotate(0deg) translateX(0);
+    }
+  }
+}
