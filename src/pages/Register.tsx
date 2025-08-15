@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import { IMAGES } from "@/libs/constants";
 import { useWebSocketStore } from "@/store/websocketStore";
+import { hashPassword } from "@/utils/hmac";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -44,9 +45,9 @@ export default function SignupPage() {
   // take all the data from the form and send it to the backend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted", userData);
     setIsLoading(true);
-    sendMessage("register", userData);
+    const hashedPassword = hashPassword(userData.password);
+    sendMessage("register", { ...userData, password: hashedPassword });
     setIsLoading(false);
   };
   return (
