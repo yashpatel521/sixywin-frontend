@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Button } from "../ui/button";
 import { Icons } from "../ui/icons";
@@ -6,10 +7,11 @@ import { GooglePayload } from "@/libs/interfaces";
 
 export const GoogleButton = () => {
   const { sendMessage } = useWebSocketStore();
+  const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      // tokenResponse.access_token or credential (depending on config)
+      setLoading(false);
       const res = await fetch(
         `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${tokenResponse.access_token}`
       );
@@ -22,16 +24,23 @@ export const GoogleButton = () => {
       };
       sendMessage("googleLogin", userData);
     },
-    onError: () => console.log("Google login failed"),
+    onError: (error) => {
+      setLoading(false);
+      console.log("Google login failed", error);
+    },
   });
 
   return (
     <Button
-      onClick={() => handleGoogleLogin()}
+      onClick={() => {
+        setLoading(true);
+        handleGoogleLogin();
+      }}
       className="h-12 animation-all hover:scale-105 active:scale-95 bg-red-600 text-white hover:bg-red-600/90"
+      disabled={loading}
     >
       <Icons.google className="mr-2 h-5 w-5" />
-      Google
+      {loading ? "Loading..." : "Google"}
     </Button>
   );
 };
