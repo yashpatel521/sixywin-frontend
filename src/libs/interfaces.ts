@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 export type ProtectedRoutesProps = {
   children: React.ReactNode;
   isProtected?: boolean;
-  checklogin?: boolean;
 };
 
 export interface WebSocketMessage<T = unknown> {

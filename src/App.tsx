@@ -22,7 +22,8 @@ import AviatorPage from "./pages/Aviator";
 // Optionally, import your 404 page
 // import NotFoundPage from "./pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import DataDeletionPage from "./pages/DataDeletionPage";
+import { Footer } from "./components/layout/footer";
+import { Header } from "./components/layout/header";
 // Define your route configs
 const publicRoutes = [
   { path: "/", element: <LandingPage /> },
@@ -31,7 +32,6 @@ const publicRoutes = [
   { path: "/contact-us", element: <ContactUsPage /> },
   { path: "/privacy-policy", element: <PrivacyPolicyPage /> },
   { path: "/terms-of-service", element: <TermsOfServicePage /> },
-  { path: "/data-deletion", element: <DataDeletionPage /> },
 ];
 
 const protectedRoutes = [
@@ -41,24 +41,7 @@ const protectedRoutes = [
   { path: "/user/:userId", element: <UserProfilePage /> },
   { path: "/play-lottery", element: <PlayLotteryPage /> },
   { path: "/double-trouble", element: <DoubleTroublePage /> },
-  { path: "/aviator", element: <AviatorPage />, checklogin: false },
-  { path: "/about-us", element: <AboutUsPage />, checklogin: false },
-  { path: "/contact-us", element: <ContactUsPage />, checklogin: false },
-  {
-    path: "/privacy-policy",
-    element: <PrivacyPolicyPage />,
-    checklogin: false,
-  },
-  {
-    path: "/terms-of-service",
-    element: <TermsOfServicePage />,
-    checklogin: false,
-  },
-  {
-    path: "/data-deletion",
-    element: <DataDeletionPage />,
-    checklogin: false,
-  },
+  { path: "/aviator", element: <AviatorPage /> },
 ];
 
 // Special-case routes (login, register, etc.)
@@ -82,15 +65,12 @@ function App() {
                   <Route key={path} path={path} element={element} />
                 ))}
 
-                {protectedRoutes.map(({ path, element, checklogin }) => (
+                {protectedRoutes.map(({ path, element }) => (
                   <Route
                     key={path}
                     path={path}
                     element={
-                      <ProtectedRoutes
-                        isProtected={true}
-                        checklogin={checklogin}
-                      >
+                      <ProtectedRoutes isProtected={true}>
                         {element}
                       </ProtectedRoutes>
                     }
@@ -102,9 +82,11 @@ function App() {
                     key={path}
                     path={path}
                     element={
-                      <ProtectedRoutes isProtected={false}>
+                      <>
+                        <Header />
                         {element}
-                      </ProtectedRoutes>
+                        <Footer />
+                      </>
                     }
                   />
                 ))}
