@@ -10,7 +10,6 @@ import { IMAGES } from "@/libs/constants";
 import { useWebSocketStore } from "@/store/websocketStore";
 import type { LoginRequestPayload } from "@/libs/interfaces";
 import { hashPassword } from "@/utils/hmac";
-import FacebookButton from "@/components/shared/FacebookButton";
 import { GoogleButton } from "@/components/shared/GoogleButton";
 
 export default function LoginPage() {
@@ -136,9 +135,8 @@ export default function LoginPage() {
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid ">
               <GoogleButton />
-              <FacebookButton />
             </div>
             <div className="mt-6 text-center text-sm">
               Don&apos;t have an account?{" "}

@@ -7,8 +7,7 @@ import { Icons } from "@/components/ui/icons";
 import { IMAGES } from "@/libs/constants";
 import { useWebSocketStore } from "@/store/websocketStore";
 import { hashPassword } from "@/utils/hmac";
-import { useGoogleLogin } from "@react-oauth/google";
-import { GooglePayload } from "@/libs/interfaces";
+import { GoogleButton } from "@/components/shared/GoogleButton";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -52,24 +51,6 @@ export default function SignupPage() {
     sendMessage("register", { ...userData, password: hashedPassword });
     setIsLoading(false);
   };
-
-  const registerWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      // tokenResponse.access_token or credential (depending on config)
-      const res = await fetch(
-        `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${tokenResponse.access_token}`
-      );
-      const profile = await res.json();
-      const userData: GooglePayload = {
-        email: profile.email,
-        username: profile.name,
-        avatar: profile.picture,
-        googleId: profile.sub,
-      };
-      sendMessage("googleLogin", userData);
-    },
-    onError: () => console.log("Google login failed"),
-  });
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center p-4 bg-gradient-to-br from-yellow-900/80 via-background/80 to-background">
@@ -208,35 +189,8 @@ export default function SignupPage() {
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                onClick={() => registerWithGoogle()}
-                className="h-12 animation-all hover:scale-105 active:scale-95 bg-red-600 text-white hover:bg-red-600/90"
-              >
-                <Icons.google className="mr-2 h-5 w-5" />
-                Google
-              </Button>
-
-              {/* <GoogleLogin
-                onSuccess={(credentialResponse) => {
-                  console.log("Google Login Success:", credentialResponse);
-                  if (!credentialResponse.credential) {
-                    console.error("No credential received from Google");
-                    return;
-                  }
-                  const decoded: GooglePayload = jwtDecode(
-                    credentialResponse.credential
-                  );
-                  console.log("User Info:", decoded);
-                }}
-                onError={() => {
-                  console.log("Google Login Failed");
-                }}
-              /> */}
-              <Button className="h-12 animation-all hover:scale-105 active:scale-95 bg-[#1877F2] text-white hover:bg-[#1877F2]/90">
-                <Icons.facebook className="mr-2 h-5 w-5" />
-                Facebook
-              </Button>
+            <div className="grid ">
+              <GoogleButton />
             </div>
             <div className="mt-6 text-center text-sm">
               Already have an account?{" "}
