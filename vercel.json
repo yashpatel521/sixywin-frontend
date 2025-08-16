@@ -3,8 +3,14 @@
   "outputDirectory": "dist",
   "redirects": [
     {
-      "source": "https://sixywin.com/(.*)",
-      "destination": "https://www.sixywin.com/$1",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "sixywin.com"
+        }
+      ],
+      "destination": "https://www.sixywin.com/:match*",
       "permanent": true
     }
   ],
