@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
-import { useWebSocketStore } from "@/store/websocketStore";
+// import { useWebSocketStore } from "@/store/websocketStore";
 
 declare global {
   interface Window {
@@ -11,7 +11,7 @@ declare global {
 }
 
 export default function FacebookButton() {
-  const { sendMessage } = useWebSocketStore();
+  //   const { sendMessage } = useWebSocketStore();
   const [fbLoaded, setFbLoaded] = useState(false);
 
   useEffect(() => {
