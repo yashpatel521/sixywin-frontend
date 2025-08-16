@@ -1,24 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "redirects": [
-    {
-      "source": "https://sixywin.com/(.*)",
-      "destination": "https://www.sixywin.com/$1",
-      "permanent": true
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        }
-      ]
-    }
-  ],
   "rewrites": [
     {
       "source": "/((?!.*\\.).*)",
