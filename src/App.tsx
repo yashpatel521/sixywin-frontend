@@ -52,7 +52,8 @@ const authRoutes = [
 
 function App() {
   useWebSocketHandlers(); // Initialize WebSocket handlers
-
+  console.log("App rendered");
+  console.log("Google Client ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <BrowserRouter>
