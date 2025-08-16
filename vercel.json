@@ -3,14 +3,14 @@
   "outputDirectory": "dist",
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
           "value": "sixywin.com"
         }
       ],
-      "destination": "https://www.sixywin.com/:match*",
+      "destination": "https://www.sixywin.com/:path*",
       "permanent": true
     }
   ],
@@ -21,6 +21,14 @@
         {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
         }
       ]
     }
