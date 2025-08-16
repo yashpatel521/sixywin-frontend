@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 export type ProtectedRoutesProps = {
   children: React.ReactNode;
   isProtected?: boolean;
+  checklogin?: boolean;
 };
 
 export interface WebSocketMessage<T = unknown> {
@@ -26,6 +27,7 @@ export interface User {
   email: string;
   username: string;
   password?: string;
+  googleId?: string;
   avatar: string;
   referenceId: string;
   coins: number;
@@ -44,6 +46,12 @@ export interface User {
   adEarnings?: number;
 }
 
+export type GooglePayload = {
+  email: string;
+  username: string;
+  avatar: string;
+  googleId: string; // Google user ID
+};
 export interface LoginRequestPayload {
   emailOrUsername?: string;
   password?: string;
