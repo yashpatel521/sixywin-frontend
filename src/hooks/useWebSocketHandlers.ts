@@ -50,6 +50,23 @@ export const useWebSocketHandlers = () => {
       }
     };
 
+    const handleGoogleLoginResponse = (payload: unknown) => {
+      const googleLoginPayload = payload as LoginResponsePayload;
+      if (googleLoginPayload.success) {
+        useWebSocketStore
+          .getState()
+          .setUserData(
+            googleLoginPayload.data.user,
+            googleLoginPayload.data.token
+          );
+      } else {
+        useWebSocketStore.getState().setUserData(null, null);
+        useWebSocketStore
+          .getState()
+          .setErrorMessage(googleLoginPayload.message || "Google login failed");
+      }
+    };
+
     const handleTicketGet = (payload: unknown) => {
       const ticketsPayload = payload as GetTicketsResponsePayload;
       if (ticketsPayload.success) {
@@ -225,6 +242,9 @@ export const useWebSocketHandlers = () => {
     useWebSocketStore
       .getState()
       .registerHandler("register_response", handleRegisterResponse);
+    useWebSocketStore
+      .getState()
+      .registerHandler("googleLogin_response", handleGoogleLoginResponse);
     useWebSocketStore
       .getState()
       .registerHandler("spinWheel_response", handleSpinWheelResponse);

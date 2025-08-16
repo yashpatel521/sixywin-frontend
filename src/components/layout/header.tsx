@@ -140,7 +140,7 @@ export function Header() {
                   >
                     <Avatar className="h-9 w-9">
                       <AvatarImage
-                        src={user?.avatar || "https://i.pravatar.cc/150"}
+                        src={user.avatar}
                         data-ai-hint="person portrait"
                         alt={`@${user?.username || "user"}`}
                       />

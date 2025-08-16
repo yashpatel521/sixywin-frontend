@@ -10,6 +10,8 @@ import { IMAGES } from "@/libs/constants";
 import { useWebSocketStore } from "@/store/websocketStore";
 import type { LoginRequestPayload } from "@/libs/interfaces";
 import { hashPassword } from "@/utils/hmac";
+import FacebookButton from "@/components/shared/FacebookButton";
+import { GoogleButton } from "@/components/shared/GoogleButton";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -135,14 +137,8 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Button className="h-12 animation-all hover:scale-105 active:scale-95 bg-red-600 text-white hover:bg-red-600/90">
-                <Icons.google className="mr-2 h-5 w-5" />
-                Google
-              </Button>
-              <Button className="h-12 animation-all hover:scale-105 active:scale-95 bg-[#1877F2] text-white hover:bg-[#1877F2]/90">
-                <Icons.facebook className="mr-2 h-5 w-5" />
-                Facebook
-              </Button>
+              <GoogleButton />
+              <FacebookButton />
             </div>
             <div className="mt-6 text-center text-sm">
               Don&apos;t have an account?{" "}
