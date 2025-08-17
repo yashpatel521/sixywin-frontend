@@ -16,6 +16,7 @@ import type {
   AviatorDrawResultResponsePayload,
   AviatorCountdownResponsePayload,
   CashOutAviatorTicketResponsePayload,
+  CreateAviatorTicketResponsePayload,
 } from "../libs/interfaces";
 import { toast } from "./use-toast";
 import { AVIATOR_COUNTDOWN_TIMER } from "@/libs/constants";
@@ -286,6 +287,37 @@ export const useWebSocketHandlers = () => {
           useWebSocketStore
             .getState()
             .updateUserData(updatedUserPayload.data.user);
+        }
+      });
+
+    useWebSocketStore
+      .getState()
+      .registerHandler("createAviatorTicket_response", (payload) => {
+        const createTicketPayload =
+          payload as CreateAviatorTicketResponsePayload;
+        if (createTicketPayload.success) {
+          toast({
+            variant: "success",
+            title: "Aviator Ticket Created",
+            description: `Your bet ${createTicketPayload.data?.amount} coins has been placed.`,
+          });
+
+          if (createTicketPayload.data?.user) {
+            useWebSocketStore
+              .getState()
+              .updateUserData(createTicketPayload.data.user);
+          }
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Aviator Ticket Creation Failed",
+            description: createTicketPayload.message,
+          });
+          useWebSocketStore
+            .getState()
+            .setErrorMessage(
+              createTicketPayload.message || "Error creating aviator ticket"
+            );
         }
       });
     useWebSocketStore

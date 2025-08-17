@@ -3,30 +3,39 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "../ui/card";
 import { Icons } from "../ui/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWebSocketStore } from "@/store/websocketStore";
 
 export function Controls() {
   const { sendMessage, aviatorDrawResult, user, setUserHistoryAviatorBets } =
     useWebSocketStore();
+
   const quickBidOptions = [10, 20, 50, 100];
   const [bidAmount, setBidAmount] = useState([10]);
-  const [hasPlacedBet, setHasPlacedBet] = useState(
-    aviatorDrawResult?.status === "ongoing"
-  );
+  const [hasActiveBet, setHasActiveBet] = useState(false);
+
+  // Reset when round ends
+  useEffect(() => {
+    if (aviatorDrawResult?.status === "finished") {
+      setHasActiveBet(false);
+    }
+  }, [aviatorDrawResult?.status]);
 
   const handlePlaceBet = () => {
-    console.log("Place Bet:", bidAmount[0]);
-    setHasPlacedBet(true);
+    // ✅ Only allow placing bet before plane starts
+    if (hasActiveBet || aviatorDrawResult?.status !== "finished") return;
+
+    setHasActiveBet(true);
     sendMessage("createAviatorTicket", {
       amount: bidAmount[0],
     });
 
-    // Add the bet to the user's history
+    // Add bet to history
     setUserHistoryAviatorBets((prev) => [
       ...prev,
       {
         id: Math.random().toString(36).substr(2, 9),
+        amount: bidAmount[0],
         amountWon: bidAmount[0],
         outcome: "pending",
         crashMultiplier: 0,
@@ -37,7 +46,9 @@ export function Controls() {
   };
 
   const handleCashOut = () => {
-    setHasPlacedBet(false);
+    if (!hasActiveBet || aviatorDrawResult?.status !== "ongoing") return;
+
+    setHasActiveBet(false);
 
     sendMessage("cashOutAviatorTicket", {
       crashMultiplier: aviatorDrawResult?.crashMultiplier,
@@ -50,7 +61,7 @@ export function Controls() {
       <CardContent className="p-4 space-y-4">
         <div>
           <div className="flex justify-between items-center mb-2">
-            <Label>Your Bid</Label>
+            <Label>Your Bet {hasActiveBet ? "Active" : "Not Placed"}</Label>
             <div className="flex items-center gap-2 font-bold text-primary">
               <Icons.gem className="h-5 w-5" />
               <span>{bidAmount[0].toLocaleString()} Coins</span>
@@ -62,7 +73,8 @@ export function Controls() {
             step={10}
             value={bidAmount}
             onValueChange={setBidAmount}
-            className="w-full"
+            // ✅ disable once round started or bet placed
+            disabled={hasActiveBet || aviatorDrawResult?.status === "ongoing"}
           />
           <div className="text-sm text-muted-foreground text-center">
             Available Coins:{" "}
@@ -75,8 +87,9 @@ export function Controls() {
                 variant="outline"
                 size="sm"
                 onClick={() => setBidAmount([amount])}
+                // ✅ disable once round started or bet placed
                 disabled={
-                  aviatorDrawResult?.status !== "finished" || hasPlacedBet
+                  hasActiveBet || aviatorDrawResult?.status === "ongoing"
                 }
               >
                 {amount}
@@ -84,15 +97,17 @@ export function Controls() {
             ))}
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={handlePlaceBet}
-            disabled={aviatorDrawResult?.status !== "finished" || hasPlacedBet}
+            // ✅ Place Bet disabled when round is ongoing or already placed
+            disabled={hasActiveBet || aviatorDrawResult?.status === "ongoing"}
           >
-            {hasPlacedBet ? (
+            {hasActiveBet ? (
               <>
                 <Icons.gem className="mr-2" />
-                Placed
+                Bet Placed
               </>
             ) : (
               <>
@@ -101,9 +116,11 @@ export function Controls() {
               </>
             )}
           </Button>
+
           <Button
             onClick={handleCashOut}
-            disabled={aviatorDrawResult?.status !== "ongoing" || !hasPlacedBet}
+            // ✅ Cash out only possible if round ongoing & user has bet
+            disabled={!hasActiveBet || aviatorDrawResult?.status !== "ongoing"}
           >
             <Icons.zap className="mr-2" />
             Cash Out

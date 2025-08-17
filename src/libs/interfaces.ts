@@ -250,6 +250,12 @@ export interface UpdatedUserResponsePayload {
 // Aviator Game Types
 // =================================================================
 
+export interface CreateAviatorTicketResponsePayload {
+  success: boolean;
+  message?: string;
+  data: AviatorTicket & { user: User };
+}
+
 export interface AviatorDrawResult {
   id: number;
   roundId: string; // Unique identifier for the round
@@ -278,6 +284,7 @@ export interface AviatorCountdownResponsePayload {
 
 export interface AviatorTicket {
   id: string;
+  amount: number;
   amountWon: number;
   cashOutMultiplier: number;
   outcome: "win" | "loss" | "pending";
