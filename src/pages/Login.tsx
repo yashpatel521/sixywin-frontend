@@ -11,15 +11,33 @@ import { useWebSocketStore } from "@/store/websocketStore";
 import type { LoginRequestPayload } from "@/libs/interfaces";
 import { hashPassword } from "@/utils/hmac";
 import { GoogleButton } from "@/components/shared/GoogleButton";
+import {
+  clearCredentials,
+  getCredentials,
+  saveCredentials,
+} from "@/utils/storage";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { sendMessage, user, errorMessage } = useWebSocketStore();
+  const [rememberMeChecked, setRememberMeChecked] = useState(false);
   useEffect(() => {
     if (user) {
       navigate("/games");
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    const rememberMeCredentials = getCredentials();
+    console.log(rememberMeCredentials);
+    if (rememberMeCredentials) {
+      setFormData({
+        emailOrUsername: rememberMeCredentials.emailOrUsername,
+        password: rememberMeCredentials.password,
+      });
+      setRememberMeChecked(true);
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     emailOrUsername: "",
@@ -38,6 +56,16 @@ export default function LoginPage() {
       password: hashedPassword,
     };
     sendMessage("login", loginPayload);
+  };
+
+  const rememberMeFunc = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setRememberMeChecked(true);
+      saveCredentials(formData.emailOrUsername, formData.password);
+    } else {
+      setRememberMeChecked(false);
+      clearCredentials();
+    }
   };
 
   return (
@@ -102,7 +130,8 @@ export default function LoginPage() {
                   <input
                     type="checkbox"
                     id="remember"
-                    onChange={() => {}}
+                    onChange={rememberMeFunc}
+                    checked={rememberMeChecked}
                     className="h-4 w-4"
                   />
                   <Label htmlFor="remember">Remember me</Label>
