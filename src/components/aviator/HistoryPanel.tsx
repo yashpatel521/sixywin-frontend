@@ -34,7 +34,10 @@ export function HistoryDisplay() {
                 </div>
               ) : (
                 history.reverse().map((entry) => (
-                  <Badge key={entry.id} className="bg-red-500/20 text-red-300">
+                  <Badge
+                    key={entry.id}
+                    className="bg-yellow-500/20 text-yellow-300"
+                  >
                     {entry?.crashMultiplier}x
                   </Badge>
                 ))

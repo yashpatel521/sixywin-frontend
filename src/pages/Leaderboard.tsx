@@ -72,7 +72,6 @@ export default function LeaderboardPage() {
                 ) : (
                   leaderboard.map((player, index) => {
                     const rank = index + 1;
-                    const todayBid = parseFloat(String(player.todayBid || "0"));
 
                     return (
                       <TableRow
@@ -121,7 +120,7 @@ export default function LeaderboardPage() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2 font-semibold">
                             <Icons.gem className="h-4 w-4 text-primary/70" />
-                            {todayBid.toLocaleString()}
+                            {player.todaysBids}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">

@@ -32,6 +32,7 @@ export interface User {
   coins: number;
   totalWon: number;
   winningAmount: number;
+  todaysBids: number;
   isBot: boolean;
   isSpinned?: boolean;
   createdAt: string;
