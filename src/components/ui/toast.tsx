@@ -13,7 +13,10 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+      // 📱 Mobile: small, centered bottom
+      "fixed bottom-2 left-1/2 z-[100] flex -translate-x-1/2 flex-col space-y-2 p-2 w-auto max-w-[90%]",
+      // 💻 Desktop: stacked bottom-right
+      "sm:left-auto sm:right-0 sm:bottom-0 sm:max-w-[420px] sm:translate-x-0 sm:p-4",
       className
     )}
     {...props}
@@ -21,9 +24,9 @@ const ToastViewport = React.forwardRef<
 ));
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
-// Variants with CSS variables for colors (success green, info blue)
+// Variants (color styles)
 const toastVariants = cva(
-  "glassmorphism group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  "glassmorphism group pointer-events-auto relative flex items-center justify-between overflow-hidden border shadow-lg transition-all data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full sm:data-[state=open]:slide-in-from-bottom-full",
   {
     variants: {
       variant: {
@@ -44,12 +47,12 @@ const toastVariants = cva(
 const variantIcons = {
   default: null,
   destructive: (
-    <Icons.alertCircle className="h-5 w-5 text-destructive-foreground" />
+    <Icons.alertCircle className="h-4 w-4 text-destructive-foreground" />
   ),
   success: (
-    <Icons.checkCircle className="h-5 w-5 text-[hsl(var(--success-foreground))]" />
+    <Icons.checkCircle className="h-4 w-4 text-[hsl(var(--success-foreground))]" />
   ),
-  info: <Icons.info className="h-5 w-5 text-[hsl(var(--info-foreground))]" />,
+  info: <Icons.info className="h-4 w-4 text-[hsl(var(--info-foreground))]" />,
 };
 
 const Toast = React.forwardRef<
@@ -63,12 +66,19 @@ const Toast = React.forwardRef<
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn("glassmorphism", toastVariants({ variant }), className)}
+      className={cn(
+        toastVariants({ variant }),
+        // 📱 Mobile: very compact
+        "p-2 rounded-md text-xs gap-2",
+        // 💻 Desktop: normal size
+        "sm:p-6 sm:pr-8 sm:rounded-md sm:text-sm sm:gap-3",
+        className
+      )}
       {...props}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2 sm:gap-3">
         {variant && variantIcons[variant]}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0.5 sm:gap-1">
           {title && <ToastTitle>{title}</ToastTitle>}
           {description && <ToastDescription>{description}</ToastDescription>}
           {children}
@@ -87,7 +97,10 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      // 📱 Mobile: tiny button
+      "inline-flex h-6 px-2 text-xs rounded border bg-transparent font-medium",
+      // 💻 Desktop: normal button
+      "sm:h-8 sm:px-3 sm:text-sm",
       className
     )}
     {...props}
@@ -102,13 +115,16 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      // 📱 Mobile: small button
+      "absolute right-1 top-1 rounded p-1 text-foreground/70",
+      // 💻 Desktop: subtle with hover/focus
+      "sm:right-2 sm:top-2 sm:text-foreground/50 sm:opacity-0 sm:transition-opacity sm:hover:text-foreground sm:focus:opacity-100 sm:group-hover:opacity-100",
       className
     )}
     toast-close=""
     {...props}
   >
-    <Icons.x className="h-4 w-4" />
+    <Icons.x className="h-3 w-3 sm:h-4 sm:w-4" />
   </ToastPrimitives.Close>
 ));
 ToastClose.displayName = ToastPrimitives.Close.displayName;
@@ -119,7 +135,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold", className)}
+    className={cn("font-medium text-xs sm:text-sm", className)}
     {...props}
   />
 ));
@@ -131,7 +147,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm opacity-90", className)}
+    className={cn("opacity-90 text-[10px] sm:text-xs", className)}
     {...props}
   />
 ));
