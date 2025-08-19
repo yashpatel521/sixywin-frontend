@@ -12,7 +12,7 @@ const games = [
     title: "Play Lottery",
     description:
       "The classic SixyWin experience. Pick your six lucky numbers for the daily draw, place your bid, and hope for a big win from the Mega Pot!",
-    href: "/play-lottery",
+    href: "/games/play-lottery",
     disabled: false,
     buttonText: "Play Now",
   },
@@ -21,7 +21,7 @@ const games = [
     title: "Double Trouble",
     description:
       "A fast-paced betting game where a new number is drawn every 30 seconds. Bet on a specific number, or bet on whether the number will be over or under 25. Quick rounds, quick wins!",
-    href: "/double-trouble",
+    href: "/games/double-trouble",
     disabled: false,
     buttonText: "Play Now",
   },
@@ -30,7 +30,7 @@ const games = [
     title: "Aviator",
     description:
       "A thrilling crash game where you bet on a rising multiplier. Cash out before the rocket flies away to secure your winnings. The higher it goes, the bigger the prize!",
-    href: "/aviator",
+    href: "/games/aviator",
     disabled: false,
     buttonText: "Play Now",
   },

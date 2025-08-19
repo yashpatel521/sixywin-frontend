@@ -20,7 +20,6 @@ import {
   Clock,
   Layers,
   Puzzle,
-  Gamepad2,
   Users,
   History,
   Mail,
@@ -59,6 +58,7 @@ import {
   TrendingDown,
   HandCoins,
   Zap,
+  Gamepad2,
 } from "lucide-react";
 import { IMAGES } from "@/libs/constants";
 

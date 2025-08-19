@@ -39,9 +39,9 @@ const protectedRoutes = [
   { path: "/profile", element: <ProfilePage /> },
   { path: "/leaderboard", element: <LeaderboardPage /> },
   { path: "/user/:userId", element: <UserProfilePage /> },
-  { path: "/play-lottery", element: <PlayLotteryPage /> },
-  { path: "/double-trouble", element: <DoubleTroublePage /> },
-  { path: "/aviator", element: <AviatorPage /> },
+  { path: "/games/play-lottery", element: <PlayLotteryPage /> },
+  { path: "/games/double-trouble", element: <DoubleTroublePage /> },
+  { path: "/games/aviator", element: <AviatorPage /> },
 ];
 
 // Special-case routes (login, register, etc.)
