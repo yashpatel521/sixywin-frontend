@@ -200,18 +200,17 @@ export default function SignupPage() {
             </div>
           </CardContent>
         </div>
-        <div className="hidden md:flex flex-col justify-center items-center p-12 bg-primary/10 relative overflow-hidden text-center">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-yellow-900/50 opacity-50 shapes" />
+        <div className="hidden md:flex flex-col justify-center items-center bg-primary/10 relative overflow-hidden text-center">
           <img
-            src={IMAGES.loginImage}
+            src={IMAGES.registerImage}
             alt="Joyful cartoon person celebrating with playing cards"
             className="object-cover"
             data-ai-hint="cartoon winner"
           />
-          <p className="text-muted-foreground mt-2 max-w-sm">
+          {/* <p className="text-muted-foreground mt-2 max-w-sm">
             Join SixyWin and start spinning! Pick your lucky numbers, earn
             coins, and climb the leaderboard — all for free.
-          </p>
+          </p> */}
         </div>
       </Card>
     </div>

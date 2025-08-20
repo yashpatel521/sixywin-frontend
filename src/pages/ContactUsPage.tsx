@@ -93,15 +93,6 @@ export default function ContactUsPage() {
             </form>
           </div>
           <div className="relative bg-primary/10 hidden md:flex flex-col justify-between p-8">
-            <div className="relative z-10 space-y-6 text-foreground">
-              <h3 className="font-headline text-2xl font-semibold">
-                Contact Information
-              </h3>
-              <p className="text-muted-foreground">
-                You can also reach out to us through the following channels.
-                We're here to help!
-              </p>
-            </div>
             <img
               src={IMAGES.contactUsImage}
               alt="Customer support person"

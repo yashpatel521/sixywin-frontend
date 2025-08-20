@@ -37,14 +37,14 @@ const sectionContent = {
       href: "/aviator",
       disabled: false,
     },
-    {
-      icon: <Icons.puzzle className="h-8 w-8" />,
-      title: "More Games On The Way!",
-      description:
-        "We're always working on new and exciting games to add to the SixyWin lineup. Check back soon for more ways to test your luck and win!",
-      href: "#",
-      disabled: true,
-    },
+    // {
+    //   icon: <Icons.puzzle className="h-8 w-8" />,
+    //   title: "More Games On The Way!",
+    //   description:
+    //     "We're always working on new and exciting games to add to the SixyWin lineup. Check back soon for more ways to test your luck and win!",
+    //   href: "#",
+    //   disabled: true,
+    // },
   ],
   buttonText: "Try Now",
   comingSoonText: "Coming Soon",
