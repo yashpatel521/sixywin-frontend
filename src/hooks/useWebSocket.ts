@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useWebSocketStore } from "../store/websocketStore";
 import type { WebSocketMessage } from "../libs/interfaces";
