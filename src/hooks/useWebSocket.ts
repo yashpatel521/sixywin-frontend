@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useWebSocketStore } from "../store/websocketStore";
 import type { WebSocketMessage } from "../libs/interfaces";
@@ -68,10 +68,12 @@ export const useCentralWebSocket = () => {
     [sendMessage, token]
   );
 
-  // Update the store's sendMessage function to use the actual sendMessage from react-use-websocket
+  // Update the store's sendMessage function only when connection state changes
   useEffect(() => {
-    useWebSocketStore.setState({ sendMessage: sendSignedMessage });
-  }, [sendSignedMessage]);
+    if (readyState === ReadyState.OPEN) {
+      useWebSocketStore.setState({ sendMessage: sendSignedMessage });
+    }
+  }, [readyState, sendSignedMessage]);
 
   // Update connection status in store
   useEffect(() => {

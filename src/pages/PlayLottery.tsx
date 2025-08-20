@@ -1,7 +1,10 @@
-import { SEO, SEO_CONFIGS } from "@/components/shared/seo";
+import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 import { TicketSubmission } from "@/components/play-lottery/ticket-submission";
 import { TopLeaders } from "@/components/shared/top-leaders";
 import { MegaPot } from "@/components/play-lottery/mega-pot";
+import { RelatedLinks } from "@/components/shared/related-links";
+import { Icons } from "@/components/ui/icons";
 // import { TopBanner } from "@/components/ads/BannerAds";
 
 export default function PlayLotteryPage() {
@@ -20,6 +23,39 @@ export default function PlayLotteryPage() {
               <TopBanner title="Advertisement" />
             </div> */}
           </div>
+        </div>
+
+        {/* Related Links */}
+        <div className="mt-8">
+          <RelatedLinks
+            title="Other Games & Guides"
+            links={[
+              {
+                title: "How to Play Virtual Lottery",
+                description: "Learn strategies and tips for winning",
+                href: "/how-to-play",
+                icon: <Icons.info className="h-5 w-5" />,
+              },
+              {
+                title: "Aviator Crash Game",
+                description: "Try our exciting crash game",
+                href: "/games/aviator",
+                icon: <Icons.rocket className="h-5 w-5" />,
+              },
+              {
+                title: "Double Trouble",
+                description: "Fast-paced number prediction game",
+                href: "/games/double-trouble",
+                icon: <Icons.layers className="h-5 w-5" />,
+              },
+              {
+                title: "Gaming FAQ",
+                description: "Get answers to common questions",
+                href: "/faq",
+                icon: <Icons.alertCircle className="h-5 w-5" />,
+              },
+            ]}
+          />
         </div>
       </div>
     </>

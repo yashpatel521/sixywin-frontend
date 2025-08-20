@@ -1,3 +1,5 @@
+import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -92,33 +94,36 @@ function GameCard({
 
 export default function GamesPage() {
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl font-bold flex items-center justify-center gap-3">
-          <Icons.gamepad2 className="h-10 w-10 text-primary" />
-          Choose Your Game
-        </h1>
-        <p className="text-muted-foreground mt-2 text-lg">
-          Select one of the games below to start playing and winning!
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        {games.map((game, index) => (
-          <GameCard
-            key={index}
-            icon={game.icon}
-            title={game.title}
-            href={game.href}
-            disabled={game.disabled}
-            buttonText={game.buttonText}
-          >
-            {game.description}
-          </GameCard>
-        ))}
-      </div>
-      {/* <div className="my-12">
+    <>
+      <SEO {...SEO_CONFIGS.games} />
+      <div className="container mx-auto p-4 md:p-8">
+        <div className="text-center mb-12">
+          <h1 className="font-headline text-4xl font-bold flex items-center justify-center gap-3">
+            <Icons.gamepad2 className="h-10 w-10 text-primary" />
+            Choose Your Game
+          </h1>
+          <p className="text-muted-foreground mt-2 text-lg">
+            Select one of the games below to start playing and winning!
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {games.map((game, index) => (
+            <GameCard
+              key={index}
+              icon={game.icon}
+              title={game.title}
+              href={game.href}
+              disabled={game.disabled}
+              buttonText={game.buttonText}
+            >
+              {game.description}
+            </GameCard>
+          ))}
+        </div>
+        {/* <div className="my-12">
         <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
       </div> */}
-    </div>
+      </div>
+    </>
   );
 }

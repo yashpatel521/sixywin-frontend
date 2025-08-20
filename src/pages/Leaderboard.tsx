@@ -1,4 +1,5 @@
-import { SEO, SEO_CONFIGS } from "@/components/shared/seo";
+import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 import {
   Card,
   CardContent,

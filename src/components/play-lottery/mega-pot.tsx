@@ -12,7 +12,6 @@ export function MegaPot() {
   useEffect(() => {
     sendMessage("megaPot", {});
   }, [sendMessage]);
-  console.log("Rendering MegaPot with data:", megaPot);
   return (
     <Card className="glassmorphism animation-all hover:shadow-2xl">
       <CardHeader className="p-4 space-y-2">

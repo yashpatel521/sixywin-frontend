@@ -1,5 +1,16 @@
 import { ReactNode } from "react";
 
+export interface SEOProps {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  image?: string;
+  url?: string;
+  type?: "website" | "article" | "game";
+  structuredData?: object;
+  robots?: string;
+}
+
 export type ProtectedRoutesProps = {
   children: React.ReactNode;
   isProtected?: boolean;

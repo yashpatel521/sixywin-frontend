@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 import {
   Card,
   CardContent,
@@ -140,74 +142,77 @@ export default function DoubleTroublePage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      {/* Header */}
-      <Card className="w-full glassmorphism">
-        <CardHeader className="text-center">
-          <CardTitle className="font-headline text-3xl flex items-center justify-center gap-2">
-            <Hourglass className="h-8 w-8 text-primary" />
-            Double Trouble
-          </CardTitle>
-          <CardDescription>
-            A new number is drawn every 30 seconds. Place your bets for the next
-            round!
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row justify-around items-center p-4 rounded-lg bg-secondary/30 gap-8 md:gap-4">
-            {doubleTroubleDrawResult?.nextDrawTime ? (
-              <CountdownTimer
-                nextDrawTime={doubleTroubleDrawResult.nextDrawTime}
-              />
-            ) : (
-              <div className="text-center text-lg text-muted-foreground">
-                Game starts soon with a new number every 30 seconds!
+    <>
+      <SEO {...SEO_CONFIGS.doubleTrouble} />
+      <div className="container mx-auto p-4 md:p-8 space-y-8">
+        {/* Header */}
+        <Card className="w-full glassmorphism">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-3xl flex items-center justify-center gap-2">
+              <Hourglass className="h-8 w-8 text-primary" />
+              Double Trouble
+            </CardTitle>
+            <CardDescription>
+              A new number is drawn every 30 seconds. Place your bets for the
+              next round!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row justify-around items-center p-4 rounded-lg bg-secondary/30 gap-8 md:gap-4">
+              {doubleTroubleDrawResult?.nextDrawTime ? (
+                <CountdownTimer
+                  nextDrawTime={doubleTroubleDrawResult.nextDrawTime}
+                />
+              ) : (
+                <div className="text-center text-lg text-muted-foreground">
+                  Game starts soon with a new number every 30 seconds!
+                </div>
+              )}
+              <LastDrawHistory drawHistory={drawHistory} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Betting Panels */}
+        {doubleTroubleDrawResult?.nextDrawTime && (
+          <>
+            <div className="grid grid-cols-12 gap-3 items-start">
+              <div className="col-span-12 md:col-span-5">
+                <RangeBetPanel
+                  betDirection={betDirection}
+                  setBetDirection={setBetDirection}
+                  overUnderBid={overUnderBid}
+                  setOverUnderBid={setOverUnderBid}
+                  onPlaceBet={handlePlaceOverUnderBet}
+                  userCoins={
+                    (user?.coins || 0) + (user?.winningAmount || 0) || 10
+                  }
+                />
               </div>
-            )}
-            <LastDrawHistory drawHistory={drawHistory} />
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Betting Panels */}
-      {doubleTroubleDrawResult?.nextDrawTime && (
-        <>
-          <div className="grid grid-cols-12 gap-3 items-start">
-            <div className="col-span-12 md:col-span-5">
-              <RangeBetPanel
-                betDirection={betDirection}
-                setBetDirection={setBetDirection}
-                overUnderBid={overUnderBid}
-                setOverUnderBid={setOverUnderBid}
-                onPlaceBet={handlePlaceOverUnderBet}
-                userCoins={
-                  (user?.coins || 0) + (user?.winningAmount || 0) || 10
-                }
-              />
+              <div className="col-span-12 md:col-span-7">
+                <NumberBetPanel
+                  numberBid={numberBid}
+                  setNumberBid={setNumberBid}
+                  selectedNumbers={selectedNumbers}
+                  setSelectedNumbers={setSelectedNumbers}
+                  placedNumberBets={placedNumberBets}
+                  onPlaceBet={handlePlaceNumberBet}
+                  totalNumbers={MAX_NUMBER_DOUBLE_TROUBLE}
+                  singleSelect={true} // Allow multiple number selections
+                  userCoins={
+                    (user?.coins || 0) + (user?.winningAmount || 0) || 10
+                  }
+                />
+              </div>
             </div>
-
-            <div className="col-span-12 md:col-span-7">
-              <NumberBetPanel
-                numberBid={numberBid}
-                setNumberBid={setNumberBid}
-                selectedNumbers={selectedNumbers}
-                setSelectedNumbers={setSelectedNumbers}
-                placedNumberBets={placedNumberBets}
-                onPlaceBet={handlePlaceNumberBet}
-                totalNumbers={MAX_NUMBER_DOUBLE_TROUBLE}
-                singleSelect={true} // Allow multiple number selections
-                userCoins={
-                  (user?.coins || 0) + (user?.winningAmount || 0) || 10
-                }
-              />
-            </div>
-          </div>
-          <CurrentBets
-            overUnderBets={placedOverUnderBets}
-            numberBets={placedNumberBets}
-          />
-        </>
-      )}
-    </div>
+            <CurrentBets
+              overUnderBets={placedOverUnderBets}
+              numberBets={placedNumberBets}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 }
