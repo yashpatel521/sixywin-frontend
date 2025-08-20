@@ -3,6 +3,8 @@ import { WebSocketProvider } from "./contexts/WebSocketContext";
 import { Toaster } from "./components/ui/toaster";
 import { ProtectedRoutes } from "./utils/ProtecedRoutes";
 import { useWebSocketHandlers } from "./hooks/useWebSocketHandlers";
+import { useEffect } from "react";
+import { initPerformanceOptimizations } from "./utils/performance";
 
 // Import all your pages
 import AboutUsPage from "./pages/AboutUs";
@@ -19,19 +21,22 @@ import UserProfilePage from "./pages/UserProfile";
 import PlayLotteryPage from "./pages/PlayLottery";
 import DoubleTroublePage from "./pages/DoubleTrouble";
 import AviatorPage from "./pages/Aviator";
-// Optionally, import your 404 page
-// import NotFoundPage from "./pages/NotFound";
+import FAQPage from "./pages/FAQ";
+import HowToPlayPage from "./pages/HowToPlay";
+// Import 404 page
+import NotFoundPage from "./pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Footer } from "./components/layout/footer";
 import { Header } from "./components/layout/header";
 // Define your route configs
 const publicRoutes = [
   { path: "/", element: <LandingPage /> },
-  // Example React route
   { path: "/about-us", element: <AboutUsPage /> },
   { path: "/contact-us", element: <ContactUsPage /> },
   { path: "/privacy-policy", element: <PrivacyPolicyPage /> },
   { path: "/terms-of-service", element: <TermsOfServicePage /> },
+  { path: "/faq", element: <FAQPage /> },
+  { path: "/how-to-play", element: <HowToPlayPage /> },
 ];
 
 const protectedRoutes = [
@@ -47,11 +52,17 @@ const protectedRoutes = [
 // Special-case routes (login, register, etc.)
 const authRoutes = [
   { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPage /> }, // Can use a prop to distinguish
+  { path: "/register", element: <RegisterPage /> },
 ];
 
 function App() {
   useWebSocketHandlers(); // Initialize WebSocket handlers
+
+  // Initialize performance monitoring
+  useEffect(() => {
+    initPerformanceOptimizations();
+  }, []);
+
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <BrowserRouter>
@@ -90,8 +101,8 @@ function App() {
                   />
                 ))}
 
-                {/* Optional 404 route */}
-                {/* <Route path="*" element={<NotFoundPage />} /> */}
+                {/* 404 route */}
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
               <Toaster />
             </main>

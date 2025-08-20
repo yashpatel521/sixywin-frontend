@@ -1,3 +1,5 @@
+import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 import {
   Card,
   CardContent,
@@ -12,6 +14,7 @@ import { GameDisplay } from "@/components/aviator/GameDisplay";
 export default function AviatorPage() {
   return (
     <>
+      <SEO {...SEO_CONFIGS.aviator} />
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         <Card className="w-full glassmorphism">
           <CardHeader className="text-center">

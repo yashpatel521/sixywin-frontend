@@ -50,14 +50,19 @@ const GAMES = [
 
 const PROFILE_LINKS = [
   {
+    label: "Profile",
+    path: "/profile",
+    icon: <Icons.user className="h-4 w-4 mr-2" />,
+  },
+  {
     label: "Leaderboard",
     path: "/leaderboard",
     icon: <Icons.barChart className="h-4 w-4 mr-2" />,
   },
   {
-    label: "Profile",
-    path: "/profile",
-    icon: <Icons.user className="h-4 w-4 mr-2" />,
+    label: "FAQ",
+    path: "/faq",
+    icon: <Icons.info className="h-4 w-4 mr-2" />,
   },
 ];
 

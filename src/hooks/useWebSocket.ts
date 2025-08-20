@@ -68,10 +68,12 @@ export const useCentralWebSocket = () => {
     [sendMessage, token]
   );
 
-  // Update the store's sendMessage function to use the actual sendMessage from react-use-websocket
+  // Update the store's sendMessage function only when connection state changes
   useEffect(() => {
-    useWebSocketStore.setState({ sendMessage: sendSignedMessage });
-  }, [sendSignedMessage]);
+    if (readyState === ReadyState.OPEN) {
+      useWebSocketStore.setState({ sendMessage: sendSignedMessage });
+    }
+  }, [readyState, sendSignedMessage]);
 
   // Update connection status in store
   useEffect(() => {
