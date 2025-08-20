@@ -13,8 +13,8 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <HeroSection />
 
-          <GamesSection />
           <RedeemSection />
+          <GamesSection />
           <FeaturesSection />
           <HowItWorksSection />
 
