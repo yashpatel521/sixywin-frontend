@@ -33,7 +33,7 @@ export function HistoryDisplay() {
                   Previous Crashes will appear here
                 </div>
               ) : (
-                history.reverse().map((entry) => (
+                history.map((entry) => (
                   <Badge
                     key={entry.id}
                     className="bg-yellow-500/20 text-yellow-300"
@@ -53,7 +53,7 @@ export function HistoryDisplay() {
               {userHistoryAviatorBets.length == 0 ? (
                 <div className="text-gray-500">No Bets Found</div>
               ) : (
-                userHistoryAviatorBets.reverse().map((bet) => (
+                userHistoryAviatorBets.map((bet) => (
                   <Badge
                     key={bet.id}
                     className={

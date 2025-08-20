@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icons } from "@/components/ui/icons";
 import { cn } from "@/libs/utils";
 import { Link } from "react-router-dom";
-import { TopBanner } from "@/components/ads/BannerAds";
+// import { TopBanner } from "@/components/ads/BannerAds";
 import { useWebSocketStore } from "@/store/websocketStore";
 import { useEffect } from "react";
 
@@ -138,7 +138,7 @@ export default function LeaderboardPage() {
           </CardContent>
         </Card>
       </div>
-      <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
+      {/* <TopBanner title="Advertisement" className="max-w-4xl mx-auto" /> */}
     </>
   );
 }

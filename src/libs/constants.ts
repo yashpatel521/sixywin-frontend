@@ -1,10 +1,11 @@
 // Image assets with fallbacks for Vercel deployment
 export const IMAGES = {
   logo: "/logo/logo7.png",
-  hero: "/landing/landing6.png",
+  hero: "/landing/landing1.png",
   redeem: "/img2.png",
   loginImage: "/auth/auth1.png",
-  contactUsImage: "/others/contactUs2.png",
+  registerImage: "/auth/auth5.png",
+  contactUsImage: "/others/contactUs3.png",
 } as const;
 
 export const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5000"; // Replace with your WebSocket server URL
