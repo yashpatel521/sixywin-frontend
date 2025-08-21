@@ -50,5 +50,6 @@ export const getUserProfile = () => {
 };
 
 export const clearUserProfile = () => {
-  localStorage.removeItem("userProfile");
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
 };
