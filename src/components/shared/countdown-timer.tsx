@@ -13,7 +13,6 @@ export const CountdownTimer = ({
     minutes: 0,
     seconds: 0,
   });
-
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();

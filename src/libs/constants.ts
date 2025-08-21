@@ -9,7 +9,7 @@ export const IMAGES = {
 } as const;
 
 export const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5000"; // Replace with your WebSocket server URL
-
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export const HMAC_SECRET =
   import.meta.env.VITE_HMAC_SECRET ||
   "sixywin-dev-secret-2025-change-in-production";

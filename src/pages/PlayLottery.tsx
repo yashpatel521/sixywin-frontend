@@ -1,7 +1,7 @@
 import { SEO } from "@/components/shared/seo";
 import { SEO_CONFIGS } from "@/utils/seo-configs";
 import { TicketSubmission } from "@/components/play-lottery/ticket-submission";
-import { TopLeaders } from "@/components/shared/top-leaders";
+import { TopLeaders } from "@/components/play-lottery/top-leaders";
 import { MegaPot } from "@/components/play-lottery/mega-pot";
 import { RelatedLinks } from "@/components/shared/related-links";
 import { Icons } from "@/components/ui/icons";

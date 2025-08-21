@@ -74,24 +74,6 @@ export interface Referral {
   referred: User;
 }
 
-export interface LoginResponsePayload {
-  success: boolean;
-  message: string;
-  data: {
-    token: string;
-    user: User;
-  };
-}
-
-export interface RegisterResponsePayload {
-  success: boolean;
-  message: string;
-  data: {
-    token: string;
-    user: User;
-  };
-}
-
 export interface SpinWheelResponsePayload {
   success: boolean;
   message: string;
@@ -182,12 +164,6 @@ export interface CreateTicket {
   user: User;
 }
 
-export interface CreateTicketResponsePayload {
-  success: boolean;
-  message?: string;
-  data?: CreateTicket;
-}
-
 export interface GameCardProps {
   icon: ReactNode;
   title: string;
@@ -261,11 +237,13 @@ export interface UpdatedUserResponsePayload {
 // =================================================================
 // Aviator Game Types
 // =================================================================
-
-export interface CreateAviatorTicketResponsePayload {
-  success: boolean;
-  message?: string;
-  data: AviatorTicket & { user: User };
+export interface AviatorTicket {
+  id: string;
+  amount: number;
+  amountWon: number;
+  cashOutMultiplier: number;
+  outcome: "win" | "loss" | "pending";
+  createdAt: string;
 }
 
 export interface AviatorDrawResult {
@@ -292,15 +270,6 @@ export interface AviatorCountdownResponsePayload {
   success: boolean;
   message?: string;
   data: AviatorCountdown;
-}
-
-export interface AviatorTicket {
-  id: string;
-  amount: number;
-  amountWon: number;
-  cashOutMultiplier: number;
-  outcome: "win" | "loss" | "pending";
-  createdAt: string;
 }
 
 export interface CashOutAviatorTicketResponsePayload {

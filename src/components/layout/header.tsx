@@ -21,6 +21,9 @@ import {
 } from "../ui/dialog";
 import { Icons } from "@/components/ui/icons";
 import { useWebSocketStore } from "@/store/websocketStore";
+import { useApiRequest } from "@/libs/apiRequest";
+import { User } from "@/libs/interfaces";
+import { useEffect } from "react";
 
 // -------------------------
 // Constants for links with icons
@@ -29,22 +32,30 @@ const GAMES = [
   {
     label: "All Games",
     path: "/games",
-    icon: <Icons.gamepad2 className="h-4 w-4 mr-2" />,
-  },
-  {
-    label: "Aviator",
-    path: "/games/aviator",
-    icon: <Icons.rocket className="h-4 w-4 mr-2" />,
+    icon: (
+      <Icons.gamepad2 className="h-4 w-4 mr-2 text-yellow-400 hover:text-black" />
+    ),
   },
   {
     label: "Lottery",
     path: "/games/play-lottery",
-    icon: <Icons.ticket className="h-4 w-4 mr-2" />,
+    icon: (
+      <Icons.ticket className="h-4 w-4 mr-2 text-yellow-400 hover:text-black" />
+    ),
+  },
+  {
+    label: "Aviator",
+    path: "/games/aviator",
+    icon: (
+      <Icons.rocket className="h-4 w-4 mr-2 text-yellow-400 hover:text-black" />
+    ),
   },
   {
     label: "Double Trouble",
     path: "/games/double-trouble",
-    icon: <Icons.layers className="h-4 w-4 mr-2" />,
+    icon: (
+      <Icons.layers className="h-4 w-4 mr-2 text-yellow-400 hover:text-black" />
+    ),
   },
 ];
 
@@ -68,9 +79,30 @@ const PROFILE_LINKS = [
 
 export function Header() {
   const navigate = useNavigate();
-  const { user } = useWebSocketStore();
+  const { user, updateUserData } = useWebSocketStore();
   const isLoggedIn = !!user;
 
+  const {
+    data = {} as User,
+    success,
+    request,
+  } = useApiRequest({
+    url: "/user/me",
+    method: "GET",
+    isToken: true,
+  });
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      request();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (success) {
+      updateUserData(data.user);
+    }
+  }, [data, success, updateUserData]);
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card/50 backdrop-blur-lg">
       <div className="container flex h-16 items-center justify-between">
@@ -128,7 +160,7 @@ export function Header() {
               </div>
 
               {/* Watch & Earn */}
-              <Dialog>
+              {/* <Dialog>
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -150,7 +182,7 @@ export function Header() {
                     </DialogDescription>
                   </DialogHeader>
                 </DialogContent>
-              </Dialog>
+              </Dialog> */}
 
               {/* Spin Wheel */}
               {!user?.isSpinned && (

@@ -2,34 +2,51 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Icons } from "@/components/ui/icons";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { IMAGES } from "@/libs/constants";
-import { useWebSocketStore } from "@/store/websocketStore";
-import type { LoginRequestPayload } from "@/libs/interfaces";
-import { hashPassword } from "@/utils/hmac";
 import { GoogleButton } from "@/components/shared/GoogleButton";
+import { useApiRequest } from "@/libs/apiRequest"; // centralized API hook
+import { hashPassword } from "@/utils/hmac";
 import {
   clearCredentials,
   getCredentials,
+  getUserProfile,
   saveCredentials,
+  saveUserProfile,
 } from "@/utils/storage";
+import { useWebSocketStore } from "@/store/websocketStore";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { sendMessage, user, errorMessage } = useWebSocketStore();
   const [rememberMeChecked, setRememberMeChecked] = useState(false);
-  useEffect(() => {
-    if (user) {
-      navigate("/games");
-    }
-  }, [user, navigate]);
+  const { setUserData } = useWebSocketStore();
+  // check user is already logged in
+  const localData = getUserProfile();
+  const isLoggedIn = !!localData?.user;
+  if (isLoggedIn) {
+    navigate("/games");
+  }
 
+  const [formData, setFormData] = useState({
+    emailOrUsername: "",
+    password: "",
+  });
+
+  // Use centralized API request
+  const { loading, data, error, message, request, success } = useApiRequest({
+    url: "/user/login",
+    data: {
+      email: formData.emailOrUsername,
+      password: hashPassword(formData.password),
+    },
+    isToken: false,
+  });
+
+  // Auto-fill remember me
   useEffect(() => {
     const rememberMeCredentials = getCredentials();
-    console.log(rememberMeCredentials);
     if (rememberMeCredentials) {
       setFormData({
         emailOrUsername: rememberMeCredentials.emailOrUsername,
@@ -39,10 +56,14 @@ export default function LoginPage() {
     }
   }, []);
 
-  const [formData, setFormData] = useState({
-    emailOrUsername: "",
-    password: "",
-  });
+  // Redirect on successful login
+  useEffect(() => {
+    if (success) {
+      saveUserProfile(data.user, data.token);
+      setUserData(data.user, data.token);
+      navigate("/games");
+    }
+  }, [data, success, navigate, setUserData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,22 +71,16 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const hashedPassword = hashPassword(formData.password);
-    const loginPayload: LoginRequestPayload = {
-      emailOrUsername: formData.emailOrUsername,
-      password: hashedPassword,
-    };
-    sendMessage("login", loginPayload);
+    await request();
+    // Save credentials if remember me is checked
+    if (rememberMeChecked) {
+      saveCredentials(formData.emailOrUsername, formData.password);
+    }
   };
 
   const rememberMeFunc = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setRememberMeChecked(true);
-      saveCredentials(formData.emailOrUsername, formData.password);
-    } else {
-      setRememberMeChecked(false);
-      clearCredentials();
-    }
+    setRememberMeChecked(e.target.checked);
+    if (!e.target.checked) clearCredentials();
   };
 
   return (
@@ -77,7 +92,6 @@ export default function LoginPage() {
             src={IMAGES.loginImage}
             alt="Joyful cartoon person celebrating with playing cards"
             className=" object-cover"
-            data-ai-hint="cartoon winner"
           />
           <p className="text-muted-foreground mt-2 max-w-sm">
             Welcome back to SixyWin! Log in to spin, earn coins, and track your
@@ -95,7 +109,7 @@ export default function LoginPage() {
             <h2 className="text-sm font-semibold uppercase text-muted-foreground mb-4 text-center">
               Login to Your Account
             </h2>
-            <div className="grid gap-6">
+            <form onSubmit={handleSubmit} className="grid gap-6">
               <div className="relative">
                 <Icons.user className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -122,9 +136,14 @@ export default function LoginPage() {
                   className="pl-10 h-12 rounded-lg animation-all focus:scale-[1.02]"
                 />
               </div>
-              {errorMessage && (
-                <p className="text-red-500 text-sm mt-1 ml-3">{errorMessage}</p>
+
+              {error && (
+                <p className="text-red-500 text-sm mt-1 ml-3">{error}</p>
               )}
+              {message && (
+                <p className="text-green-500 text-sm mt-1 ml-3">{message}</p>
+              )}
+
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <input
@@ -147,13 +166,12 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 rounded-lg text-base font-bold animation-all hover:scale-105 active:scale-95"
-                onClick={(e) =>
-                  handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)
-                }
+                disabled={loading}
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </Button>
-            </div>
+            </form>
+
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
