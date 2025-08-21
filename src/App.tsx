@@ -79,11 +79,7 @@ function App() {
                   <Route
                     key={path}
                     path={path}
-                    element={
-                      <ProtectedRoutes isProtected={true}>
-                        {element}
-                      </ProtectedRoutes>
-                    }
+                    element={<ProtectedRoutes>{element}</ProtectedRoutes>}
                   />
                 ))}
 

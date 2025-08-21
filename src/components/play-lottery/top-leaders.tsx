@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/libs/utils";
 import { Icons } from "@/components/ui/icons";
-import { useWebSocketStore } from "@/store/websocketStore";
 import { useEffect } from "react";
+import { useApiRequest } from "@/libs/apiRequest";
+import { User } from "@/libs/interfaces";
 
 const getRankClasses = (rank: number) => {
   if (rank === 1) return "text-yellow-400";
@@ -92,10 +93,20 @@ const PodiumPlace = ({
 
 export function TopLeaders() {
   // Get top 3 players and add rank
-  const { sendMessage, leaderboard } = useWebSocketStore(); // Get tickets from Zustand store
+  // Use centralized API request
+  const { data, request } = useApiRequest({
+    url: "/user/leaderboard",
+    method: "GET",
+    isToken: true,
+    params: { limit: 3 },
+  });
+
   useEffect(() => {
-    sendMessage("leaderboard", { limit: 3 });
-  }, [sendMessage]);
+    request();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const leaderboard: User[] = data || [];
+
   const topThree = leaderboard.slice(0, 3).map((player, index) => ({
     ...player,
     rank: index + 1,

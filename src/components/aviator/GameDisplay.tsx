@@ -10,17 +10,18 @@ export function GameDisplay() {
     if (aviatorDrawResult?.status === "finished") return "text-red-400";
     return "text-muted-foreground";
   };
-
   return (
     <div className="lg:col-span-3 flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/30 relative overflow-hidden h-96">
       {aviatorDrawResult?.status === "finished" &&
       aviatorCountdown?.countdown < AVIATOR_COUNTDOWN_TIMER - 2 ? (
-        <div className="text-center">
-          <Icons.hourglass className="h-16 w-16 text-primary mx-auto mb-4" />
+        <div className="text-center flex flex-col items-center ">
+          <div className="flex flex-row items-center gap-4 mb-4">
+            <Icons.hourglass className="h-16 w-16 text-primary mx-auto" />
+            <p className="text-6xl font-bold text-primary">
+              {aviatorCountdown?.countdown}
+            </p>
+          </div>
           <h3 className="font-headline text-2xl">Next round starts in...</h3>
-          <p className="text-6xl font-bold text-primary">
-            {aviatorCountdown?.countdown}
-          </p>
         </div>
       ) : (
         <div className="relative flex items-center justify-center w-full h-full">

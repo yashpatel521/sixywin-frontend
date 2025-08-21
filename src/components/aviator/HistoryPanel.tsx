@@ -1,59 +1,82 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "../ui/card";
 import { Icons } from "../ui/icons";
+import { useEffect } from "react";
+import { useApiRequest } from "@/libs/apiRequest";
 import { useWebSocketStore } from "@/store/websocketStore";
-import { useEffect, useState } from "react";
-import { AviatorDrawResult } from "@/libs/interfaces";
 
 export function HistoryDisplay() {
-  const { aviatorDrawResult, userHistoryAviatorBets } = useWebSocketStore();
+  const {
+    setUserHistoryAviatorBets,
+    userHistoryAviatorBets: userHistory,
+    aviatorDrawHistory: globalDataHistory,
+    setAviatorDrawHistory,
+  } = useWebSocketStore();
+  // User's own history
+  const { data: userData, request: requestUserHistory } = useApiRequest({
+    url: "/aviator/userHistory",
+    method: "GET",
+    isToken: true,
+  });
+
+  // Global / all users history
+  const { data: globalData, request: requestGlobalHistory } = useApiRequest({
+    url: "/aviator/globalHistory", // Change to your new API endpoint
+    method: "GET",
+    isToken: true, // If token not required
+  });
 
   useEffect(() => {
-    if (aviatorDrawResult?.status == "finished") {
-      setHistory((prev) => [...prev, aviatorDrawResult]);
-    }
-    //slice to 5
-    setHistory((prev) => prev.slice(0, 5));
-  }, [aviatorDrawResult]);
+    requestUserHistory();
+    requestGlobalHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const [history, setHistory] = useState<AviatorDrawResult[]>([]);
+  useEffect(() => {
+    if (userData) {
+      setUserHistoryAviatorBets(userData);
+    }
+    if (globalData) {
+      setAviatorDrawHistory(globalData);
+    }
+  }, [userData, globalData]);
 
   return (
     <>
       <Card className="glassmorphism">
         <CardContent className="p-4 space-y-4">
+          {/* Global History */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Icons.history className="h-5 w-5" />
-              <h3 className="font-semibold">Recent Crashes</h3>
+              <h3 className="font-semibold">Recent Crashes (Global)</h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {history.length === 0 ? (
-                <div className="text-gray-500">
-                  Previous Crashes will appear here
-                </div>
+              {globalDataHistory.length === 0 ? (
+                <div className="text-gray-500">No Global History</div>
               ) : (
-                history.map((entry) => (
+                globalDataHistory.map((entry) => (
                   <Badge
                     key={entry.id}
                     className="bg-yellow-500/20 text-yellow-300"
                   >
-                    {entry?.crashMultiplier}x
+                    {entry.crashMultiplier}x
                   </Badge>
                 ))
               )}
             </div>
           </div>
+          {/* User Bids */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Icons.gem className="h-5 w-5" />
               <h3 className="font-semibold">Your Bids</h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {userHistoryAviatorBets.length == 0 ? (
+              {userHistory.length === 0 ? (
                 <div className="text-gray-500">No Bets Found</div>
               ) : (
-                userHistoryAviatorBets.map((bet) => (
+                userHistory.map((bet) => (
                   <Badge
                     key={bet.id}
                     className={
@@ -74,7 +97,9 @@ export function HistoryDisplay() {
                     <span>{bet?.cashOutMultiplier}x</span>
                     <div className="flex items-center gap-1 font-semibold text-xs bg-black/20 text-white rounded-full px-2 py-0.5">
                       <Icons.gem className="h-3 w-3" />
-                      <span>{bet.amountWon}</span>
+                      <span>
+                        {bet.outcome == "loss" ? bet.amount : bet.amountWon}
+                      </span>
                     </div>
                   </Badge>
                 ))

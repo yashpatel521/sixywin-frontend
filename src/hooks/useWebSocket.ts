@@ -14,11 +14,6 @@ export const useCentralWebSocket = () => {
     onOpen: () => {
       console.log("WebSocket connection opened.");
       setConnected(true);
-
-      // Auto-authenticate after reconnect/refresh
-      if (token) {
-        sendSignedMessage("auth", { token });
-      }
     },
     onClose: () => {
       console.log("WebSocket connection closed.");

@@ -5,29 +5,34 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import { IMAGES } from "@/libs/constants";
-import { useWebSocketStore } from "@/store/websocketStore";
-import { hashPassword } from "@/utils/hmac";
+// import { useWebSocketStore } from "@/store/websocketStore";
+// import { hashPassword } from "@/utils/hmac";
 import { GoogleButton } from "@/components/shared/GoogleButton";
+import { getUserProfile } from "@/utils/storage";
+import { hashPassword } from "@/utils/hmac";
+import { useApiRequest } from "@/libs/apiRequest";
+import { useWebSocketStore } from "@/store/websocketStore";
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  // if the user is already logged in, redirect to the home page
-  const { sendMessage, errorMessage, user } = useWebSocketStore();
-  useEffect(() => {
-    if (user) {
-      navigate("/games");
-    }
-  }, [user, navigate]);
+  const { setUserData } = useWebSocketStore.getState();
+
+  // check user is already logged in
+  const localData = getUserProfile();
+  const isLoggedIn = localData?.user;
+  if (isLoggedIn) {
+    navigate("/games");
+  }
+
   const query = new URLSearchParams(useLocation().search);
   const ref = query.get("ref");
 
   // see password
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
 
-  const [userData, setUserData] = useState({
+  const [userData, setUserDataForm] = useState({
     username: "",
     email: "",
     password: "",
@@ -35,22 +40,37 @@ export default function SignupPage() {
     referralId: ref || "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserData({ ...userData, [e.target.name]: e.target.value });
+    setUserDataForm({ ...userData, [e.target.name]: e.target.value });
   };
 
   // check if the password and confirm password are the same
   useEffect(() => {
     setIsPasswordValid(userData.password === userData.confirmPassword);
   }, [userData.password, userData.confirmPassword]);
+  const { loading, data, error, message, request, success } = useApiRequest({
+    url: "/user/register",
+    data: {
+      username: userData.username,
+      password: hashPassword(userData.password),
+      email: userData.email,
+      referralId: userData.referralId,
+    },
+    isToken: false,
+  });
 
   // take all the data from the form and send it to the backend
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
-    const hashedPassword = hashPassword(userData.password);
-    sendMessage("register", { ...userData, password: hashedPassword });
-    setIsLoading(false);
+    await request();
   };
+
+  // Redirect on successful login
+  useEffect(() => {
+    if (success) {
+      setUserData(data.user, data.token);
+      navigate("/games");
+    }
+  }, [data, success, navigate, setUserData]);
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center p-4 bg-gradient-to-br from-yellow-900/80 via-background/80 to-background">
@@ -151,10 +171,12 @@ export default function SignupPage() {
                     Passwords do not match
                   </p>
                 )}
-              {errorMessage && (
-                <p className="text-red-500 text-sm mt-1 ml-3">{errorMessage}</p>
+              {!success && (
+                <p className="text-red-500 text-sm mt-1 ml-3">{message}</p>
               )}
-
+              {error && (
+                <p className="text-red-500 text-sm mt-1 ml-3">{error}</p>
+              )}
               {/* Referral ID - Full width */}
               <div className="relative">
                 <Icons.gift className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -174,9 +196,9 @@ export default function SignupPage() {
                 onClick={(e) =>
                   handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)
                 }
-                disabled={isLoading}
+                disabled={loading}
               >
-                {isLoading ? "Loading..." : "Create Account"}
+                {loading ? "Loading..." : "Create Account"}
               </Button>
             </div>
             <div className="relative my-6">

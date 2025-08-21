@@ -1,73 +1,23 @@
 import { useEffect } from "react";
 import { useWebSocketStore } from "../store/websocketStore";
 import type {
-  LoginResponsePayload,
   GetTicketsResponsePayload,
   SpinWheelResponsePayload,
   GetLeaderboardResponsePayload,
   GetUserProfileResponsePayload,
   GetMegaPotResponsePayload,
   GetLatestDrawResponsePayload,
-  CreateTicketResponsePayload,
   DoubleTroubleDrawResultPayload,
   CreateDoubleTroubleTicketResponsePayload,
   UpdatedUserResponsePayload,
-  RegisterResponsePayload,
   AviatorDrawResultResponsePayload,
   AviatorCountdownResponsePayload,
-  CashOutAviatorTicketResponsePayload,
-  CreateAviatorTicketResponsePayload,
 } from "../libs/interfaces";
 import { toast } from "./use-toast";
 import { AVIATOR_COUNTDOWN_TIMER } from "@/libs/constants";
 
 export const useWebSocketHandlers = () => {
   useEffect(() => {
-    const handleLoginResponse = (payload: unknown) => {
-      const loginPayload = payload as LoginResponsePayload;
-      if (loginPayload.success) {
-        useWebSocketStore
-          .getState()
-          .setUserData(loginPayload.data.user, loginPayload.data.token);
-      } else {
-        useWebSocketStore.getState().setUserData(null, null);
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(loginPayload.message || "Login failed");
-      }
-    };
-
-    const handleRegisterResponse = (payload: unknown) => {
-      const registerPayload = payload as RegisterResponsePayload;
-      if (registerPayload.success) {
-        useWebSocketStore
-          .getState()
-          .setUserData(registerPayload.data.user, registerPayload.data.token);
-      } else {
-        useWebSocketStore.getState().setUserData(null, null);
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(registerPayload.message || "Registration failed");
-      }
-    };
-
-    const handleGoogleLoginResponse = (payload: unknown) => {
-      const googleLoginPayload = payload as LoginResponsePayload;
-      if (googleLoginPayload.success) {
-        useWebSocketStore
-          .getState()
-          .setUserData(
-            googleLoginPayload.data.user,
-            googleLoginPayload.data.token
-          );
-      } else {
-        useWebSocketStore.getState().setUserData(null, null);
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(googleLoginPayload.message || "Google login failed");
-      }
-    };
-
     const handleTicketGet = (payload: unknown) => {
       const ticketsPayload = payload as GetTicketsResponsePayload;
       if (ticketsPayload.success) {
@@ -164,33 +114,6 @@ export const useWebSocketHandlers = () => {
       }
     };
 
-    const handleCreateTicketResponse = (payload: unknown) => {
-      const createTicketPayload = payload as CreateTicketResponsePayload;
-      if (createTicketPayload.success) {
-        toast({
-          variant: "success",
-          title: "Ticket Created",
-          description: `Your ticket for ${createTicketPayload.data?.bid} coins has been successfully created!`,
-        });
-        if (createTicketPayload.data?.user) {
-          useWebSocketStore
-            .getState()
-            .updateUserData(createTicketPayload.data.user);
-        }
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Ticket Creation Failed",
-          description: createTicketPayload.message,
-        });
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(
-            createTicketPayload.message || "Error creating ticket"
-          );
-      }
-    };
-
     const handleDoubleTroubleDrawResult = (payload: unknown) => {
       const doubleTroublePayload = payload as DoubleTroubleDrawResultPayload;
       if (doubleTroublePayload.success) {
@@ -239,15 +162,6 @@ export const useWebSocketHandlers = () => {
 
     useWebSocketStore
       .getState()
-      .registerHandler("login_response", handleLoginResponse);
-    useWebSocketStore
-      .getState()
-      .registerHandler("register_response", handleRegisterResponse);
-    useWebSocketStore
-      .getState()
-      .registerHandler("googleLogin_response", handleGoogleLoginResponse);
-    useWebSocketStore
-      .getState()
       .registerHandler("spinWheel_response", handleSpinWheelResponse);
     useWebSocketStore
       .getState()
@@ -264,9 +178,7 @@ export const useWebSocketHandlers = () => {
     useWebSocketStore
       .getState()
       .registerHandler("latestDraw_response", handleLatestDrawGet);
-    useWebSocketStore
-      .getState()
-      .registerHandler("createTicket_response", handleCreateTicketResponse);
+
     useWebSocketStore
       .getState()
       .registerHandler(
@@ -292,36 +204,6 @@ export const useWebSocketHandlers = () => {
 
     useWebSocketStore
       .getState()
-      .registerHandler("createAviatorTicket_response", (payload) => {
-        const createTicketPayload =
-          payload as CreateAviatorTicketResponsePayload;
-        if (createTicketPayload.success) {
-          toast({
-            variant: "success",
-            title: "Aviator Ticket Created",
-            description: `Your bet ${createTicketPayload.data?.amount} coins has been placed.`,
-          });
-
-          if (createTicketPayload.data?.user) {
-            useWebSocketStore
-              .getState()
-              .updateUserData(createTicketPayload.data.user);
-          }
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Aviator Ticket Creation Failed",
-            description: createTicketPayload.message,
-          });
-          useWebSocketStore
-            .getState()
-            .setErrorMessage(
-              createTicketPayload.message || "Error creating aviator ticket"
-            );
-        }
-      });
-    useWebSocketStore
-      .getState()
       .registerHandler("aviatorDrawResult_response", (payload) => {
         const aviatorDrawPayload = payload as AviatorDrawResultResponsePayload;
         if (aviatorDrawPayload.success) {
@@ -343,6 +225,13 @@ export const useWebSocketHandlers = () => {
                   : bet
               )
             );
+
+            useWebSocketStore
+              .getState()
+              .setAviatorDrawHistory((prev) => [
+                ...prev,
+                aviatorDrawPayload.data,
+              ]);
           }
         } else {
           useWebSocketStore.getState().setAviatorDrawResult(null);
@@ -372,38 +261,6 @@ export const useWebSocketHandlers = () => {
             .setErrorMessage(
               aviatorCountdownPayload.message ||
                 "Error fetching aviator countdown"
-            );
-        }
-      });
-    useWebSocketStore
-      .getState()
-      .registerHandler("cashOutAviatorTicket_response", (payload) => {
-        const cashOutPayload = payload as CashOutAviatorTicketResponsePayload;
-        if (cashOutPayload.success) {
-          useWebSocketStore.getState().updateUserData(cashOutPayload.data.user);
-          toast({
-            variant: "success",
-            title: "Cash Out Successful",
-            description: `You have cashed out ${cashOutPayload.data.aviatorBidSave.amountWon} coins with a multiplier of ${cashOutPayload.data.aviatorBidSave.cashOutMultiplier}.`,
-          });
-          useWebSocketStore.getState().setUserHistoryAviatorBets((prev) =>
-            prev.map((bet) =>
-              bet.outcome === "pending"
-                ? {
-                    ...bet,
-                    outcome: "win",
-                    cashOutMultiplier:
-                      cashOutPayload.data.aviatorBidSave.cashOutMultiplier,
-                    amountWon: cashOutPayload.data.aviatorBidSave.amountWon,
-                  }
-                : bet
-            )
-          );
-        } else {
-          useWebSocketStore
-            .getState()
-            .setErrorMessage(
-              cashOutPayload.message || "Error cashing out aviator ticket"
             );
         }
       });

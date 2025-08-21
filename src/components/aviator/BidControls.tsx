@@ -5,30 +5,58 @@ import { Card, CardContent } from "../ui/card";
 import { Icons } from "../ui/icons";
 import { useEffect, useState } from "react";
 import { useWebSocketStore } from "@/store/websocketStore";
+import { useApiRequest } from "@/libs/apiRequest";
+import { toast } from "@/hooks/use-toast";
+import { saveUserProfile } from "@/utils/storage";
 
 export function Controls() {
-  const { sendMessage, aviatorDrawResult, user, setUserHistoryAviatorBets } =
+  const { aviatorDrawResult, user, setUserHistoryAviatorBets, updateUserData } =
     useWebSocketStore();
 
   const quickBidOptions = [10, 20, 50, 100];
   const [bidAmount, setBidAmount] = useState([10]);
   const [hasActiveBet, setHasActiveBet] = useState(false);
 
-  // Reset when round ends
+  // Place Bet API
+  const {
+    data: placeBetData,
+    success: placeBetSuccess,
+    request: placeBetRequest,
+  } = useApiRequest({
+    url: "/aviator/create",
+    method: "POST",
+    isToken: true,
+    data: { amount: bidAmount[0] },
+  });
+
+  // Cash Out API
+  const {
+    data: cashOutData,
+    success: cashOutSuccess,
+    request: cashOutRequest,
+  } = useApiRequest({
+    url: "/aviator/cashout",
+    method: "POST",
+    isToken: true,
+    data: {
+      roundId: aviatorDrawResult?.roundId,
+      crashMultiplier: aviatorDrawResult?.crashMultiplier,
+    },
+  });
+
+  // Reset bet when round ends
   useEffect(() => {
     if (aviatorDrawResult?.status === "finished") {
       setHasActiveBet(false);
     }
   }, [aviatorDrawResult?.status]);
 
-  const handlePlaceBet = () => {
-    // ✅ Only allow placing bet before plane starts
+  // Place Bet handler
+  const handlePlaceBet = async () => {
     if (hasActiveBet || aviatorDrawResult?.status !== "finished") return;
 
     setHasActiveBet(true);
-    sendMessage("createAviatorTicket", {
-      amount: bidAmount[0],
-    });
+    await placeBetRequest();
 
     // Add bet to history
     setUserHistoryAviatorBets((prev) => [
@@ -45,20 +73,58 @@ export function Controls() {
     ]);
   };
 
-  const handleCashOut = () => {
+  // Update user after Place Bet success
+  useEffect(() => {
+    if (placeBetSuccess) {
+      saveUserProfile(placeBetData.user);
+      updateUserData(placeBetData.user);
+      toast({
+        title: "Bet Placed",
+        description: `You have placed a bet of ${bidAmount[0]} coins.`,
+        variant: "success",
+      });
+      setBidAmount([10]);
+    }
+  }, [placeBetSuccess, placeBetData, updateUserData]);
+
+  // Cash Out handler
+  const handleCashOut = async () => {
     if (!hasActiveBet || aviatorDrawResult?.status !== "ongoing") return;
-
     setHasActiveBet(false);
-
-    sendMessage("cashOutAviatorTicket", {
-      crashMultiplier: aviatorDrawResult?.crashMultiplier,
-      roundId: aviatorDrawResult?.roundId,
-    });
+    await cashOutRequest();
   };
+
+  useEffect(() => {
+    if (cashOutSuccess) {
+      saveUserProfile(cashOutData.user);
+      updateUserData(cashOutData.user);
+
+      toast({
+        title: "Cashed Out",
+        description: `You cashed out ${cashOutData.aviatorBidSave.amountWon} coins with a multiplier of ${cashOutData.aviatorBidSave.cashOutMultiplier}.`,
+        variant: "success",
+      });
+
+      // Update bet history
+      setUserHistoryAviatorBets((prev) =>
+        prev.map((bet) =>
+          bet.outcome === "pending"
+            ? {
+                ...bet,
+                outcome: "win",
+                cashOutMultiplier: cashOutData.aviatorBidSave.cashOutMultiplier,
+                amountWon: cashOutData.aviatorBidSave.amountWon,
+              }
+            : bet
+        )
+      );
+    }
+  }, [cashOutSuccess, cashOutData, updateUserData]);
 
   return (
     <Card className="glassmorphism">
       <CardContent className="p-4 space-y-4">
+        {/* Bet Slider */}
         <div>
           <div className="flex justify-between items-center mb-2">
             <Label>Your Bet {hasActiveBet ? "Active" : "Not Placed"}</Label>
@@ -73,7 +139,6 @@ export function Controls() {
             step={10}
             value={bidAmount}
             onValueChange={setBidAmount}
-            // ✅ disable once round started or bet placed
             disabled={hasActiveBet || aviatorDrawResult?.status === "ongoing"}
           />
           <div className="text-sm text-muted-foreground text-center">
@@ -87,7 +152,6 @@ export function Controls() {
                 variant="outline"
                 size="sm"
                 onClick={() => setBidAmount([amount])}
-                // ✅ disable once round started or bet placed
                 disabled={
                   hasActiveBet || aviatorDrawResult?.status === "ongoing"
                 }
@@ -98,10 +162,10 @@ export function Controls() {
           </div>
         </div>
 
+        {/* Buttons */}
         <div className="grid grid-cols-2 gap-2">
           <Button
             onClick={handlePlaceBet}
-            // ✅ Place Bet disabled when round is ongoing or already placed
             disabled={hasActiveBet || aviatorDrawResult?.status === "ongoing"}
           >
             {hasActiveBet ? (
@@ -119,7 +183,6 @@ export function Controls() {
 
           <Button
             onClick={handleCashOut}
-            // ✅ Cash out only possible if round ongoing & user has bet
             disabled={!hasActiveBet || aviatorDrawResult?.status !== "ongoing"}
           >
             <Icons.zap className="mr-2" />

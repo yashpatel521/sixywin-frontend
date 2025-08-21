@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,14 +13,33 @@ import { Label } from "@/components/ui/label";
 import { LatestDrawNumbers } from "./latest-draw";
 import { MAX_NUMBERS, TOTAL_NUMBERS } from "@/libs/constants";
 import { Icons } from "@/components/ui/icons";
+import { getUserProfile, saveUserProfile } from "@/utils/storage";
+import { CreateTicket } from "@/libs/interfaces";
+import { useApiRequest } from "@/libs/apiRequest";
+import { toast } from "@/hooks/use-toast";
 import { useWebSocketStore } from "@/store/websocketStore";
 
 export function TicketSubmission() {
-  const { sendMessage, user } = useWebSocketStore(); // Get tickets from Zustand store
-
+  const { updateUserData } = useWebSocketStore();
+  const user = getUserProfile()?.user;
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [bidAmount, setBidAmount] = useState(10);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    loading,
+    data = {} as CreateTicket,
+    message,
+    error,
+    success,
+    request,
+  } = useApiRequest({
+    url: "/ticket/create",
+    method: "POST",
+    isToken: true,
+    data: {
+      numbers: selectedNumbers,
+      bid: bidAmount,
+    },
+  });
 
   // Handle bid amount changes with toast notification
   const handleBidChange = (value: number[]) => {
@@ -53,16 +72,30 @@ export function TicketSubmission() {
       return;
     }
 
-    setIsSubmitting(true);
-
-    sendMessage("createTicket", {
-      numbers: selectedNumbers,
-      bid: bidAmount,
-    });
-    setIsSubmitting(false);
+    await request();
     setSelectedNumbers([]);
     setBidAmount(10); // Reset bid amount after submission
   };
+
+  // Redirect on successful login
+  useEffect(() => {
+    if (success) {
+      saveUserProfile(data.user);
+      updateUserData(data.user);
+      toast({
+        variant: "success",
+        title: "Ticket Created",
+        description: `Your ticket for ${data?.bid} coins has been successfully created!`,
+      });
+    }
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Ticket Creation Failed",
+        description: message || "Error creating ticket",
+      });
+    }
+  }, [data, success, message, error, updateUserData]);
 
   const numberGrid = useMemo(
     () => Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1),
@@ -158,7 +191,7 @@ export function TicketSubmission() {
               <Button
                 variant="outline"
                 onClick={handleQuickPick}
-                disabled={isSubmitting}
+                disabled={loading}
                 className="w-full animation-all hover:scale-105 active:scale-95"
               >
                 <Icons.dices className="mr-2 h-4 w-4" />
@@ -166,13 +199,11 @@ export function TicketSubmission() {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={
-                  selectedNumbers.length !== MAX_NUMBERS || isSubmitting
-                }
+                disabled={selectedNumbers.length !== MAX_NUMBERS || loading}
                 className="w-full animation-all hover:scale-105 active:scale-95"
               >
                 <Icons.sparkles className="mr-2 h-4 w-4" />
-                {isSubmitting ? "Submitting..." : "Submit Ticket & Bid"}
+                {loading ? "Submitting..." : "Submit Ticket & Bid"}
               </Button>
             </div>
           </div>
