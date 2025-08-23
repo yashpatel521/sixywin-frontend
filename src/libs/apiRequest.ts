@@ -15,6 +15,7 @@ interface ApiRequestProps {
 interface ApiResponse<T = unknown> {
   loading: boolean;
   success: boolean | null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   data: T | null | any;
   error: string | null;
   message: string | null;

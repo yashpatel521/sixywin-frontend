@@ -59,6 +59,7 @@ import {
   HandCoins,
   Zap,
   Gamepad2,
+  LoaderPinwheel,
 } from "lucide-react";
 import { IMAGES } from "@/libs/constants";
 
@@ -129,4 +130,5 @@ export const Icons = {
   trendingDown: (props: LucideProps) => <TrendingDown {...props} />,
   handCoins: (props: LucideProps) => <HandCoins {...props} />,
   zap: (props: LucideProps) => <Zap {...props} />,
+  loaderPinwheel: (props: LucideProps) => <LoaderPinwheel {...props} />,
 };
