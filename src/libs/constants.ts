@@ -1,3 +1,5 @@
+export const IS_PRODUCTION = import.meta.env.PROD;
+
 // Image assets with fallbacks for Vercel deployment
 export const IMAGES = {
   logo: "/logo/logo7.png",
@@ -10,6 +12,12 @@ export const IMAGES = {
 
 export const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:5000"; // Replace with your WebSocket server URL
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const GOOGLE_ADSENSE_CLIENT =
+  import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT || "";
+export const ADS_ENABLED = import.meta.env.VITE_ADS_ENABLED === "true";
+export const IS_DEVELOPMENT = import.meta.env.MODE === "development";
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
 export const HMAC_SECRET =
   import.meta.env.VITE_HMAC_SECRET ||
   "sixywin-dev-secret-2025-change-in-production";

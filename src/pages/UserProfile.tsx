@@ -23,7 +23,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useParams } from "react-router-dom";
 import TicketHistory from "@/components/shared/ticket-history";
-import { TopBanner } from "@/components/ads/BannerAds";
 import { useWebSocketStore } from "@/store/websocketStore";
 
 export default function UserProfilePage() {
@@ -261,8 +260,6 @@ export default function UserProfilePage() {
       {userProfile?.user?.id && (
         <TicketHistory userId={Number(userProfile.user.id)} />
       )}
-
-      <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </div>
   );
 }

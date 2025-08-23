@@ -5,7 +5,6 @@ import { TopLeaders } from "@/components/play-lottery/top-leaders";
 import { MegaPot } from "@/components/play-lottery/mega-pot";
 import { RelatedLinks } from "@/components/shared/related-links";
 import { Icons } from "@/components/ui/icons";
-// import { TopBanner } from "@/components/ads/BannerAds";
 
 export default function PlayLotteryPage() {
   return (
@@ -19,9 +18,6 @@ export default function PlayLotteryPage() {
           </div>
           <div className="space-y-8">
             <TopLeaders />
-            {/* <div className="my-12">
-              <TopBanner title="Advertisement" />
-            </div> */}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
-import { APP_VERSION } from "@/libs/constants";
+import { APP_VERSION, IS_PRODUCTION } from "@/libs/constants";
 
 export function VersionInfo({ className }: { className?: string }) {
-  if (import.meta.env.PROD) {
+  if (IS_PRODUCTION) {
     return null; // Hide in production
   }
 
