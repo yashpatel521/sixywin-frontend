@@ -10,7 +10,10 @@ import type {
   AviatorCountdownResponsePayload,
 } from "../libs/interfaces";
 import { toast } from "./use-toast";
-import { AVIATOR_COUNTDOWN_TIMER } from "@/libs/constants";
+import {
+  AVIATOR_COUNTDOWN_TIMER,
+  MAX_NUMBER_DOUBLE_TROUBLE,
+} from "@/libs/constants";
 
 export const useWebSocketHandlers = () => {
   useEffect(() => {
@@ -23,6 +26,36 @@ export const useWebSocketHandlers = () => {
           useWebSocketStore
             .getState()
             .setDoubleTroubleHistory({ current, history });
+          useWebSocketStore.getState().setDoubleTroubleUserHistory((prev) =>
+            prev.map((t) => {
+              if (t.status !== "pending") return t;
+              const winNum = current.winningNumbers;
+              switch (t.drawType) {
+                case "Number":
+                  return { ...t, status: t.number === winNum ? "win" : "loss" };
+                case "Under":
+                  return {
+                    ...t,
+                    status:
+                      winNum < MAX_NUMBER_DOUBLE_TROUBLE / 2 ? "win" : "loss",
+                  };
+                case "Over":
+                  return {
+                    ...t,
+                    status:
+                      winNum > MAX_NUMBER_DOUBLE_TROUBLE / 2 ? "win" : "loss",
+                  };
+                case "Exact":
+                  return {
+                    ...t,
+                    status:
+                      winNum === MAX_NUMBER_DOUBLE_TROUBLE / 2 ? "win" : "loss",
+                  };
+                default:
+                  return t;
+              }
+            })
+          );
         } else {
           useWebSocketStore
             .getState()
@@ -118,6 +151,7 @@ export const useWebSocketHandlers = () => {
       .registerHandler("updatedUser_response", (payload) => {
         const updatedUserPayload = payload as UpdatedUserResponsePayload;
         if (updatedUserPayload.success) {
+          console.log("Updated user:", updatedUserPayload.data.user);
           useWebSocketStore
             .getState()
             .updateUserData(updatedUserPayload.data.user);

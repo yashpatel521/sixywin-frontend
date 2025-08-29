@@ -9,6 +9,7 @@ import { Icons } from "@/components/ui/icons";
 import { cn } from "@/libs/utils";
 import { useState, useEffect } from "react";
 import { useWebSocketStore } from "@/store/websocketStore";
+import { MAX_NUMBER_DOUBLE_TROUBLE } from "@/libs/constants";
 
 export const BannerDoubleTrouble = () => {
   const { doubleTroubleHistory, sendMessage } = useWebSocketStore();
@@ -44,9 +45,11 @@ export const BannerDoubleTrouble = () => {
   const seconds = (secondsLeft % 60).toString().padStart(2, "0");
 
   const getColorClass = (num: number) => {
-    if (num === 15) return "bg-yellow-400/70 text-black";
-    if (num < 15) return "bg-[hsl(var(--destructive)/0.7)] text-white";
-    if (num > 15) return "bg-[hsl(var(--success)/0.7)] text-white";
+    if (num === MAX_NUMBER_DOUBLE_TROUBLE) return "bg-yellow-400/70 text-black";
+    if (num < MAX_NUMBER_DOUBLE_TROUBLE / 2)
+      return "bg-[hsl(var(--destructive)/0.7)] text-white";
+    if (num > MAX_NUMBER_DOUBLE_TROUBLE / 2)
+      return "bg-[hsl(var(--success)/0.7)] text-white";
     return "glassmorphism text-white";
   };
 

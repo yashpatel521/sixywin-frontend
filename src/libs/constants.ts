@@ -45,32 +45,10 @@ export const prizes = [
 
 export const segmentColors = ["#fde047", "#dc2626"];
 
-/**
- * Application Version Information
- * Update this file on every release/deployment
- */
-
-export const APP_VERSION = {
-  VERSION: "1.4.0",
-
-  BUILD_DATE: "2025-08-06",
-  BUILD_NUMBER: "20250806-001",
-  COMMIT_HASH: "latest", // Will be updated after push
-  BRANCH: "development",
-  ENVIRONMENT: import.meta.env.MODE || "development",
-  WEBSOCKET_VERSION: "2.0", // Updated message type system
-  API_VERSION: "v1",
-  get FULL_VERSION() {
-    return `${this.VERSION}-${this.BUILD_NUMBER}`;
-  },
-
-  get VERSION_INFO() {
-    return {
-      version: this.VERSION,
-      buildDate: this.BUILD_DATE,
-      environment: this.ENVIRONMENT,
-      commit: this.COMMIT_HASH,
-      websocketVersion: this.WEBSOCKET_VERSION,
-    };
-  },
-} as const;
+// Double Trouble Payouts
+export const doubleTroublePayouts = {
+  exact: 50,
+  over: 2,
+  under: 2,
+  number: 10,
+};

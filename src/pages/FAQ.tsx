@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Icons } from "@/components/ui/icons";
+import { MAX_NUMBER_DOUBLE_TROUBLE } from "@/libs/constants";
 
 const faqData = [
   {
@@ -89,8 +90,9 @@ const faqData = [
     questions: [
       {
         question: "What is Double Trouble?",
-        answer:
-          "Double Trouble is a fast-paced number prediction game. Every 30 seconds, a number is drawn. You can bet on specific numbers or whether the number will be over/under 15.",
+        answer: `Double Trouble is a fast-paced number prediction game. Every 30 seconds, a number is drawn. You can bet on specific numbers or whether the number will be over/under ${
+          MAX_NUMBER_DOUBLE_TROUBLE / 2
+        }.`,
       },
       {
         question: "How often are numbers drawn?",
@@ -99,8 +101,11 @@ const faqData = [
       },
       {
         question: "What are the betting options?",
-        answer:
-          "You can bet on: specific numbers (1-30), 'Under 15', 'Over 15', or 'Exactly 15'. Each option has different virtual coin payout rates.",
+        answer: `You can bet on: specific numbers (1-30), 'Under ${
+          MAX_NUMBER_DOUBLE_TROUBLE / 2
+        }', 'Over ${MAX_NUMBER_DOUBLE_TROUBLE / 2}', or 'Exactly ${
+          MAX_NUMBER_DOUBLE_TROUBLE / 2
+        }'. Each option has different virtual coin payout rates.`,
       },
       {
         question: "Can I bet on multiple options?",

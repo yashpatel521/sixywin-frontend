@@ -13,14 +13,19 @@ import { Label } from "@/components/ui/label";
 import { NumberGrid } from "./NumberGrid";
 import { useWebSocketStore } from "@/store/websocketStore";
 import { useState } from "react";
-import { MAX_NUMBER_DOUBLE_TROUBLE, API_URL } from "@/libs/constants";
+import {
+  MAX_NUMBER_DOUBLE_TROUBLE,
+  API_URL,
+  doubleTroublePayouts,
+} from "@/libs/constants";
 import axios from "axios";
-import { getUserProfile } from "@/utils/storage";
+import { getUserProfile, saveUserProfile } from "@/utils/storage";
 import { DoubleTroubleTicket } from "@/libs/interfaces";
 import { toast } from "@/hooks/use-toast";
 
 export function NumberBetPanel() {
-  const { user, setDoubleTroubleUserHistory } = useWebSocketStore();
+  const { user, setDoubleTroubleUserHistory, updateUserData } =
+    useWebSocketStore();
   const [numberBid, setNumberBid] = useState([10]);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [singleSelect] = useState(false);
@@ -57,7 +62,9 @@ export function NumberBetPanel() {
       return;
     }
 
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     const token = getUserProfile()?.token;
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -75,7 +82,11 @@ export function NumberBetPanel() {
           },
           { headers }
         );
-        const payload = res.data as { success: boolean; data: DoubleTroubleTicket; message?: string };
+        const payload = res.data as {
+          success: boolean;
+          data: DoubleTroubleTicket;
+          message?: string;
+        };
         if (payload?.success && payload.data) {
           successes.push(payload.data);
         } else {
@@ -91,8 +102,36 @@ export function NumberBetPanel() {
       toast({
         variant: "success",
         title: "Bet(s) Placed",
-        description: `${successes.length} number bet${successes.length > 1 ? "s" : ""} placed successfully.`,
+        description: `${successes.length} number bet${
+          successes.length > 1 ? "s" : ""
+        } placed successfully.`,
       });
+
+      // Update local user funds to reflect successful bet placements
+      if (user) {
+        const totalDeduction = numberBid[0] * successes.length;
+        let newCoins = user.coins || 0;
+        let newWinningAmount = user.winningAmount || 0;
+        if (newCoins >= totalDeduction) {
+          newCoins -= totalDeduction;
+        } else {
+          const remaining = totalDeduction - newCoins;
+          newCoins = 0;
+          newWinningAmount = Math.max(0, newWinningAmount - remaining);
+        }
+        updateUserData({
+          ...user,
+          coins: newCoins,
+          winningAmount: newWinningAmount,
+          todaysBids: (user.todaysBids || 0) + totalDeduction,
+        });
+        saveUserProfile({
+          ...user,
+          coins: newCoins,
+          winningAmount: newWinningAmount,
+          todaysBids: (user.todaysBids || 0) + totalDeduction,
+        });
+      }
     }
     if (failures.length) {
       toast({
@@ -114,7 +153,8 @@ export function NumberBetPanel() {
           <Target className="h-6 w-6" /> Bet on a Specific Number
         </CardTitle>
         <CardDescription className="text-center">
-          Correctly guess the number and win a 10x Payout!
+          Correctly guess the number and win a {doubleTroublePayouts.number}x
+          Payout!
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

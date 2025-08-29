@@ -21,7 +21,7 @@ import { useWebSocketStore } from "@/store/websocketStore";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [rememberMeChecked, setRememberMeChecked] = useState(false);
-  const { setUserData } = useWebSocketStore();
+  const { setUserData, sendMessage } = useWebSocketStore();
   // check user is already logged in
   const localData = getUserProfile();
   const isLoggedIn = !!localData?.user;
@@ -61,6 +61,7 @@ export default function LoginPage() {
     if (success) {
       saveUserProfile(data.user, data.token);
       setUserData(data.user, data.token);
+      sendMessage("addUserToConnections", {});
       navigate("/games");
     }
   }, [data, success, navigate, setUserData]);

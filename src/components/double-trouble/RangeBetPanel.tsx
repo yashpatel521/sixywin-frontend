@@ -16,13 +16,19 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useApiRequest } from "@/libs/apiRequest";
 import { DoubleTroubleTicket } from "@/libs/interfaces";
+import { saveUserProfile } from "@/utils/storage";
+import {
+  MAX_NUMBER_DOUBLE_TROUBLE,
+  doubleTroublePayouts,
+} from "@/libs/constants";
 
 export function RangeBetPanel() {
-  const { user, setDoubleTroubleUserHistory } = useWebSocketStore();
+  const { user, setDoubleTroubleUserHistory, updateUserData } =
+    useWebSocketStore();
   const [overUnderBid, setOverUnderBid] = useState([10]);
   const [betDirection, setBetDirection] = useState<drawType | null>(null);
   // API Call
-  const { data, request } = useApiRequest<DoubleTroubleTicket>({
+  const { data, request, success } = useApiRequest<DoubleTroubleTicket>({
     url: "/doubleTrouble/create",
     method: "POST",
     isToken: true,
@@ -35,10 +41,19 @@ export function RangeBetPanel() {
 
   // When a ticket is created successfully, append it to the local user history
   useEffect(() => {
-    if (data) {
+    if (success) {
+      saveUserProfile(data.user);
+      updateUserData(data.user);
       setDoubleTroubleUserHistory((prev) => [data, ...(prev || [])]);
+      toast({
+        variant: "success",
+        title: "Bet Placed",
+        description: "Your bet has been placed successfully.",
+      });
+      setBetDirection(null);
+      setOverUnderBid([10]);
     }
-  }, [data, setDoubleTroubleUserHistory]);
+  }, [data, setDoubleTroubleUserHistory, success]);
 
   const handlePlaceOverUnderBet = async () => {
     if (!betDirection) {
@@ -49,16 +64,7 @@ export function RangeBetPanel() {
       });
       return;
     }
-
     await request();
-    toast({
-      variant: "success",
-      title: "Bet Placed",
-      description: "Your bet has been placed successfully.",
-    });
-    setBetDirection(null);
-    setOverUnderBid([10]);
-    console.log(data);
   };
 
   return (
@@ -70,7 +76,9 @@ export function RangeBetPanel() {
           Bet on the Range
         </CardTitle>
         <CardDescription className="text-center">
-          Win 2x for a correct range, or 50x for an exact guess of 15!
+          Win {doubleTroublePayouts.over}x for a correct range, or{" "}
+          {doubleTroublePayouts.exact}x for an exact guess of{" "}
+          {MAX_NUMBER_DOUBLE_TROUBLE / 2}!
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -98,19 +106,19 @@ export function RangeBetPanel() {
             variant={betDirection === "Under" ? "default" : "outline"}
             onClick={() => setBetDirection("Under")}
           >
-            <ArrowDown className="mb-1" /> Under 15
+            <ArrowDown className="mb-1" /> Under {MAX_NUMBER_DOUBLE_TROUBLE / 2}
           </Button>
           <Button
             variant={betDirection === "Exact" ? "default" : "outline"}
             onClick={() => setBetDirection("Exact")}
           >
-            <Dot className="mb-1" /> Exact 15
+            <Dot className="mb-1" /> Exact {MAX_NUMBER_DOUBLE_TROUBLE / 2}
           </Button>
           <Button
             variant={betDirection === "Over" ? "default" : "outline"}
             onClick={() => setBetDirection("Over")}
           >
-            <ArrowUp className="mb-1" /> Over 15
+            <ArrowUp className="mb-1" /> Over {MAX_NUMBER_DOUBLE_TROUBLE / 2}
           </Button>
         </div>
       </CardContent>

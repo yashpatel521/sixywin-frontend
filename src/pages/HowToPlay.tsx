@@ -4,6 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import {
+  doubleTroublePayouts,
+  MAX_NUMBER_DOUBLE_TROUBLE,
+} from "@/libs/constants";
 
 export default function HowToPlayPage() {
   const structuredData = {
@@ -240,9 +244,19 @@ export default function HowToPlayPage() {
                         <h4 className="font-semibold">Betting Options:</h4>
                         <ul className="space-y-1 text-sm text-muted-foreground">
                           <li>• Specific Number (1-30): Highest payout</li>
-                          <li>• Under 15: Numbers 1-14</li>
-                          <li>• Over 15: Numbers 16-30</li>
-                          <li>• Exactly 15: Number 15 only</li>
+                          <li>
+                            • Under {MAX_NUMBER_DOUBLE_TROUBLE / 2}: Numbers 1-
+                            {MAX_NUMBER_DOUBLE_TROUBLE / 2}
+                          </li>
+                          <li>
+                            • Over {MAX_NUMBER_DOUBLE_TROUBLE / 2}: Numbers
+                            {MAX_NUMBER_DOUBLE_TROUBLE / 2 + 1}-
+                            {MAX_NUMBER_DOUBLE_TROUBLE}
+                          </li>
+                          <li>
+                            • Exactly {MAX_NUMBER_DOUBLE_TROUBLE / 2}: Number
+                            {MAX_NUMBER_DOUBLE_TROUBLE / 2} only
+                          </li>
                         </ul>
                       </div>
                     </CardContent>
@@ -268,9 +282,18 @@ export default function HowToPlayPage() {
                       <div className="space-y-2">
                         <h4 className="font-semibold">Payout Guide:</h4>
                         <ul className="space-y-1 text-sm text-muted-foreground">
-                          <li>• Under/Over 15: 2x payout</li>
-                          <li>• Exactly 15: 15x payout</li>
-                          <li>• Specific number: 30x payout</li>
+                          <li>
+                            • Under/Over {MAX_NUMBER_DOUBLE_TROUBLE / 2}:{" "}
+                            {doubleTroublePayouts.over}x payout
+                          </li>
+                          <li>
+                            • Exactly {MAX_NUMBER_DOUBLE_TROUBLE / 2}:{" "}
+                            {doubleTroublePayouts.exact}x payout
+                          </li>
+                          <li>
+                            • Specific number: {doubleTroublePayouts.number}x
+                            payout
+                          </li>
                           <li>• Multiple bets: Combine for bigger wins</li>
                         </ul>
                       </div>

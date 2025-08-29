@@ -48,10 +48,10 @@ export function UserBetHistory() {
 
   const getDirectionIcon = (direction: string) => {
     if (direction.toLowerCase() === "under")
-      return <Icons.arrowUp className="h-5 w-5 text-[hsl(var(--success))]" />;
+      return <Icons.arrowDown className="h-5 w-5 text-[hsl(var(--success))]" />;
     if (direction.toLowerCase() === "over")
       return (
-        <Icons.arrowDown className="h-5 w-5 text-[hsl(var(--destructive))]" />
+        <Icons.arrowUp className="h-5 w-5 text-[hsl(var(--destructive))]" />
       );
     if (direction.toLowerCase() === "exact")
       return <Icons.target className="h-5 w-5 text-[hsl(var(--info))]" />;

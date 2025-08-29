@@ -15,7 +15,7 @@ import { useWebSocketStore } from "@/store/websocketStore";
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { setUserData } = useWebSocketStore.getState();
+  const { setUserData, sendMessage } = useWebSocketStore.getState();
 
   // check user is already logged in
   const localData = getUserProfile();
@@ -68,6 +68,7 @@ export default function SignupPage() {
   useEffect(() => {
     if (success) {
       setUserData(data.user, data.token);
+      sendMessage("addUserToConnections", {});
       navigate("/games");
     }
   }, [data, success, navigate, setUserData]);
