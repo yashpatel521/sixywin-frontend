@@ -1,4 +1,4 @@
-import { SEO } from "@/components/shared/seo";
+import { SEO, buildBreadcrumbLD, buildFAQPageLD } from "@/components/shared/seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Accordion,
@@ -7,7 +7,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Icons } from "@/components/ui/icons";
-import { MAX_NUMBER_DOUBLE_TROUBLE } from "@/libs/constants";
+import {
+  MAX_NUMBER_DOUBLE_TROUBLE,
+  WINNING_MULTIPLIERS,
+} from "@/libs/constants";
 
 const faqData = [
   {
@@ -50,8 +53,7 @@ const faqData = [
       },
       {
         question: "What are the winning odds?",
-        answer:
-          "Odds vary by matches: 3 matches (5x your bid), 4 matches (50x), 5 matches (1,000x), 6 matches (100,000x). These are virtual rewards for entertainment only.",
+        answer: `Odds vary by matches: 3 matches (${WINNING_MULTIPLIERS[3].toLocaleString()}x your bid), 4 matches (${WINNING_MULTIPLIERS[4].toLocaleString()}x), 5 matches (${WINNING_MULTIPLIERS[5].toLocaleString()}x), 6 matches (${WINNING_MULTIPLIERS[6].toLocaleString()}x). These are virtual rewards for entertainment only.`,
       },
       {
         question: "Can I play multiple tickets?",
@@ -167,20 +169,20 @@ const faqData = [
 ];
 
 export default function FAQPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqData.flatMap((category) =>
-      category.questions.map((faq) => ({
-        "@type": "Question",
-        name: faq.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: faq.answer,
-        },
-      }))
+  const structuredData = [
+    buildBreadcrumbLD([
+      { name: "Home", item: "/" },
+      { name: "FAQ", item: "/faq" },
+    ]),
+    buildFAQPageLD(
+      faqData.flatMap((category) =>
+        category.questions.map((faq) => ({
+          question: faq.question,
+          answer: faq.answer,
+        }))
+      )
     ),
-  };
+  ];
 
   return (
     <>

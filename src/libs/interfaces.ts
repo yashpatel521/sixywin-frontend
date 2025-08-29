@@ -7,7 +7,7 @@ export interface SEOProps {
   image?: string;
   url?: string;
   type?: "website" | "article" | "game";
-  structuredData?: object;
+  structuredData?: object | object[];
   robots?: string;
 }
 

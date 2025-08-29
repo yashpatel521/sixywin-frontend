@@ -4,7 +4,7 @@ export const IS_PRODUCTION = import.meta.env.PROD;
 export const IMAGES = {
   logo: "/logo/logo7.png",
   hero: "/landing/landing1.png",
-  redeem: "/img2.png",
+  redeem: "/landing/lottery1.png",
   loginImage: "/auth/auth1.png",
   registerImage: "/auth/auth5.png",
   contactUsImage: "/others/contactUs3.png",
@@ -51,4 +51,13 @@ export const doubleTroublePayouts = {
   over: 2,
   under: 2,
   number: 10,
+};
+
+// Winning multipliers for matches
+export const WINNING_MULTIPLIERS: Record<number, number> = {
+  6: 100000,
+  5: 1000,
+  4: 50,
+  3: 5,
+  2: 2,
 };

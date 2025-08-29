@@ -13,11 +13,11 @@ Disallow: /api/
 Disallow: /private/
 
 # Allow important pages
-Allow: /play-lottery
-Allow: /double-trouble
+Allow: /games/play-lottery
+Allow: /games/double-trouble
 Allow: /leaderboard
 Allow: /games
-Allow: /about
-Allow: /contact
-Allow: /privacy
-Allow: /terms 
+Allow: /about-us
+Allow: /contact-us
+Allow: /privacy-policy
+Allow: /terms-of-service

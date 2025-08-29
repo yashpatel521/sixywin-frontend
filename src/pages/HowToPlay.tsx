@@ -1,4 +1,4 @@
-import { SEO } from "@/components/shared/seo";
+import { SEO, buildBreadcrumbLD, buildHowToLD } from "@/components/shared/seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icons } from "@/components/ui/icons";
@@ -7,39 +7,27 @@ import { Link } from "react-router-dom";
 import {
   doubleTroublePayouts,
   MAX_NUMBER_DOUBLE_TROUBLE,
+  WINNING_MULTIPLIERS,
 } from "@/libs/constants";
 
 export default function HowToPlayPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to Play SixyWin Virtual Games",
-    description:
+  const structuredData = [
+    buildBreadcrumbLD([
+      { name: "Home", item: "/" },
+      { name: "How to Play", item: "/how-to-play" },
+    ]),
+    buildHowToLD(
+      "How to Play SixyWin Virtual Games",
+      [
+        { name: "Create Account", text: "Sign up for free and get starting virtual coins" },
+        { name: "Choose Game", text: "Select from Virtual Lottery, Aviator, or Double Trouble" },
+        { name: "Place Bets", text: "Use virtual coins to place bets and play games" },
+        { name: "Win Rewards", text: "Win virtual coins and redeem for real rewards" },
+      ],
       "Complete guide on how to play virtual lottery, Aviator crash game, and Double Trouble on SixyWin platform",
-    image: "https://sixywin.com/guides/how-to-play.png",
-    step: [
-      {
-        "@type": "HowToStep",
-        name: "Create Account",
-        text: "Sign up for free and get starting virtual coins",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Choose Game",
-        text: "Select from Virtual Lottery, Aviator, or Double Trouble",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Place Bets",
-        text: "Use virtual coins to place bets and play games",
-      },
-      {
-        "@type": "HowToStep",
-        name: "Win Rewards",
-        text: "Win virtual coins and redeem for real rewards",
-      },
-    ],
-  };
+      "https://sixywin.com/guides/how-to-play.png"
+    ),
+  ];
 
   return (
     <>
@@ -93,10 +81,22 @@ export default function HowToPlayPage() {
                       <div className="space-y-2">
                         <h4 className="font-semibold">Winning Tiers:</h4>
                         <ul className="space-y-1 text-sm text-muted-foreground">
-                          <li>• 3 matches: 5x your bid</li>
-                          <li>• 4 matches: 50x your bid</li>
-                          <li>• 5 matches: 1,000x your bid</li>
-                          <li>• 6 matches: 100,000x your bid</li>
+                          <li>
+                            • 3 matches:{" "}
+                            {WINNING_MULTIPLIERS[3].toLocaleString()}x your bid
+                          </li>
+                          <li>
+                            • 4 matches:{" "}
+                            {WINNING_MULTIPLIERS[4].toLocaleString()}x your bid
+                          </li>
+                          <li>
+                            • 5 matches:{" "}
+                            {WINNING_MULTIPLIERS[5].toLocaleString()}x your bid
+                          </li>
+                          <li>
+                            • 6 matches:{" "}
+                            {WINNING_MULTIPLIERS[6].toLocaleString()}x your bid
+                          </li>
                         </ul>
                       </div>
                     </CardContent>

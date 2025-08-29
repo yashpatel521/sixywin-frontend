@@ -11,10 +11,10 @@ export function SEO({
   structuredData,
   robots = "index, follow",
 }: SEOProps) {
-  const fullUrl = url.startsWith("http") ? url : `https://sixywin.com${url}`;
-  const fullImageUrl = image.startsWith("http")
-    ? image
-    : `https://sixywin.com${image}`;
+  const toAbsolute = (base: string, u: string) =>
+    u.startsWith("http") ? u : `${base}${u.startsWith("/") ? u : `/${u}`}`;
+  const fullUrl = toAbsolute("https://sixywin.com", url);
+  const fullImageUrl = toAbsolute("https://sixywin.com", image);
 
   useEffect(() => {
     // Update document title
@@ -34,11 +34,11 @@ export function SEO({
     updateMetaProperty("og:site_name", "SixyWin");
 
     // Update Twitter Card tags
-    updateMetaProperty("twitter:card", "summary_large_image");
-    updateMetaProperty("twitter:url", fullUrl);
-    updateMetaProperty("twitter:title", title);
-    updateMetaProperty("twitter:description", description);
-    updateMetaProperty("twitter:image", fullImageUrl);
+    updateMetaTag("twitter:card", "summary_large_image");
+    updateMetaTag("twitter:url", fullUrl);
+    updateMetaTag("twitter:title", title);
+    updateMetaTag("twitter:description", description);
+    updateMetaTag("twitter:image", fullImageUrl);
 
     // Update canonical link
     updateCanonicalLink(fullUrl);
@@ -92,17 +92,89 @@ function updateCanonicalLink(href: string) {
   canonical.setAttribute("href", href);
 }
 
-function updateStructuredData(data: object) {
-  const existingScript = document.querySelector(
+function updateStructuredData(data: object | object[]) {
+  // Remove any existing structured data blocks we previously added
+  const existingScripts = document.querySelectorAll(
     'script[data-seo="structured-data"]'
   );
-  if (existingScript) {
-    existingScript.remove();
-  }
+  existingScripts.forEach((s) => s.remove());
 
-  const script = document.createElement("script");
-  script.type = "application/ld+json";
-  script.setAttribute("data-seo", "structured-data");
-  script.textContent = JSON.stringify(data);
-  document.head.appendChild(script);
+  const blocks = Array.isArray(data) ? data : [data];
+  for (const block of blocks) {
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.setAttribute("data-seo", "structured-data");
+    script.textContent = JSON.stringify(block);
+    document.head.appendChild(script);
+  }
+}
+
+// JSON-LD helper builders
+const BASE_URL = "https://sixywin.com";
+const abs = (u: string) => (u?.startsWith("http") ? u : `${BASE_URL}${u?.startsWith("/") ? u : `/${u}`}`);
+
+export function buildOrganizationLD(opts?: {
+  name?: string;
+  url?: string;
+  logo?: string;
+  sameAs?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: opts?.name ?? "SixyWin",
+    url: abs(opts?.url ?? "/"),
+    logo: abs(opts?.logo ?? "/logo/logo3.png"),
+    sameAs: opts?.sameAs ?? [],
+  };
+}
+
+export function buildWebSiteLD(opts?: { name?: string; url?: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: opts?.name ?? "SixyWin",
+    url: abs(opts?.url ?? "/"),
+  };
+}
+
+export function buildBreadcrumbLD(items: Array<{ name: string; item: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: it.name,
+      item: abs(it.item),
+    })),
+  };
+}
+
+export function buildFAQPageLD(qas: Array<{ question: string; answer: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: qas.map((qa) => ({
+      "@type": "Question",
+      name: qa.question,
+      acceptedAnswer: { "@type": "Answer", text: qa.answer },
+    })),
+  };
+}
+
+export function buildHowToLD(
+  name: string,
+  steps: Array<{ name: string; text: string }>,
+  description?: string,
+  image?: string
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name,
+    description,
+    image: image ? abs(image) : abs("/og-image.png"),
+    step: steps.map((s) => ({ "@type": "HowToStep", name: s.name, text: s.text })),
+  };
 }
