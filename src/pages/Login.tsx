@@ -18,6 +18,7 @@ import {
 } from "@/utils/storage";
 import { useWebSocketStore } from "@/store/websocketStore";
 import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -87,12 +88,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <SEO
-        title="Login | SixyWin"
-        description="Log in to your SixyWin account to play free virtual lottery and games."
-        url="/login"
-        robots="noindex, nofollow"
-      />
+      <SEO {...SEO_CONFIGS.login} />
       <div className="relative flex min-h-dvh items-center justify-center p-4 bg-gradient-to-br from-yellow-900/80 via-background/80 to-background">
         <Card className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl glassmorphism border-none">
           <div className="hidden md:flex flex-col justify-center items-center p-12 bg-primary/10 relative overflow-hidden text-center">
@@ -103,8 +99,8 @@ export default function LoginPage() {
               className=" object-cover"
             />
             <p className="text-muted-foreground mt-2 max-w-sm">
-              Welcome back to SixyWin! Log in to spin, earn coins, and track your
-              lucky streak.
+              Welcome back to SixyWin! Log in to spin, earn coins, and track
+              your lucky streak.
             </p>
           </div>
           <div className="p-8 md:p-12 flex flex-col justify-center">

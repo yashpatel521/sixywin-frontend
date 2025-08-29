@@ -21,6 +21,43 @@ export const SEO_CONFIGS = {
     },
   },
 
+  register: {
+    title: "Sign Up - Create Your Free Account | SixyWin",
+    description:
+      "Join SixyWin today! Create your free account and start playing virtual lottery games, crash games, and strategy games. No risk, all fun!",
+    keywords:
+      "register, sign up, create account, free account, SixyWin, virtual games",
+    url: "/register",
+    image: "/og-images/referral.png", // custom image for sharing
+    type: "website" as const,
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Register - SixyWin",
+      description:
+        "Sign up for a free account on SixyWin to play virtual lottery, crash, and strategy games.",
+      url: "https://sixywin.com/register",
+    },
+  },
+
+  login: {
+    title: "Login - Access Your Account | SixyWin",
+    description:
+      "Login to your SixyWin account and continue playing virtual lottery, crash, and strategy games. Enjoy your rewards and track your progress.",
+    keywords: "login, sign in, access account, SixyWin, virtual games",
+    url: "/login",
+    image: "/og-images/referral.png", // custom image for sharing
+    type: "website" as const,
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Login - SixyWin",
+      description:
+        "Login to your SixyWin account to access virtual lottery, crash, and strategy games.",
+      url: "https://sixywin.com/login",
+    },
+  },
+
   playLottery: {
     title:
       "Virtual Lottery Simulator - Realistic Free Lottery Gaming | SixyWin",

@@ -39,12 +39,13 @@ export interface User {
   adEarnings?: number;
 }
 
-export type GooglePayload = {
+export interface GooglePayload {
   email: string;
   username: string;
   avatar: string;
   googleId: string; // Google user ID
-};
+  referralId?: string;
+}
 
 export interface Referral {
   id: number;

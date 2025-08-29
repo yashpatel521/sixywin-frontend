@@ -13,6 +13,7 @@ import { hashPassword } from "@/utils/hmac";
 import { useApiRequest } from "@/libs/apiRequest";
 import { useWebSocketStore } from "@/store/websocketStore";
 import { SEO } from "@/components/shared/seo";
+import { SEO_CONFIGS } from "@/utils/seo-configs";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -76,12 +77,7 @@ export default function SignupPage() {
 
   return (
     <>
-      <SEO
-        title="Register | SixyWin"
-        description="Create your free SixyWin account to play virtual lottery and games."
-        url="/register"
-        robots="noindex, nofollow"
-      />
+      <SEO {...SEO_CONFIGS.register} />
       <div className="relative flex min-h-dvh items-center justify-center p-4 bg-gradient-to-br from-yellow-900/80 via-background/80 to-background">
         <Card className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl glassmorphism border-none">
           <div className="p-8 md:p-12 flex flex-col justify-center">
@@ -164,7 +160,9 @@ export default function SignupPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground"
                     >
                       <Icons.eyeOff className="h-5 w-5" />
@@ -203,7 +201,9 @@ export default function SignupPage() {
                 {/* Submit Button - Full width */}
                 <Button
                   onClick={(e) =>
-                    handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)
+                    handleSubmit(
+                      e as unknown as React.FormEvent<HTMLFormElement>
+                    )
                   }
                   disabled={loading}
                 >

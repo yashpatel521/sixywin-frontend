@@ -19,7 +19,7 @@ interface ApiResponse<T = unknown> {
   data: T | null | any;
   error: string | null;
   message: string | null;
-  request: () => Promise<void>;
+  request: (dynamicData?: unknown) => Promise<void>;
 }
 
 interface BackendResponse<T = unknown> {
@@ -41,51 +41,54 @@ export function useApiRequest<T = unknown>({
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean | null>(null);
 
-  const request = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-    setSuccess(null);
+  const request = useCallback(
+    async (dynamicData?: unknown) => {
+      setLoading(true);
+      setError(null);
+      setMessage(null);
+      setSuccess(null);
 
-    try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
+      try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
 
-      if (isToken) {
-        const userProfile = getUserProfile();
-        const token = userProfile?.token;
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (isToken) {
+          const userProfile = getUserProfile();
+          const token = userProfile?.token;
+          if (token) headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await axios.request<BackendResponse<T>>({
+          url: API_URL + url,
+          method,
+          data: dynamicData || data,
+          params,
+          headers,
+        });
+
+        const { success, message, data: responseDataValue } = res.data;
+
+        setResponseData(responseDataValue);
+        setMessage(message);
+        setSuccess(success);
+      } catch (err: unknown) {
+        let errorMessage = "Something went wrong";
+
+        if (axios.isAxiosError(err)) {
+          errorMessage = err.response?.data?.message || err.message;
+        } else if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
+        setSuccess(false);
+      } finally {
+        setLoading(false);
       }
-
-      const res = await axios.request<BackendResponse<T>>({
-        url: API_URL + url,
-        method,
-        data,
-        params,
-        headers,
-      });
-
-      const { success, message, data: responseDataValue } = res.data;
-
-      setResponseData(responseDataValue);
-      setMessage(message);
-      setSuccess(success);
-    } catch (err: unknown) {
-      let errorMessage = "Something went wrong";
-
-      if (axios.isAxiosError(err)) {
-        errorMessage = err.response?.data?.message || err.message;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-      setSuccess(false);
-    } finally {
-      setLoading(false);
-    }
-  }, [url, data, method, isToken, params]);
+    },
+    [url, data, method, isToken, params]
+  );
 
   return {
     loading,
