@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { differenceInSeconds } from "date-fns";
-import { CountdownTimerProps } from "@/libs/interfaces";
 
 const formatTime = (time: number) => time.toString().padStart(2, "0");
 
 export const CountdownTimer = ({
   nextDrawDate,
   label,
-}: CountdownTimerProps) => {
+}: {
+  nextDrawDate: string | Date;
+  label?: string;
+}) => {
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
     minutes: 0,

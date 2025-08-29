@@ -11,22 +11,56 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { drawType } from "@/libs/interfaces";
+import { useWebSocketStore } from "@/store/websocketStore";
+import { useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
+import { useApiRequest } from "@/libs/apiRequest";
+import { DoubleTroubleTicket } from "@/libs/interfaces";
 
-export function RangeBetPanel({
-  betDirection,
-  setBetDirection,
-  overUnderBid,
-  setOverUnderBid,
-  onPlaceBet,
-  userCoins,
-}: {
-  betDirection: drawType | null;
-  setBetDirection: (dir: drawType) => void;
-  overUnderBid: number[];
-  setOverUnderBid: (val: number[]) => void;
-  userCoins: number;
-  onPlaceBet: () => void;
-}) {
+export function RangeBetPanel() {
+  const { user, setDoubleTroubleUserHistory } = useWebSocketStore();
+  const [overUnderBid, setOverUnderBid] = useState([10]);
+  const [betDirection, setBetDirection] = useState<drawType | null>(null);
+  // API Call
+  const { data, request } = useApiRequest<DoubleTroubleTicket>({
+    url: "/doubleTrouble/create",
+    method: "POST",
+    isToken: true,
+    data: {
+      drawType: betDirection,
+      bidAmount: overUnderBid[0],
+      userNumber: user?.id,
+    },
+  });
+
+  // When a ticket is created successfully, append it to the local user history
+  useEffect(() => {
+    if (data) {
+      setDoubleTroubleUserHistory((prev) => [data, ...(prev || [])]);
+    }
+  }, [data, setDoubleTroubleUserHistory]);
+
+  const handlePlaceOverUnderBet = async () => {
+    if (!betDirection) {
+      toast({
+        variant: "destructive",
+        title: "No Selection",
+        description: 'Please select "Under", "Over", or "Exact" first.',
+      });
+      return;
+    }
+
+    await request();
+    toast({
+      variant: "success",
+      title: "Bet Placed",
+      description: "Your bet has been placed successfully.",
+    });
+    setBetDirection(null);
+    setOverUnderBid([10]);
+    console.log(data);
+  };
+
   return (
     <Card className="w-full glassmorphism hover:shadow-2xl">
       <CardHeader>
@@ -50,13 +84,13 @@ export function RangeBetPanel({
           </div>
           <Slider
             min={10}
-            max={userCoins}
+            max={user?.coins || 0}
             step={10}
             value={overUnderBid}
             onValueChange={setOverUnderBid}
           />
           <p className="text-sm text-muted-foreground text-center">
-            You have {userCoins.toLocaleString()} Coins available.
+            You have {user?.coins.toLocaleString()} Coins available.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -81,7 +115,11 @@ export function RangeBetPanel({
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={onPlaceBet} className="w-full">
+        <Button
+          onClick={handlePlaceOverUnderBet}
+          disabled={overUnderBid[0] === 0 || !betDirection}
+          className="w-full"
+        >
           Place Range Bet
         </Button>
       </CardFooter>

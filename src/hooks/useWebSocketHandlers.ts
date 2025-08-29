@@ -1,14 +1,10 @@
 import { useEffect } from "react";
 import { useWebSocketStore } from "../store/websocketStore";
 import type {
-  GetTicketsResponsePayload,
   SpinWheelResponsePayload,
-  GetLeaderboardResponsePayload,
   GetUserProfileResponsePayload,
-  GetMegaPotResponsePayload,
   GetLatestDrawResponsePayload,
-  DoubleTroubleDrawResultPayload,
-  CreateDoubleTroubleTicketResponsePayload,
+  DoubleTroubleStatusResponsePayload,
   UpdatedUserResponsePayload,
   AviatorDrawResultResponsePayload,
   AviatorCountdownResponsePayload,
@@ -18,15 +14,29 @@ import { AVIATOR_COUNTDOWN_TIMER } from "@/libs/constants";
 
 export const useWebSocketHandlers = () => {
   useEffect(() => {
-    const handleTicketGet = (payload: unknown) => {
-      const ticketsPayload = payload as GetTicketsResponsePayload;
-      if (ticketsPayload.success) {
-        useWebSocketStore.getState().setTickets(ticketsPayload.data);
+    const handleDoubleTroubleStatus = (payload: unknown) => {
+      const statusPayload = payload as DoubleTroubleStatusResponsePayload;
+      if (statusPayload.success) {
+        const current = statusPayload.data.current || null;
+        const history = statusPayload.data.history || [];
+        if (current) {
+          useWebSocketStore
+            .getState()
+            .setDoubleTroubleHistory({ current, history });
+        } else {
+          useWebSocketStore
+            .getState()
+            .setDoubleTroubleHistory({ current: null, history });
+        }
       } else {
-        useWebSocketStore.getState().setTickets([]);
         useWebSocketStore
           .getState()
-          .setErrorMessage(ticketsPayload.message || "Error fetching tickets");
+          .setDoubleTroubleHistory({ current: null, history: [] });
+        useWebSocketStore
+          .getState()
+          .setErrorMessage(
+            statusPayload.message || "Error fetching double trouble status"
+          );
       }
     };
 
@@ -60,20 +70,6 @@ export const useWebSocketHandlers = () => {
       }
     };
 
-    const handleLeaderboardGet = (payload: unknown) => {
-      const leaderboardPayload = payload as GetLeaderboardResponsePayload;
-      if (leaderboardPayload.success) {
-        useWebSocketStore.getState().setLeaderboard(leaderboardPayload.data);
-      } else {
-        useWebSocketStore.getState().setLeaderboard([]);
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(
-            leaderboardPayload.message || "Error fetching leaderboard"
-          );
-      }
-    };
-
     const handleUserProfileGet = (payload: unknown) => {
       const userProfilePayload = payload as GetUserProfileResponsePayload;
       if (userProfilePayload.success) {
@@ -85,18 +81,6 @@ export const useWebSocketHandlers = () => {
           .setErrorMessage(
             userProfilePayload.message || "Error fetching user profile"
           );
-      }
-    };
-
-    const handleMegaPotGet = (payload: unknown) => {
-      const megaPotPayload = payload as GetMegaPotResponsePayload;
-      if (megaPotPayload.success) {
-        useWebSocketStore.getState().setMegaPot(megaPotPayload.data);
-      } else {
-        useWebSocketStore.getState().setMegaPot(null);
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(megaPotPayload.message || "Error fetching mega pot");
       }
     };
 
@@ -114,82 +98,20 @@ export const useWebSocketHandlers = () => {
       }
     };
 
-    const handleDoubleTroubleDrawResult = (payload: unknown) => {
-      const doubleTroublePayload = payload as DoubleTroubleDrawResultPayload;
-      if (doubleTroublePayload.success) {
-        useWebSocketStore
-          .getState()
-          .setDoubleTroubleDrawResult(doubleTroublePayload.data);
-      } else {
-        useWebSocketStore.getState().setDoubleTroubleDrawResult(null);
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(
-            doubleTroublePayload.message ||
-              "Error fetching double trouble draw result"
-          );
-      }
-    };
-
-    const handleCreateDoubleTroubleTicketResponse = (payload: unknown) => {
-      const createTicketPayload =
-        payload as CreateDoubleTroubleTicketResponsePayload;
-      if (createTicketPayload.success) {
-        toast({
-          variant: "success",
-          title: "Double Trouble Ticket Created",
-          description: `Your bet ${createTicketPayload.data?.ticket.bidAmount} coins has Made`,
-        });
-        if (createTicketPayload.data?.user) {
-          useWebSocketStore
-            .getState()
-            .updateUserData(createTicketPayload.data.user);
-        }
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Double Trouble Ticket Creation Failed",
-          description: createTicketPayload.message,
-        });
-        useWebSocketStore
-          .getState()
-          .setErrorMessage(
-            createTicketPayload.message ||
-              "Error creating double trouble ticket"
-          );
-      }
-    };
-
     useWebSocketStore
       .getState()
       .registerHandler("spinWheel_response", handleSpinWheelResponse);
     useWebSocketStore
       .getState()
-      .registerHandler("ticketHistory_response", handleTicketGet);
-    useWebSocketStore
-      .getState()
-      .registerHandler("leaderboard_response", handleLeaderboardGet);
-    useWebSocketStore
-      .getState()
       .registerHandler("userProfile_response", handleUserProfileGet);
     useWebSocketStore
       .getState()
-      .registerHandler("megaPot_response", handleMegaPotGet);
-    useWebSocketStore
-      .getState()
       .registerHandler("latestDraw_response", handleLatestDrawGet);
-
     useWebSocketStore
       .getState()
       .registerHandler(
-        "doubleTroubleDrawResult_response",
-        handleDoubleTroubleDrawResult
-      );
-    useWebSocketStore
-      .getState()
-      .registerHandler(
-        "createDoubleTroubleTicket_response",
-        handleCreateDoubleTroubleTicketResponse
+        "doubleTroubleStatus_response",
+        handleDoubleTroubleStatus
       );
     useWebSocketStore
       .getState()

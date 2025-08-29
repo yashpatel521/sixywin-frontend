@@ -3,12 +3,12 @@ import type {
   User,
   Ticket,
   UserProfile,
-  MegaPot,
   latestDraw,
-  DoubleTroubleDrawResult,
   AviatorDrawResult,
   AviatorCountdown,
   AviatorTicket,
+  DoubleTroubleTicket,
+  DoubleTroubleStatus,
 } from "../libs/interfaces";
 import { AVIATOR_COUNTDOWN_TIMER } from "@/libs/constants";
 import {
@@ -23,17 +23,25 @@ interface WebSocketState {
   messages: string[];
   user: User | null;
   token: string | null;
+  userProfile: UserProfile | null;
+  errorMessage: string | null;
+
+  // Lottery
+  latestDraw: latestDraw | null;
   tickets: Ticket[];
   leaderboard: User[];
-  userProfile: UserProfile | null;
-  megaPot: MegaPot | null;
-  latestDraw: latestDraw | null;
-  doubleTroubleDrawResult: DoubleTroubleDrawResult | null;
-  errorMessage: string | null;
+
+  // Double Trouble
+  doubleTroubleHistory: DoubleTroubleStatus | null;
+  doubleTroubleUserHistory: DoubleTroubleTicket[] | [];
+
+  // Aviator
   aviatorDrawResult: AviatorDrawResult | null;
   aviatorCountdown: AviatorCountdown;
   userHistoryAviatorBets: AviatorTicket[];
   aviatorDrawHistory: AviatorDrawResult[];
+
+  // WebSocket
   connect: () => void;
   disconnect: () => void;
   sendMessage: (type: string, payload: unknown) => void;
@@ -47,10 +55,14 @@ interface WebSocketState {
   setTickets: (tickets: Ticket[]) => void;
   setLeaderboard: (leaderboard: User[]) => void;
   setUserProfile: (profile: UserProfile | null) => void;
-  setMegaPot: (megaPot: MegaPot | null) => void;
   setLatestDraw: (latestDraw: latestDraw | null) => void;
-  setDoubleTroubleDrawResult: (
-    doubleTroubleDrawResult: DoubleTroubleDrawResult | null
+  setDoubleTroubleHistory: (
+    doubleTroubleHistory: DoubleTroubleStatus | null
+  ) => void;
+  setDoubleTroubleUserHistory: (
+    updater:
+      | DoubleTroubleTicket[]
+      | ((prev: DoubleTroubleTicket[]) => DoubleTroubleTicket[])
   ) => void;
   setAviatorDrawResult: (aviatorDrawResult: AviatorDrawResult | null) => void;
   setAviatorCountdown: (aviatorCountdown: AviatorCountdown) => void;
@@ -78,10 +90,10 @@ export const useWebSocketStore = create<WebSocketState>((set) => {
     token: savedProfile?.token || null,
     leaderboard: [],
     userProfile: null,
-    megaPot: null,
     latestDraw: null,
     createTicket: null,
-    doubleTroubleDrawResult: null,
+    doubleTroubleHistory: null,
+    doubleTroubleUserHistory: [],
     errorMessage: null,
     aviatorDrawResult: null,
     aviatorCountdown: { countdown: AVIATOR_COUNTDOWN_TIMER },
@@ -126,11 +138,24 @@ export const useWebSocketStore = create<WebSocketState>((set) => {
     setLeaderboard: (leaderboard: User[]) => set({ leaderboard }),
     setUserProfile: (profile: UserProfile | null) =>
       set({ userProfile: profile }),
-    setMegaPot: (megaPot: MegaPot | null) => set({ megaPot }),
     setLatestDraw: (latestDraw: latestDraw | null) => set({ latestDraw }),
-    setDoubleTroubleDrawResult: (
-      doubleTroubleDrawResult: DoubleTroubleDrawResult | null
-    ) => set({ doubleTroubleDrawResult }),
+    setDoubleTroubleHistory: (
+      doubleTroubleHistory: DoubleTroubleStatus | null
+    ) => set({ doubleTroubleHistory }),
+    setDoubleTroubleUserHistory: (updater) =>
+      set((state) => {
+        const newHistory =
+          typeof updater === "function"
+            ? (
+                updater as (
+                  prev: DoubleTroubleTicket[]
+                ) => DoubleTroubleTicket[]
+              )(state.doubleTroubleUserHistory)
+            : updater;
+        return {
+          doubleTroubleUserHistory: newHistory.slice(0, 5),
+        };
+      }),
     setAviatorDrawResult: (aviatorDrawResult: AviatorDrawResult | null) =>
       set({ aviatorDrawResult }),
     setAviatorCountdown: (aviatorCountdown: AviatorCountdown) =>
@@ -167,10 +192,9 @@ export const useWebSocketStore = create<WebSocketState>((set) => {
         token: null,
         tickets: [],
         latestDraw: null,
-        megaPot: null,
         userProfile: null,
         leaderboard: [],
-        doubleTroubleDrawResult: null,
+        doubleTroubleHistory: null,
         aviatorDrawResult: null,
         aviatorCountdown: { countdown: AVIATOR_COUNTDOWN_TIMER },
         userHistoryAviatorBets: [],

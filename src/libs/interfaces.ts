@@ -11,25 +11,9 @@ export interface SEOProps {
   robots?: string;
 }
 
-export type ProtectedRoutesProps = {
-  children: React.ReactNode;
-  isProtected?: boolean;
-};
-
 export interface WebSocketMessage<T = unknown> {
   type: string;
   payload: T;
-}
-
-export interface UserUpdatePayload {
-  userId: string;
-  newStatus: string;
-}
-
-export interface ChatMessagePayload {
-  sender: string;
-  message: string;
-  timestamp: number;
 }
 
 export interface User {
@@ -50,10 +34,8 @@ export interface User {
   updatedAt: string;
   token?: string;
   referrals?: Referral[];
-  // Leaderboard-specific fields
   todayTicketBuy?: string | number;
   todayBid?: string | number;
-  // Legacy support
   adEarnings?: number;
 }
 
@@ -63,10 +45,6 @@ export type GooglePayload = {
   avatar: string;
   googleId: string; // Google user ID
 };
-export interface LoginRequestPayload {
-  emailOrUsername?: string;
-  password?: string;
-}
 
 export interface Referral {
   id: number;
@@ -80,11 +58,35 @@ export interface SpinWheelResponsePayload {
   data: User & { amount: number };
 }
 
-export interface CountdownTimerProps {
-  nextDrawDate: string | Date;
-  label?: string;
+export interface UserProfile {
+  user: User;
+  referredUsers: User[];
 }
 
+export interface UpdatedUserResponsePayload {
+  success: boolean;
+  message?: string;
+  data: {
+    user: User;
+  };
+}
+
+export interface GetUserProfileResponsePayload {
+  success: boolean;
+  message?: string;
+  data: UserProfile;
+}
+
+export interface GameCardProps {
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
+  href: string;
+  disabled?: boolean;
+  buttonText: string;
+}
+
+// Lottery Ticket Interface
 export interface Ticket {
   id: number;
   numbers: number[];
@@ -99,57 +101,14 @@ export interface Ticket {
   };
 }
 
-export interface GetTicketsResponsePayload {
-  success: boolean;
-  message?: string;
-  data: Ticket[];
-}
-
-export interface GetLeaderboardResponsePayload {
-  success: boolean;
-  message?: string;
-  data: User[];
-}
-
-export interface UserProfile {
-  user: User;
-  referredUsers: User[];
-}
-
-export interface GetUserProfileResponsePayload {
-  success: boolean;
-  message?: string;
-  data: UserProfile;
-}
-
-export interface MegaPot {
-  amount: number;
-  createdAt: string;
-  id: number;
-  isActive: boolean;
-  isWon: boolean;
-  nextDrawDate: string;
-  todayBids: number;
-  todayWinnings: number;
-  updatedAt: string;
-  winnerId: number;
-}
-
-export interface GetMegaPotResponsePayload {
-  success: boolean;
-  message?: string;
-  data: MegaPot;
-}
-
 export interface latestDraw {
-  createdAt: string;
-  drawDate: string;
   id: number;
-  nextDrawDate: string;
-  nextDrawTime: string;
   totalPrize: number;
   totalWinners: number;
   winningNumbers: number[];
+  nextDrawDate: string | Date;
+  drawDate: string | Date;
+  createdAt: string | Date;
 }
 
 export interface GetLatestDrawResponsePayload {
@@ -164,96 +123,56 @@ export interface CreateTicket {
   user: User;
 }
 
-export interface GameCardProps {
-  icon: ReactNode;
-  title: string;
-  children: ReactNode;
-  href: string;
-  disabled?: boolean;
-  buttonText: string;
-}
-
-export type PlacedBet = {
-  direction: drawType | null;
-  bid: number;
-  result?: "win" | "lose" | "pending"; // add this
-  drawsRemaining: number; // add this property
-};
-
-export type PlacedNumberBet = {
-  number: number;
-  bid: number;
-  result?: "win" | "lose" | "pending"; // add this
-  drawsRemaining: number; // add this property
-};
-
-export interface CurrentBetsProps {
-  overUnderBets: PlacedBet[];
-  numberBets: PlacedNumberBet[];
-}
-
+// DoubleTrouble Ticket Interface
 export type GameResult = "win" | "loss" | "pending" | "megaPot";
 export type drawType = "Under" | "Over" | "Exact" | "Number";
 
-export interface DoubleTroubleDrawResult {
-  createdAt: string;
+export interface DoubleTroubleDraw {
   id: number;
-  nextDrawTime: string;
   winningNumbers: number;
+  nextDrawTime: string | Date;
+  createdAt: string | Date;
 }
 
-export interface DoubleTroubleDrawResultPayload {
+export interface DoubleTroubleStatus {
+  current: DoubleTroubleDraw | null;
+  history: DoubleTroubleDraw[];
+}
+
+export interface DoubleTroubleStatusResponsePayload {
   success: boolean;
   message?: string;
-  data: DoubleTroubleDrawResult;
+  data: DoubleTroubleStatus;
 }
 
 export interface DoubleTroubleTicket {
-  bidAmount: number;
-  createdAt: string;
-  drawType: string;
   id: number;
-  status: string;
-  updatedAt: string;
+  drawType: drawType;
+  bidAmount: number;
+  number: number;
+  status: GameResult;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-export interface CreateDoubleTroubleTicketResponsePayload {
-  success: boolean;
-  message?: string;
-  data?: {
-    ticket: DoubleTroubleTicket;
-    user: User;
-  };
-}
-
-export interface UpdatedUserResponsePayload {
-  success: boolean;
-  message?: string;
-  data: {
-    user: User;
-  };
-}
-
-// =================================================================
-// Aviator Game Types
-// =================================================================
+// Aviator Ticket Interface
 export interface AviatorTicket {
   id: string;
   amount: number;
   amountWon: number;
   cashOutMultiplier: number;
   outcome: "win" | "loss" | "pending";
-  createdAt: string;
+  createdAt: string | Date;
 }
 
 export interface AviatorDrawResult {
   id: number;
   roundId: string; // Unique identifier for the round
   crashMultiplier: number | null; // Set at end of round
-  startedAt: string; // Start time of the round
   status: "ongoing" | "finished"; // Current status of the draw
-  endedAt: string | null; // End time of the round, null if ongoing
-  createdAt: string; // Creation time of the draw
+  startedAt: string | Date; // Start time of the round
+  endedAt: string | Date | null; // End time of the round, null if ongoing
+  createdAt: string | Date; // Creation time of the draw
 }
 
 export interface AviatorDrawResultResponsePayload {

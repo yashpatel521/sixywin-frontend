@@ -27,6 +27,7 @@ export const TOTAL_NUMBERS = 49;
 export const DRAW_INTERVAL_SECONDS = 30;
 export const MAX_NUMBER_DOUBLE_TROUBLE = 30;
 export const AVIATOR_COUNTDOWN_TIMER = 10;
+export const MEGAPOT_AMOUNT = +import.meta.env.VITE_MEGAPOT_AMOUNT || 10;
 
 export const AD_DURATION = 5; // seconds
 export const REWARD_AMOUNT = 150;
