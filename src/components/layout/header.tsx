@@ -11,19 +11,13 @@ import {
 } from "../ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { SpinWheel } from "../shared/spin-wheel";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+
 import { Icons } from "@/components/ui/icons";
 import { useWebSocketStore } from "@/store/websocketStore";
 import { useApiRequest } from "@/libs/apiRequest";
 import { User } from "@/libs/interfaces";
 import { useEffect } from "react";
+import { IMAGES } from "@/libs/constants";
 
 // -------------------------
 // Constants for links with icons
@@ -106,10 +100,62 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card/50 backdrop-blur-lg">
       <div className="container flex h-16 items-center justify-between">
+        {/* Mobile Menu */}
+        <div className="flex md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Icons.menu />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full max-w-xs glassmorphism">
+              <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+              <Link to="/" className="mb-8 flex items-center space-x-2">
+                <Icons.logo className="h-6 w-6" />
+              </Link>
+
+              {isLoggedIn && (
+                <nav className="flex flex-col space-y-4">
+                  {/* Games list (mobile) */}
+                  <div className="flex flex-col space-y-2">
+                    <span className="font-semibold">Games</span>
+                    {GAMES.map((game) => (
+                      <Link
+                        key={game.path}
+                        to={game.path}
+                        className="ml-2 text-foreground/60 hover:text-primary flex items-center"
+                      >
+                        {game.icon}
+                        {game.label}
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Profile links (mobile) */}
+                  {PROFILE_LINKS.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className="text-foreground/60 hover:text-primary flex items-center"
+                    >
+                      {link.icon}
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+              )}
+            </SheetContent>
+          </Sheet>
+        </div>
         {/* Logo + Main Nav */}
         <div className="flex items-center space-x-4">
           <Link to="/" className="flex items-center space-x-2">
-            <Icons.logo className="h-6 w-6" />
+            <img
+              src={IMAGES.logo}
+              alt="Logo"
+              className="h-16 w-full hidden sm:block"
+            />
           </Link>
 
           {/* Desktop MainNav */}
@@ -160,58 +206,10 @@ export function Header() {
               </div>
 
               {/* Watch & Earn */}
-              {/* <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 rounded-full hover:scale-105 active:scale-95 transition-all"
-                  >
-                    <Icons.film className="h-4 w-4" />
-                    <span className="sr-only">Watch and Earn</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="glassmorphism">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-headline flex items-center justify-center gap-2">
-                      <Icons.film className="h-6 w-6 text-primary" />
-                      Watch & Earn
-                    </DialogTitle>
-                    <DialogDescription className="text-center">
-                      Watch a short ad to earn a guaranteed coin reward.
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog> */}
+              {/* <WatchAd /> */}
 
               {/* Spin Wheel */}
-              {!user?.isSpinned && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="flex items-center gap-2 bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all"
-                    >
-                      <Icons.gift className="h-4 w-4" />
-                      Spin to Win
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="glassmorphism">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-headline flex items-center justify-center gap-2">
-                        <Icons.gift className="h-6 w-6 text-primary" />
-                        Daily Bonus Wheel
-                      </DialogTitle>
-                      <DialogDescription className="text-center">
-                        Spin the wheel to win extra coins! You get one free spin
-                        per day.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <SpinWheel />
-                  </DialogContent>
-                </Dialog>
-              )}
+              <SpinWheel />
 
               {/* Avatar + Dropdown */}
               <DropdownMenu>
@@ -287,55 +285,6 @@ export function Header() {
               </Button>
             </>
           )}
-        </div>
-
-        {/* Mobile Menu */}
-        <div className="flex md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Icons.menu />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-full max-w-xs glassmorphism">
-              <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-              <Link to="/" className="mb-8 flex items-center space-x-2">
-                <Icons.logo className="h-6 w-6" />
-              </Link>
-
-              {isLoggedIn && (
-                <nav className="flex flex-col space-y-4">
-                  {/* Games list (mobile) */}
-                  <div className="flex flex-col space-y-2">
-                    <span className="font-semibold">Games</span>
-                    {GAMES.map((game) => (
-                      <Link
-                        key={game.path}
-                        to={game.path}
-                        className="ml-2 text-foreground/60 hover:text-primary flex items-center"
-                      >
-                        {game.icon}
-                        {game.label}
-                      </Link>
-                    ))}
-                  </div>
-
-                  {/* Profile links (mobile) */}
-                  {PROFILE_LINKS.map((link) => (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className="text-foreground/60 hover:text-primary flex items-center"
-                    >
-                      {link.icon}
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-              )}
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
     </header>

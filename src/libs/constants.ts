@@ -2,9 +2,10 @@ export const IS_PRODUCTION = import.meta.env.PROD;
 
 // Image assets with fallbacks for Vercel deployment
 export const IMAGES = {
+  thumbnail: "/logo/logo10.png",
   logo: "/logo/logo7.png",
-  hero: "/landing/landing1.png",
-  redeem: "/landing/lottery1.png",
+  hero: "/landing/landing7.png",
+  redeem: "/landing/lottery2.png",
   loginImage: "/auth/auth1.png",
   registerImage: "/auth/auth5.png",
   contactUsImage: "/others/contactUs3.png",

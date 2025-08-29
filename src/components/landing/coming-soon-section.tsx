@@ -29,12 +29,12 @@ export function ComingSoonSection() {
             alt={sectionContent.image.alt}
             width={sectionContent.image.width}
             height={sectionContent.image.height}
-            className="rounded-2xl object-cover shadow-2xl"
+            className="rounded-2xl object-cover shadow-2xl border-2 border-primary border-dashed bg-transparent"
             data-ai-hint={sectionContent.image["data-ai-hint"]}
           />
-          <span className="absolute top-4 left-4 bg-primary text-primary-foreground font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
+          {/* <span className="absolute top-4 left-4 bg-primary text-primary-foreground font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
             Coming Soon
-          </span>
+          </span> */}
         </div>
 
         <div className="space-y-6 animation-all fade-in-up duration-700">
