@@ -11,28 +11,25 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { NumberGrid } from "./NumberGrid";
+import { useWebSocketStore } from "@/store/websocketStore";
+import { useState } from "react";
+import {
+  MAX_NUMBER_DOUBLE_TROUBLE,
+  API_URL,
+  doubleTroublePayouts,
+} from "@/libs/constants";
+import axios from "axios";
+import { getUserProfile, saveUserProfile } from "@/utils/storage";
+import { DoubleTroubleTicket } from "@/libs/interfaces";
+import { toast } from "@/hooks/use-toast";
 
-export function NumberBetPanel({
-  numberBid,
-  setNumberBid,
-  selectedNumbers,
-  setSelectedNumbers,
-  placedNumberBets,
-  onPlaceBet,
-  totalNumbers,
-  singleSelect = false, // new prop for single selection
-  userCoins,
-}: {
-  numberBid: number[];
-  setNumberBid: (val: number[]) => void;
-  selectedNumbers: number[];
-  setSelectedNumbers: React.Dispatch<React.SetStateAction<number[]>>;
-  placedNumberBets: { number: number }[];
-  onPlaceBet: () => void;
-  totalNumbers: number;
-  singleSelect?: boolean;
-  userCoins: number;
-}) {
+export function NumberBetPanel() {
+  const { user, setDoubleTroubleUserHistory, updateUserData } =
+    useWebSocketStore();
+  const [numberBid, setNumberBid] = useState([10]);
+  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
+  const [singleSelect] = useState(false);
+  const totalNumbers = MAX_NUMBER_DOUBLE_TROUBLE;
   const numberGrid = Array.from({ length: totalNumbers }, (_, i) => i + 1);
 
   const handleNumberClick = (num: number) => {
@@ -46,6 +43,108 @@ export function NumberBetPanel({
       );
     }
   };
+  const totalCoins = (user?.coins || 0) + (user?.winningAmount || 0);
+  const placedNumberBets = selectedNumbers.map((n) => ({
+    number: n,
+    result: "pending" as const,
+  }));
+
+  const onPlaceBet = async () => {
+    if (selectedNumbers.length === 0) return;
+
+    const totalCost = numberBid[0] * selectedNumbers.length;
+    if (totalCost > totalCoins) {
+      toast({
+        variant: "destructive",
+        title: "Insufficient Funds",
+        description: `You need ${totalCost.toLocaleString()} coins to place these bets.`,
+      });
+      return;
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const token = getUserProfile()?.token;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const successes: DoubleTroubleTicket[] = [];
+    const failures: number[] = [];
+
+    for (const num of selectedNumbers) {
+      try {
+        const res = await axios.post(
+          `${API_URL}/doubleTrouble/create`,
+          {
+            drawType: "Number",
+            bidAmount: numberBid[0],
+            userNumber: num,
+          },
+          { headers }
+        );
+        const payload = res.data as {
+          success: boolean;
+          data: DoubleTroubleTicket;
+          message?: string;
+        };
+        if (payload?.success && payload.data) {
+          successes.push(payload.data);
+        } else {
+          failures.push(num);
+        }
+      } catch {
+        failures.push(num);
+      }
+    }
+
+    if (successes.length) {
+      setDoubleTroubleUserHistory((prev) => [...successes, ...(prev || [])]);
+      toast({
+        variant: "success",
+        title: "Bet(s) Placed",
+        description: `${successes.length} number bet${
+          successes.length > 1 ? "s" : ""
+        } placed successfully.`,
+      });
+
+      // Update local user funds to reflect successful bet placements
+      if (user) {
+        const totalDeduction = numberBid[0] * successes.length;
+        let newCoins = user.coins || 0;
+        let newWinningAmount = user.winningAmount || 0;
+        if (newCoins >= totalDeduction) {
+          newCoins -= totalDeduction;
+        } else {
+          const remaining = totalDeduction - newCoins;
+          newCoins = 0;
+          newWinningAmount = Math.max(0, newWinningAmount - remaining);
+        }
+        updateUserData({
+          ...user,
+          coins: newCoins,
+          winningAmount: newWinningAmount,
+          todaysBids: (user.todaysBids || 0) + totalDeduction,
+        });
+        saveUserProfile({
+          ...user,
+          coins: newCoins,
+          winningAmount: newWinningAmount,
+          todaysBids: (user.todaysBids || 0) + totalDeduction,
+        });
+      }
+    }
+    if (failures.length) {
+      toast({
+        variant: "destructive",
+        title: "Some Bets Failed",
+        description: `Failed for numbers: ${failures.join(", ")}.`,
+      });
+    }
+
+    // Reset selection and bid
+    setSelectedNumbers([]);
+    setNumberBid([10]);
+  };
 
   return (
     <Card className="w-full glassmorphism hover:shadow-2xl">
@@ -54,7 +153,8 @@ export function NumberBetPanel({
           <Target className="h-6 w-6" /> Bet on a Specific Number
         </CardTitle>
         <CardDescription className="text-center">
-          Correctly guess the number and win a 10x Payout!
+          Correctly guess the number and win a {doubleTroublePayouts.number}x
+          Payout!
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -68,13 +168,13 @@ export function NumberBetPanel({
           </div>
           <Slider
             min={10}
-            max={userCoins}
+            max={totalCoins}
             step={10}
             value={numberBid}
             onValueChange={setNumberBid}
           />
           <p className="text-sm text-muted-foreground text-center">
-            You have {userCoins.toLocaleString()} Coins available.
+            You have {totalCoins.toLocaleString()} Coins available.
           </p>
         </div>
         <NumberGrid

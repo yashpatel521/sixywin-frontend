@@ -28,6 +28,7 @@ import NotFoundPage from "./pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Footer } from "./components/layout/footer";
 import { Header } from "./components/layout/header";
+import { GOOGLE_CLIENT_ID } from "./libs/constants";
 // Define your route configs
 const publicRoutes = [
   { path: "/", element: <LandingPage /> },
@@ -64,7 +65,7 @@ function App() {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <WebSocketProvider>
           <div className="fixed inset-0 -z-10 h-full w-full bg-gradient-to-br from-yellow-900/80 via-background/80 to-background" />

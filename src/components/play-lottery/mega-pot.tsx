@@ -1,17 +1,21 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { CountdownTimer } from "@/components/shared/countdown-timer";
 import { Separator } from "@/components/ui/separator";
 import { Icons } from "@/components/ui/icons";
-import { useWebSocketStore } from "@/store/websocketStore";
+import { MEGAPOT_AMOUNT } from "@/libs/constants";
+import { useApiRequest } from "@/libs/apiRequest";
 import { useEffect } from "react";
 
 export function MegaPot() {
-  // Use the new WebSocket hook for cleaner logic
-  const { sendMessage, megaPot } = useWebSocketStore(); // Get user from Zustand store
+  const { data, request } = useApiRequest({
+    url: "/ticket/globalStats",
+    method: "GET",
+    isToken: true,
+  });
 
   useEffect(() => {
-    sendMessage("megaPot", {});
-  }, [sendMessage]);
+    request();
+  }, []);
+  const { todayTicketsCount, todayTotalWinnings } = data || {};
   return (
     <Card className="glassmorphism animation-all hover:shadow-2xl">
       <CardHeader className="p-4 space-y-2">
@@ -23,7 +27,7 @@ export function MegaPot() {
             </CardTitle>
             <div className="flex justify-center items-center gap-2 text-4xl font-bold text-primary mt-2 p-2 rounded-lg bg-primary/10 border-2 border-dashed border-primary/20 shadow-[0_0_15px_rgba(255,223,0,0.5)] drop-shadow-[0_2px_4px_hsl(var(--primary)/0.5)]">
               <Icons.gem className="h-9 w-9" />
-              <span>{megaPot?.amount.toLocaleString() || "0"}</span>
+              <span>{MEGAPOT_AMOUNT.toLocaleString() || "0"}</span>
             </div>
           </div>
 
@@ -35,7 +39,7 @@ export function MegaPot() {
               Tickets Submitted (Last 24h)
             </div>
             <div className="text-2xl font-bold mt-2 text-yellow-400 ">
-              {megaPot?.todayBids?.toLocaleString() || "0"}
+              {todayTicketsCount}
             </div>
             <p className="text-xs text-muted-foreground">
               The total number of tickets submitted by players in the last 24
@@ -51,20 +55,13 @@ export function MegaPot() {
               Total Winnings (Last 24h)
             </div>
             <div className="text-2xl font-bold mt-2 text-yellow-400">
-              {megaPot?.todayWinnings?.toLocaleString() || "0"}
+              {todayTotalWinnings}
             </div>
             <p className="text-xs text-muted-foreground">
               The total number of coins won by players from all games in the
               last 24 hours.
             </p>
           </div>
-
-          <Separator orientation="vertical" className="h-12 hidden md:block" />
-
-          <CountdownTimer
-            nextDrawDate={megaPot?.nextDrawDate || new Date()}
-            label="Pot reset in"
-          />
         </div>
       </CardHeader>
     </Card>

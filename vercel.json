@@ -1,6 +1,17 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/about", "destination": "/about-us", "permanent": true },
+    { "source": "/contact", "destination": "/contact-us", "permanent": true },
+    { "source": "/privacy", "destination": "/privacy-policy", "permanent": true },
+    { "source": "/terms", "destination": "/terms-of-service", "permanent": true },
+    { "source": "/howto", "destination": "/how-to-play", "permanent": true },
+    { "source": "/how-to", "destination": "/how-to-play", "permanent": true },
+    { "source": "/faqs", "destination": "/faq", "permanent": true },
+    { "source": "/help", "destination": "/faq", "permanent": true },
+    { "source": "/home", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/((?!.*\\.).*)",

@@ -11,22 +11,62 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { drawType } from "@/libs/interfaces";
+import { useWebSocketStore } from "@/store/websocketStore";
+import { useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
+import { useApiRequest } from "@/libs/apiRequest";
+import { DoubleTroubleTicket } from "@/libs/interfaces";
+import { saveUserProfile } from "@/utils/storage";
+import {
+  MAX_NUMBER_DOUBLE_TROUBLE,
+  doubleTroublePayouts,
+} from "@/libs/constants";
 
-export function RangeBetPanel({
-  betDirection,
-  setBetDirection,
-  overUnderBid,
-  setOverUnderBid,
-  onPlaceBet,
-  userCoins,
-}: {
-  betDirection: drawType | null;
-  setBetDirection: (dir: drawType) => void;
-  overUnderBid: number[];
-  setOverUnderBid: (val: number[]) => void;
-  userCoins: number;
-  onPlaceBet: () => void;
-}) {
+export function RangeBetPanel() {
+  const { user, setDoubleTroubleUserHistory, updateUserData } =
+    useWebSocketStore();
+  const [overUnderBid, setOverUnderBid] = useState([10]);
+  const [betDirection, setBetDirection] = useState<drawType | null>(null);
+  // API Call
+  const { data, request, success } = useApiRequest<DoubleTroubleTicket>({
+    url: "/doubleTrouble/create",
+    method: "POST",
+    isToken: true,
+    data: {
+      drawType: betDirection,
+      bidAmount: overUnderBid[0],
+      userNumber: user?.id,
+    },
+  });
+
+  // When a ticket is created successfully, append it to the local user history
+  useEffect(() => {
+    if (success) {
+      saveUserProfile(data.user);
+      updateUserData(data.user);
+      setDoubleTroubleUserHistory((prev) => [data, ...(prev || [])]);
+      toast({
+        variant: "success",
+        title: "Bet Placed",
+        description: "Your bet has been placed successfully.",
+      });
+      setBetDirection(null);
+      setOverUnderBid([10]);
+    }
+  }, [data, setDoubleTroubleUserHistory, success]);
+
+  const handlePlaceOverUnderBet = async () => {
+    if (!betDirection) {
+      toast({
+        variant: "destructive",
+        title: "No Selection",
+        description: 'Please select "Under", "Over", or "Exact" first.',
+      });
+      return;
+    }
+    await request();
+  };
+
   return (
     <Card className="w-full glassmorphism hover:shadow-2xl">
       <CardHeader>
@@ -36,7 +76,9 @@ export function RangeBetPanel({
           Bet on the Range
         </CardTitle>
         <CardDescription className="text-center">
-          Win 2x for a correct range, or 50x for an exact guess of 15!
+          Win {doubleTroublePayouts.over}x for a correct range, or{" "}
+          {doubleTroublePayouts.exact}x for an exact guess of{" "}
+          {MAX_NUMBER_DOUBLE_TROUBLE / 2}!
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -50,13 +92,13 @@ export function RangeBetPanel({
           </div>
           <Slider
             min={10}
-            max={userCoins}
+            max={user?.coins || 0}
             step={10}
             value={overUnderBid}
             onValueChange={setOverUnderBid}
           />
           <p className="text-sm text-muted-foreground text-center">
-            You have {userCoins.toLocaleString()} Coins available.
+            You have {user?.coins.toLocaleString()} Coins available.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -64,24 +106,28 @@ export function RangeBetPanel({
             variant={betDirection === "Under" ? "default" : "outline"}
             onClick={() => setBetDirection("Under")}
           >
-            <ArrowDown className="mb-1" /> Under 15
+            <ArrowDown className="mb-1" /> Under {MAX_NUMBER_DOUBLE_TROUBLE / 2}
           </Button>
           <Button
             variant={betDirection === "Exact" ? "default" : "outline"}
             onClick={() => setBetDirection("Exact")}
           >
-            <Dot className="mb-1" /> Exact 15
+            <Dot className="mb-1" /> Exact {MAX_NUMBER_DOUBLE_TROUBLE / 2}
           </Button>
           <Button
             variant={betDirection === "Over" ? "default" : "outline"}
             onClick={() => setBetDirection("Over")}
           >
-            <ArrowUp className="mb-1" /> Over 15
+            <ArrowUp className="mb-1" /> Over {MAX_NUMBER_DOUBLE_TROUBLE / 2}
           </Button>
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={onPlaceBet} className="w-full">
+        <Button
+          onClick={handlePlaceOverUnderBet}
+          disabled={overUnderBid[0] === 0 || !betDirection}
+          className="w-full"
+        >
           Place Range Bet
         </Button>
       </CardFooter>

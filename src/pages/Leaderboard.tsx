@@ -160,7 +160,6 @@ export default function LeaderboardPage() {
           </CardContent>
         </Card>
       </div>
-      {/* <TopBanner title="Advertisement" className="max-w-4xl mx-auto" /> */}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { SEO } from "@/components/shared/seo";
+import { SEO, buildBreadcrumbLD, buildFAQPageLD } from "@/components/shared/seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Accordion,
@@ -7,6 +7,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Icons } from "@/components/ui/icons";
+import {
+  MAX_NUMBER_DOUBLE_TROUBLE,
+  WINNING_MULTIPLIERS,
+} from "@/libs/constants";
 
 const faqData = [
   {
@@ -49,8 +53,7 @@ const faqData = [
       },
       {
         question: "What are the winning odds?",
-        answer:
-          "Odds vary by matches: 3 matches (5x your bid), 4 matches (50x), 5 matches (1,000x), 6 matches (100,000x). These are virtual rewards for entertainment only.",
+        answer: `Odds vary by matches: 3 matches (${WINNING_MULTIPLIERS[3].toLocaleString()}x your bid), 4 matches (${WINNING_MULTIPLIERS[4].toLocaleString()}x), 5 matches (${WINNING_MULTIPLIERS[5].toLocaleString()}x), 6 matches (${WINNING_MULTIPLIERS[6].toLocaleString()}x). These are virtual rewards for entertainment only.`,
       },
       {
         question: "Can I play multiple tickets?",
@@ -89,8 +92,9 @@ const faqData = [
     questions: [
       {
         question: "What is Double Trouble?",
-        answer:
-          "Double Trouble is a fast-paced number prediction game. Every 30 seconds, a number is drawn. You can bet on specific numbers or whether the number will be over/under 15.",
+        answer: `Double Trouble is a fast-paced number prediction game. Every 30 seconds, a number is drawn. You can bet on specific numbers or whether the number will be over/under ${
+          MAX_NUMBER_DOUBLE_TROUBLE / 2
+        }.`,
       },
       {
         question: "How often are numbers drawn?",
@@ -99,8 +103,11 @@ const faqData = [
       },
       {
         question: "What are the betting options?",
-        answer:
-          "You can bet on: specific numbers (1-30), 'Under 15', 'Over 15', or 'Exactly 15'. Each option has different virtual coin payout rates.",
+        answer: `You can bet on: specific numbers (1-30), 'Under ${
+          MAX_NUMBER_DOUBLE_TROUBLE / 2
+        }', 'Over ${MAX_NUMBER_DOUBLE_TROUBLE / 2}', or 'Exactly ${
+          MAX_NUMBER_DOUBLE_TROUBLE / 2
+        }'. Each option has different virtual coin payout rates.`,
       },
       {
         question: "Can I bet on multiple options?",
@@ -162,20 +169,20 @@ const faqData = [
 ];
 
 export default function FAQPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqData.flatMap((category) =>
-      category.questions.map((faq) => ({
-        "@type": "Question",
-        name: faq.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: faq.answer,
-        },
-      }))
+  const structuredData = [
+    buildBreadcrumbLD([
+      { name: "Home", item: "/" },
+      { name: "FAQ", item: "/faq" },
+    ]),
+    buildFAQPageLD(
+      faqData.flatMap((category) =>
+        category.questions.map((faq) => ({
+          question: faq.question,
+          answer: faq.answer,
+        }))
+      )
     ),
-  };
+  ];
 
   return (
     <>

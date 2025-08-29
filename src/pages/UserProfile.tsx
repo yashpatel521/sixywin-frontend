@@ -23,14 +23,18 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useParams } from "react-router-dom";
 import TicketHistory from "@/components/shared/ticket-history";
-import { TopBanner } from "@/components/ads/BannerAds";
 import { useWebSocketStore } from "@/store/websocketStore";
+import { SEO } from "@/components/shared/seo";
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const { toast } = useToast();
   const [isCopied, setIsCopied] = useState(false);
   const { sendMessage, userProfile } = useWebSocketStore(); // Get tickets from Zustand store
+
+  const pageTitle = userProfile?.user?.username
+    ? `${userProfile.user.username} - Profile | SixyWin`
+    : "User Profile | SixyWin";
 
   useEffect(() => {
     if (userId) {
@@ -81,7 +85,14 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <>
+      <SEO
+        title={pageTitle}
+        description="View player profile, referrals and ticket history."
+        url={`/user/${userId ?? ""}`}
+        robots="noindex, nofollow"
+      />
+      <div className="container mx-auto p-4 md:p-8">
       {/* User Details and Referral Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* User Profile Card */}
@@ -261,8 +272,7 @@ export default function UserProfilePage() {
       {userProfile?.user?.id && (
         <TicketHistory userId={Number(userProfile.user.id)} />
       )}
-
-      <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
     </div>
+    </>
   );
 }

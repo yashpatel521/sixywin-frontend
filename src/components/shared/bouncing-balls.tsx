@@ -1,13 +1,9 @@
-import { useState, useEffect } from "react";
-import { cn } from "@/libs/utils";
+import { useState, useEffect, type CSSProperties } from "react";
 
-interface BallStyle {
-  top: string;
-  left: string;
-  animationName: string;
-  animationDuration: string;
-  animationDelay: string;
-}
+type Ball = {
+  num: number;
+  style: CSSProperties;
+};
 
 const animationNames = [
   "bounce-1",
@@ -18,44 +14,43 @@ const animationNames = [
   "bounce-6",
 ];
 
+const BALL_COUNT = 6;
+const MAX_NUMBER = 49;
+
 export function BouncingBalls() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [ballStyles, setBallStyles] = useState<BallStyle[]>([]);
-  const [ballNumbers, setBallNumbers] = useState<number[]>([]);
+  const [balls, setBalls] = useState<Ball[]>([]);
 
   useEffect(() => {
-    setIsMounted(true);
-
-    const styles: BallStyle[] = [];
-    const numbers = new Set<number>();
-
-    while (numbers.size < 6) {
-      numbers.add(Math.floor(Math.random() * 49) + 1);
+    const uniqueNumbers = new Set<number>();
+    while (uniqueNumbers.size < BALL_COUNT) {
+      uniqueNumbers.add(Math.floor(Math.random() * MAX_NUMBER) + 1);
     }
-    setBallNumbers(Array.from(numbers));
 
-    for (let i = 0; i < 6; i++) {
-      styles.push({
+    const nums = Array.from(uniqueNumbers);
+    const generated: Ball[] = Array.from({ length: BALL_COUNT }, (_, i) => ({
+      num: nums[i],
+      style: {
         top: `${Math.random() * 80}%`,
         left: `${Math.random() * 80}%`,
         animationName: animationNames[i % animationNames.length],
         animationDuration: `${Math.random() * 5 + 5}s`,
         animationDelay: `${Math.random() * 2}s`,
-      });
-    }
-    setBallStyles(styles);
+      },
+    }));
+
+    setBalls(generated);
   }, []);
 
-  if (!isMounted) {
+  if (balls.length === 0) {
     return null;
   }
 
   return (
     <div className="absolute inset-0 -z-10 opacity-50">
       <div className="relative w-full h-full">
-        {ballStyles.map((style, i) => (
-          <div key={i} className={cn("bouncing-ball")} style={style}>
-            {ballNumbers[i]}
+        {balls.map((ball) => (
+          <div key={ball.num} className="bouncing-ball" style={ball.style}>
+            {ball.num}
           </div>
         ))}
       </div>

@@ -17,14 +17,35 @@ import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/libs/utils";
 import { Icons } from "@/components/ui/icons";
-import { useWebSocketStore } from "@/store/websocketStore";
-import { useEffect } from "react";
+import { useApiRequest } from "@/libs/apiRequest";
+import { Ticket } from "@/libs/interfaces";
+import { useEffect, useState } from "react";
+import { Button } from "../ui/button";
 
 export default function TicketHistory({ userId }: { userId: number }) {
-  const { sendMessage, tickets } = useWebSocketStore(); // Get tickets from Zustand store
+  const [pageNo, setPageNo] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [tic]
+  const { data, request } = useApiRequest({
+    url: `/ticket/userTickets/${userId}`,
+    method: "GET",
+    isToken: true,
+    data: {
+      pageNo,
+    },
+  });
   useEffect(() => {
-    sendMessage("ticketHistory", { userId }); // Changed from "ticketHistory" to "getTickets"
-  }, [sendMessage, userId]);
+    request();
+  }, []);
+
+  const loadMoreTickets = async () => {
+    setIsLoading(true);
+    setPageNo((prev) => prev + 1);
+    setIsLoading(false);
+  };
+
+  const tickets: Ticket[] = data || [];
+  // console.log(tickets);
 
   const renderNumbers = (numbers: number[], matchedNumbers?: number[]) => (
     <div className="flex gap-1 flex-wrap max-w-xs">
@@ -109,72 +130,79 @@ export default function TicketHistory({ userId }: { userId: number }) {
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Your Numbers</TableHead>
-                  <TableHead>Winning Numbers</TableHead>
-                  <TableHead className="text-center">Bid</TableHead>
-                  <TableHead className="text-center">Matches</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Coins Won</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tickets.map((ticket) => (
-                  <TableRow key={ticket.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium whitespace-nowrap">
-                      {format(parseISO(ticket.createdAt), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell>
-                      {renderNumbers(ticket.numbers, ticket.matchedNumbers)}
-                    </TableCell>
-                    <TableCell>
-                      {ticket.drawResult &&
-                      ticket.drawResult.winningNumbers &&
-                      ticket.drawResult.winningNumbers.length > 0 ? (
-                        renderNumbers(
-                          ticket.drawResult.winningNumbers,
-                          ticket.numbers
-                        )
-                      ) : (
-                        <span className="text-muted-foreground text-sm">
-                          No winning numbers yet
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center font-semibold">
-                      {ticket.bid}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant={
-                          (ticket.matchedNumbers?.length || 0) > 0
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={cn(
-                          (ticket.matchedNumbers?.length || 0) > 0 &&
-                            "bg-accent text-accent-foreground hover:bg-accent/80 animation-all hover:scale-110"
-                        )}
-                      >
-                        {ticket.matchedNumbers?.length || 0}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {renderStatus(ticket.result)}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold flex items-center justify-end gap-1 whitespace-nowrap">
-                      <Icons.gem className="h-4 w-4 text-primary" />
-                      {ticket.coinsWon.toLocaleString()}
-                    </TableCell>
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Your Numbers</TableHead>
+                    <TableHead>Winning Numbers</TableHead>
+                    <TableHead className="text-center">Bid</TableHead>
+                    <TableHead className="text-center">Matches</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-right">Coins Won</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {tickets.map((ticket: Ticket) => (
+                    <TableRow key={ticket.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium whitespace-nowrap">
+                        {format(parseISO(ticket.createdAt), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        {renderNumbers(ticket.numbers, ticket.matchedNumbers)}
+                      </TableCell>
+                      <TableCell>
+                        {ticket.drawResult?.winningNumbers?.length ? (
+                          renderNumbers(
+                            ticket.drawResult.winningNumbers,
+                            ticket.numbers
+                          )
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            No winning numbers yet
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center font-semibold">
+                        {ticket.bid}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          variant={
+                            (ticket.matchedNumbers?.length || 0) > 0
+                              ? "default"
+                              : "secondary"
+                          }
+                          className={cn(
+                            (ticket.matchedNumbers?.length || 0) > 0 &&
+                              "bg-accent text-accent-foreground hover:bg-accent/80 animation-all hover:scale-110"
+                          )}
+                        >
+                          {ticket.matchedNumbers?.length || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {renderStatus(ticket.result)}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold flex items-center justify-end gap-1 whitespace-nowrap">
+                        <Icons.gem className="h-4 w-4 text-primary" />
+                        {ticket.coinsWon.toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Load More Button */}
+            <div className="flex justify-center mt-4">
+              <Button onClick={loadMoreTickets} disabled={isLoading}>
+                {isLoading ? "Loading..." : "Load More"}
+              </Button>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

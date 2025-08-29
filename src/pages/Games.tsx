@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { cn } from "@/libs/utils";
 import { Icons } from "@/components/ui/icons";
 import { GameCardProps } from "@/libs/interfaces";
-// import { TopBanner } from "@/components/ads/BannerAds";
 
 const games = [
   {
@@ -120,9 +119,6 @@ export default function GamesPage() {
             </GameCard>
           ))}
         </div>
-        {/* <div className="my-12">
-        <TopBanner title="Advertisement" className="max-w-4xl mx-auto" />
-      </div> */}
       </div>
     </>
   );

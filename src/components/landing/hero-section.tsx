@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-// import { BouncingBalls } from "@/components/shared/bouncing-balls";
+import { BouncingBalls } from "@/components/shared/bouncing-balls";
 import { IMAGES } from "@/libs/constants";
 import { Icons } from "@/components/ui/icons";
+import { WINNING_MULTIPLIERS } from "@/libs/constants";
 
 const sectionContent = {
   welcome: "Welcome to",
@@ -18,10 +19,26 @@ const sectionContent = {
     "data-ai-hint": "cartoon winner",
   },
   tiers: [
-    { title: "3 Matches", multiplier: "5x", description: "Your Bid" },
-    { title: "4 Matches", multiplier: "50x", description: "Your Bid" },
-    { title: "5 Matches", multiplier: "1,000x", description: "Your Bid" },
-    { title: "6 Matches", multiplier: "100,000x", description: "Your Bid" },
+    {
+      title: "3 Matches",
+      multiplier: WINNING_MULTIPLIERS[3],
+      description: "Your Bid",
+    },
+    {
+      title: "4 Matches",
+      multiplier: WINNING_MULTIPLIERS[4],
+      description: "Your Bid",
+    },
+    {
+      title: "5 Matches",
+      multiplier: WINNING_MULTIPLIERS[5],
+      description: "Your Bid",
+    },
+    {
+      title: "6 Matches",
+      multiplier: WINNING_MULTIPLIERS[6],
+      description: "Your Bid",
+    },
   ],
 };
 
@@ -31,7 +48,7 @@ const TierCard = ({
   description,
 }: {
   title: string;
-  multiplier: string;
+  multiplier: number;
   description: string;
 }) => (
   <div className="bg-card/50 backdrop-blur-lg border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center animation-all hover:shadow-2xl hover:-translate-y-2 fade-in-up">
@@ -39,7 +56,9 @@ const TierCard = ({
       <Icons.trophy className="h-5 w-5" />
     </div>
     <h4 className="text-md font-bold text-foreground">{title}</h4>
-    <p className="text-2xl font-bold text-primary">{multiplier}</p>
+    <p className="text-2xl font-bold text-primary">
+      {multiplier.toLocaleString()}x
+    </p>
     <p className="text-sm text-muted-foreground">{description}</p>
   </div>
 );
@@ -48,7 +67,7 @@ export function HeroSection() {
   return (
     <section className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mt-5">
       <div className="relative text-center lg:text-left lg:col-span-1">
-        {/* <BouncingBalls /> */}
+        <BouncingBalls />
         <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-foreground animation-all animate-in fade-in slide-in-from-top-4 duration-500">
           {sectionContent.welcome}{" "}
           <span className="text-primary">{sectionContent.appName}</span>

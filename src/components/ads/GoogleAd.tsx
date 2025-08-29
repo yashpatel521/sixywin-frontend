@@ -4,6 +4,11 @@
  * Works with Google's built-in consent management
  */
 
+import {
+  ADS_ENABLED,
+  GOOGLE_ADSENSE_CLIENT,
+  IS_DEVELOPMENT,
+} from "@/libs/constants";
 import { useEffect, useRef } from "react";
 
 interface GoogleAdProps {
@@ -16,16 +21,15 @@ interface GoogleAdProps {
 
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    adsbygoogle: unknown[];
   }
 }
 
 // Get AdSense configuration from environment variables
 const getAdSenseConfig = () => ({
-  clientId:
-    import.meta.env.VITE_GOOGLE_ADSENSE_CLIENT || "ca-pub-2204167319440199",
-  adsEnabled: import.meta.env.VITE_ADS_ENABLED === "true",
-  isDevelopment: import.meta.env.MODE === "development",
+  clientId: GOOGLE_ADSENSE_CLIENT,
+  adsEnabled: ADS_ENABLED,
+  isDevelopment: IS_DEVELOPMENT,
 });
 
 export function GoogleAd({
