@@ -22,7 +22,7 @@ export const LatestDrawNumbers = () => {
             Next Draw In
           </div>
           {latestDraw && (
-            <CountdownTimer nextDrawDate={latestDraw.nextDrawTime} />
+            <CountdownTimer nextDrawDate={latestDraw.nextDrawDate} />
           )}
         </div>
 
