@@ -18,7 +18,7 @@ const sectionContent = {
       title: "Play Lottery",
       description:
         "The classic SixyWin experience. Pick your six lucky numbers for the daily draw, place your bid, and hope for a big win from the Mega Pot!",
-      href: "/play",
+      href: "/games/play",
       disabled: false,
     },
     {
@@ -26,7 +26,7 @@ const sectionContent = {
       title: "Double Trouble",
       description:
         "A fast-paced betting game where a new number is drawn every 30 seconds. Bet on a specific number, or bet on whether the number will be over or under 25. Quick rounds, quick wins!",
-      href: "/double-trouble",
+      href: "/games/double-trouble",
       disabled: false,
     },
     {
@@ -34,7 +34,7 @@ const sectionContent = {
       title: "Aviator",
       description:
         "Fly high and watch out for the crash! The longer you stay in the air, the bigger your multiplier. Cash out before it's too late!",
-      href: "/aviator",
+      href: "/games/aviator",
       disabled: false,
     },
     // {
