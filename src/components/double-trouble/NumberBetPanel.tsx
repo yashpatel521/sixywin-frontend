@@ -10,141 +10,76 @@ import {
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { NumberGrid } from "./NumberGrid";
 import { useWebSocketStore } from "@/store/websocketStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MAX_NUMBER_DOUBLE_TROUBLE,
-  API_URL,
   doubleTroublePayouts,
 } from "@/libs/constants";
-import axios from "axios";
-import { getUserProfile, saveUserProfile } from "@/utils/storage";
+import { saveUserProfile } from "@/utils/storage";
 import { DoubleTroubleTicket } from "@/libs/interfaces";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/libs/utils";
+import { useApiRequest } from "@/libs/apiRequest";
 
 export function NumberBetPanel() {
   const { user, setDoubleTroubleUserHistory, updateUserData } =
     useWebSocketStore();
   const [numberBid, setNumberBid] = useState([10]);
-  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
-  const [singleSelect] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+
   const totalNumbers = MAX_NUMBER_DOUBLE_TROUBLE;
   const numberGrid = Array.from({ length: totalNumbers }, (_, i) => i + 1);
 
   const handleNumberClick = (num: number) => {
-    if (singleSelect) {
-      setSelectedNumbers([num]); // Only one number at a time
-    } else {
-      setSelectedNumbers((prev: number[]) =>
-        prev.includes(num)
-          ? prev.filter((n: number) => n !== num)
-          : [...prev, num]
-      );
-    }
+    setSelectedNumber((prev) => (prev === num ? null : num));
   };
+
   const totalCoins = (user?.coins || 0) + (user?.winningAmount || 0);
-  const placedNumberBets = selectedNumbers.map((n) => ({
-    number: n,
-    result: "pending" as const,
-  }));
+
+  const { data, request, success } = useApiRequest<DoubleTroubleTicket>({
+    url: "/doubleTrouble/create",
+    method: "POST",
+    isToken: true,
+    data: {
+      drawType: "Number",
+      bidAmount: numberBid[0],
+      userNumber: user?.id,
+    },
+  });
 
   const onPlaceBet = async () => {
-    if (selectedNumbers.length === 0) return;
+    if (selectedNumber === null) return;
 
-    const totalCost = numberBid[0] * selectedNumbers.length;
+    const totalCost = numberBid[0];
     if (totalCost > totalCoins) {
       toast({
         variant: "destructive",
         title: "Insufficient Funds",
-        description: `You need ${totalCost.toLocaleString()} coins to place these bets.`,
+        description: `You need ${totalCost.toLocaleString()} coins to place this bet.`,
       });
       return;
     }
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    const token = getUserProfile()?.token;
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    await request();
+  };
 
-    const successes: DoubleTroubleTicket[] = [];
-    const failures: number[] = [];
-
-    for (const num of selectedNumbers) {
-      try {
-        const res = await axios.post(
-          `${API_URL}/doubleTrouble/create`,
-          {
-            drawType: "Number",
-            bidAmount: numberBid[0],
-            userNumber: num,
-          },
-          { headers }
-        );
-        const payload = res.data as {
-          success: boolean;
-          data: DoubleTroubleTicket;
-          message?: string;
-        };
-        if (payload?.success && payload.data) {
-          successes.push(payload.data);
-        } else {
-          failures.push(num);
-        }
-      } catch {
-        failures.push(num);
-      }
-    }
-
-    if (successes.length) {
-      setDoubleTroubleUserHistory((prev) => [...successes, ...(prev || [])]);
+  useEffect(() => {
+    if (success && data) {
+      setDoubleTroubleUserHistory((prev) => [data, ...(prev || [])]);
       toast({
         variant: "success",
-        title: "Bet(s) Placed",
-        description: `${successes.length} number bet${
-          successes.length > 1 ? "s" : ""
-        } placed successfully.`,
+        title: "Bet Placed",
+        description: `Bet placed successfully on number ${selectedNumber}.`,
       });
 
-      // Update local user funds to reflect successful bet placements
-      if (user) {
-        const totalDeduction = numberBid[0] * successes.length;
-        let newCoins = user.coins || 0;
-        let newWinningAmount = user.winningAmount || 0;
-        if (newCoins >= totalDeduction) {
-          newCoins -= totalDeduction;
-        } else {
-          const remaining = totalDeduction - newCoins;
-          newCoins = 0;
-          newWinningAmount = Math.max(0, newWinningAmount - remaining);
-        }
-        updateUserData({
-          ...user,
-          coins: newCoins,
-          winningAmount: newWinningAmount,
-          todaysBids: (user.todaysBids || 0) + totalDeduction,
-        });
-        saveUserProfile({
-          ...user,
-          coins: newCoins,
-          winningAmount: newWinningAmount,
-          todaysBids: (user.todaysBids || 0) + totalDeduction,
-        });
-      }
+      // Deduct coins locally
+      updateUserData(data.user);
+      saveUserProfile(data.user); // Update stored user data
+      setSelectedNumber(null);
+      setNumberBid([10]);
     }
-    if (failures.length) {
-      toast({
-        variant: "destructive",
-        title: "Some Bets Failed",
-        description: `Failed for numbers: ${failures.join(", ")}.`,
-      });
-    }
-
-    // Reset selection and bid
-    setSelectedNumbers([]);
-    setNumberBid([10]);
-  };
+  }, [success, data]);
 
   return (
     <Card className="w-full glassmorphism hover:shadow-2xl">
@@ -158,6 +93,7 @@ export function NumberBetPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Bid Section */}
         <div className="grid gap-2">
           <div className="flex justify-between items-center">
             <Label>Number Bid </Label>
@@ -177,17 +113,37 @@ export function NumberBetPanel() {
             You have {totalCoins.toLocaleString()} Coins available.
           </p>
         </div>
-        <NumberGrid
-          numberGrid={numberGrid}
-          selectedNumbers={selectedNumbers}
-          placedNumberBets={placedNumberBets}
-          onNumberClick={handleNumberClick}
-        />
+
+        {/* Number Grid (single-select) */}
+        <div className="grid grid-cols-10 gap-2">
+          {numberGrid.map((num) => {
+            const isSelected = selectedNumber === num;
+
+            let bgClass = "bg-background/50 border";
+            if (isSelected) {
+              bgClass = "bg-accent text-accent-foreground shadow-md scale-110";
+            }
+
+            return (
+              <button
+                key={num}
+                onClick={() => handleNumberClick(num)}
+                className={cn(
+                  "h-10 w-10 flex items-center justify-center rounded-full text-sm font-medium transition-all",
+                  bgClass
+                )}
+              >
+                {num}
+              </button>
+            );
+          })}
+        </div>
       </CardContent>
+
       <CardFooter>
         <Button
           onClick={onPlaceBet}
-          disabled={selectedNumbers.length === 0}
+          disabled={selectedNumber === null}
           className="w-full"
         >
           Place Number Bet
