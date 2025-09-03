@@ -35,6 +35,7 @@ export function BouncingBalls() {
         animationName: animationNames[i % animationNames.length],
         animationDuration: `${Math.random() * 5 + 5}s`,
         animationDelay: `${Math.random() * 2}s`,
+        zIndex: Math.floor(Math.random() * 10),
       },
     }));
 
@@ -49,8 +50,13 @@ export function BouncingBalls() {
     <div className="absolute inset-0 -z-10 opacity-50">
       <div className="relative w-full h-full">
         {balls.map((ball) => (
-          <div key={ball.num} className="bouncing-ball" style={ball.style}>
-            {ball.num}
+          <div
+            key={ball.num}
+            className="bouncing-ball bg-gradient-to-br from-primary to-accent text-white font-bold rounded-full flex items-center justify-center shadow-lg"
+            style={ball.style}
+          >
+            <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-sm"></div>
+            <span className="relative z-10">{ball.num}</span>
           </div>
         ))}
       </div>

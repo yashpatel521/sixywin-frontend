@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -20,6 +21,9 @@ export default {
         body: ["Inter", "sans-serif"],
         headline: ["Space Grotesk", "sans-serif"],
         code: ["monospace"],
+        'luckiest-guy': ["'Luckiest Guy'", "cursive"],
+        'anton': ["'Anton'", "sans-serif"],
+        'bungee': ["'Bungee'", "cursive"]
       },
       colors: {
         background: "hsl(var(--background))",
@@ -100,5 +104,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 } satisfies Config;

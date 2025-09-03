@@ -4,6 +4,8 @@ import { BouncingBalls } from "@/components/shared/bouncing-balls";
 import { IMAGES } from "@/libs/constants";
 import { Icons } from "@/components/ui/icons";
 import { WINNING_MULTIPLIERS } from "@/libs/constants";
+import { motion, Variants } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 const sectionContent = {
   welcome: "Welcome to",
@@ -42,6 +44,30 @@ const sectionContent = {
   ],
 };
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10,
+    },
+  },
+};
+
 const TierCard = ({
   title,
   multiplier,
@@ -51,7 +77,10 @@ const TierCard = ({
   multiplier: number;
   description: string;
 }) => (
-  <div className="bg-card/50 backdrop-blur-lg border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center animation-all hover:shadow-2xl hover:-translate-y-2 fade-in-up">
+  <motion.div 
+    className="bg-card/50 backdrop-blur-lg border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center hover:shadow-2xl hover:-translate-y-2"
+    whileHover={{ y: -5, scale: 1.02 }}
+  >
     <div className="bg-primary/20 text-primary rounded-full p-2 mb-2">
       <Icons.trophy className="h-5 w-5" />
     </div>
@@ -60,26 +89,37 @@ const TierCard = ({
       {multiplier.toLocaleString()}x
     </p>
     <p className="text-sm text-muted-foreground">{description}</p>
-  </div>
+  </motion.div>
 );
 
 export function HeroSection() {
+  const [ref, inView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
   return (
-    <section className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mt-5">
-      <div className="relative text-center lg:text-left lg:col-span-1">
+    <motion.section
+      ref={ref}
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+      variants={containerVariants}
+      className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mt-5"
+    >
+      <motion.div variants={itemVariants} className="relative text-center lg:text-left lg:col-span-1">
         <BouncingBalls />
-        <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-foreground animation-all animate-in fade-in slide-in-from-top-4 duration-500">
+        <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-foreground">
           {sectionContent.welcome}{" "}
           <span className="text-primary">{sectionContent.appName}</span>
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8 animation-all animate-in fade-in slide-in-from-top-6 duration-700">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8">
           {sectionContent.description}
         </p>
-        <div className="flex justify-center lg:justify-start gap-4 animation-all animate-in fade-in slide-in-from-bottom-8 duration-900">
+        <div className="flex justify-center lg:justify-start gap-4">
           <Button
             asChild
             size="lg"
-            className="animation-all hover:scale-105 active:scale-95"
+            className="hover:scale-105 active:scale-95"
           >
             <Link to="/register">
               {sectionContent.buttonText}{" "}
@@ -87,8 +127,9 @@ export function HeroSection() {
             </Link>
           </Button>
         </div>
-      </div>
-      <div className="hidden lg:flex justify-center items-center lg:col-span-1">
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="hidden lg:flex justify-center items-center lg:col-span-1">
         <img
           src={sectionContent.image.src}
           alt={sectionContent.image.alt}
@@ -96,19 +137,24 @@ export function HeroSection() {
           height={sectionContent.image.height}
           data-ai-hint={sectionContent.image["data-ai-hint"]}
         />
-      </div>
-      <div className="lg:col-span-1 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="lg:col-span-1 space-y-4">
+        <motion.div 
+          variants={containerVariants}
+          className="grid grid-cols-2 gap-4"
+        >
           {sectionContent.tiers.map((tier, index) => (
-            <TierCard
-              key={index}
-              title={tier.title}
-              multiplier={tier.multiplier}
-              description={tier.description}
-            />
+            <motion.div key={index} variants={itemVariants}>
+              <TierCard
+                title={tier.title}
+                multiplier={tier.multiplier}
+                description={tier.description}
+              />
+            </motion.div>
           ))}
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }
