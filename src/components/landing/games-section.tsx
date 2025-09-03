@@ -18,7 +18,7 @@ const sectionContent = {
       title: "Play Lottery",
       description:
         "The classic SixyWin experience. Pick your six lucky numbers for the daily draw, place your bid, and hope for a big win from the Mega Pot!",
-      href: "/games/play",
+      href: "/games/play-lottery",
       disabled: false,
     },
     {
