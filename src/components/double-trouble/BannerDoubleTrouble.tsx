@@ -45,7 +45,8 @@ export const BannerDoubleTrouble = () => {
   const seconds = (secondsLeft % 60).toString().padStart(2, "0");
 
   const getColorClass = (num: number) => {
-    if (num === MAX_NUMBER_DOUBLE_TROUBLE) return "bg-yellow-400/70 text-black";
+    if (num === MAX_NUMBER_DOUBLE_TROUBLE / 2)
+      return "bg-yellow-400/70 text-black";
     if (num < MAX_NUMBER_DOUBLE_TROUBLE / 2)
       return "bg-[hsl(var(--destructive)/0.7)] text-white";
     if (num > MAX_NUMBER_DOUBLE_TROUBLE / 2)
