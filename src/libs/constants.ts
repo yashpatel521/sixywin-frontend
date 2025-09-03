@@ -5,7 +5,7 @@ export const IMAGES = {
   thumbnail: "/logo/logo10.png",
   logo: "/logo/logo7.png",
   hero: "/landing/landing7.png",
-  redeem: "/landing/lottery2.png",
+  redeem: "/landing/lottery3.png",
   loginImage: "/auth/auth1.png",
   registerImage: "/auth/auth5.png",
   contactUsImage: "/others/contactUs3.png",

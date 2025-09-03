@@ -24,17 +24,22 @@ export function ComingSoonSection() {
     <section className="mt-20 md:mt-32 p-8 md:p-16 bg-gradient-to-r from-primary/80 to-accent/80 rounded-3xl text-foreground overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
         <div className="relative animation-all fade-in-up duration-700">
-          <img
-            src={sectionContent.image.src}
-            alt={sectionContent.image.alt}
-            width={sectionContent.image.width}
-            height={sectionContent.image.height}
-            className="rounded-2xl object-cover shadow-2xl border-2 border-primary border-dashed bg-transparent"
-            data-ai-hint={sectionContent.image["data-ai-hint"]}
-          />
-          {/* <span className="absolute top-4 left-4 bg-primary text-primary-foreground font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
-            Coming Soon
-          </span> */}
+          <div
+            className="relative rounded-2xl shadow-2xl border-2 border-primary overflow-hidden 
+             bg-gradient-to-b from-yellow-400 via-yellow-300 to-yellow-500"
+          >
+            <img
+              src={sectionContent.image.src}
+              alt={sectionContent.image.alt}
+              width={sectionContent.image.width}
+              height={sectionContent.image.height}
+              className="object-cover w-full h-full"
+              data-ai-hint={sectionContent.image["data-ai-hint"]}
+            />
+
+            {/* Gradient overlay for smooth blending */}
+            <div className="absolute inset-0 bg-gradient-to-b from-yellow-600 via-transparent to-yellow-900 pointer-events-none" />
+          </div>
         </div>
 
         <div className="space-y-6 animation-all fade-in-up duration-700">
