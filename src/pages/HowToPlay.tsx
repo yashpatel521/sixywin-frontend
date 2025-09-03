@@ -19,10 +19,22 @@ export default function HowToPlayPage() {
     buildHowToLD(
       "How to Play SixyWin Virtual Games",
       [
-        { name: "Create Account", text: "Sign up for free and get starting virtual coins" },
-        { name: "Choose Game", text: "Select from Virtual Lottery, Aviator, or Double Trouble" },
-        { name: "Place Bets", text: "Use virtual coins to place bets and play games" },
-        { name: "Win Rewards", text: "Win virtual coins and redeem for real rewards" },
+        {
+          name: "Create Account",
+          text: "Sign up for free and get starting virtual coins",
+        },
+        {
+          name: "Choose Game",
+          text: "Select from Virtual Lottery, Aviator, or Double Trouble",
+        },
+        {
+          name: "Place Bets",
+          text: "Use virtual coins to place bets and play games",
+        },
+        {
+          name: "Win Rewards",
+          text: "Win virtual coins and redeem for real rewards",
+        },
       ],
       "Complete guide on how to play virtual lottery, Aviator crash game, and Double Trouble on SixyWin platform",
       "https://sixywin.com/guides/how-to-play.png"
@@ -81,6 +93,14 @@ export default function HowToPlayPage() {
                       <div className="space-y-2">
                         <h4 className="font-semibold">Winning Tiers:</h4>
                         <ul className="space-y-1 text-sm text-muted-foreground">
+                          <li>
+                            • 1 match: {WINNING_MULTIPLIERS[1].toLocaleString()}
+                            x your bid
+                          </li>
+                          <li>
+                            • 2 matches:{" "}
+                            {WINNING_MULTIPLIERS[2].toLocaleString()}x your bid
+                          </li>
                           <li>
                             • 3 matches:{" "}
                             {WINNING_MULTIPLIERS[3].toLocaleString()}x your bid

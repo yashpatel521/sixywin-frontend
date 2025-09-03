@@ -18,6 +18,7 @@ import { useApiRequest } from "@/libs/apiRequest";
 import { User } from "@/libs/interfaces";
 import { useEffect } from "react";
 import { IMAGES } from "@/libs/constants";
+import { saveUserProfile } from "@/utils/storage";
 
 // -------------------------
 // Constants for links with icons
@@ -95,8 +96,11 @@ export function Header() {
   useEffect(() => {
     if (success) {
       updateUserData(data.user);
+      saveUserProfile(data.user);
     }
   }, [data, success, updateUserData]);
+
+  const totalCoins = (user?.coins || 0) + (user?.winningAmount || 0);
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-card/50 backdrop-blur-lg">
       <div className="container flex h-16 items-center justify-between">
@@ -202,7 +206,7 @@ export function Header() {
               {/* Coins */}
               <div className="flex items-center gap-2 rounded-full border border-secondary bg-background/50 px-3 py-1 text-sm font-semibold text-primary">
                 <Icons.gem className="h-4 w-4" />
-                <span>{(user?.coins || 0) + (user?.winningAmount || 0)}</span>
+                <span>{totalCoins.toLocaleString()}</span>
               </div>
 
               {/* Watch & Earn */}

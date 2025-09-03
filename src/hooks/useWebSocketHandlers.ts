@@ -14,6 +14,7 @@ import {
   AVIATOR_COUNTDOWN_TIMER,
   MAX_NUMBER_DOUBLE_TROUBLE,
 } from "@/libs/constants";
+import { saveUserProfile } from "@/utils/storage";
 
 export const useWebSocketHandlers = () => {
   useEffect(() => {
@@ -151,10 +152,10 @@ export const useWebSocketHandlers = () => {
       .registerHandler("updatedUser_response", (payload) => {
         const updatedUserPayload = payload as UpdatedUserResponsePayload;
         if (updatedUserPayload.success) {
-          console.log("Updated user:", updatedUserPayload.data.user);
           useWebSocketStore
             .getState()
             .updateUserData(updatedUserPayload.data.user);
+          saveUserProfile(updatedUserPayload.data.user);
         }
       });
 
