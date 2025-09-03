@@ -15,9 +15,12 @@ Disallow: /private/
 # Allow important pages
 Allow: /games/play-lottery
 Allow: /games/double-trouble
+Allow: /games/aviator
 Allow: /leaderboard
 Allow: /games
 Allow: /about-us
 Allow: /contact-us
 Allow: /privacy-policy
 Allow: /terms-of-service
+Allow: /faq
+Allow: /how-to-play
