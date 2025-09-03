@@ -60,6 +60,13 @@ import {
   Zap,
   Gamepad2,
   LoaderPinwheel,
+  Star,
+  Club,
+  Diamond,
+  Heart,
+  Spade,
+  Pointer,
+  HandMetal,
 } from "lucide-react";
 import { IMAGES } from "@/libs/constants";
 
@@ -131,4 +138,11 @@ export const Icons = {
   handCoins: (props: LucideProps) => <HandCoins {...props} />,
   zap: (props: LucideProps) => <Zap {...props} />,
   loaderPinwheel: (props: LucideProps) => <LoaderPinwheel {...props} />,
+  star: (props: LucideProps) => <Star {...props} />,
+  club: (props: LucideProps) => <Club {...props} />,
+  diamond: (props: LucideProps) => <Diamond {...props} />,
+  heart: (props: LucideProps) => <Heart {...props} />,
+  spade: (props: LucideProps) => <Spade {...props} />,
+  pointer: (props: LucideProps) => <Pointer {...props} />,
+  handMetal: (props: LucideProps) => <HandMetal {...props} />,
 };

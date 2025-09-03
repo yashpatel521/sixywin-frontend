@@ -1,5 +1,7 @@
 import React from "react";
 import { Icons } from "@/components/ui/icons";
+import { motion, Variants } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 const sectionContent = {
   title: "Why You'll Love SixyWin",
@@ -25,6 +27,30 @@ const sectionContent = {
   ],
 };
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10,
+    },
+  },
+};
+
 const FeatureCard = ({
   icon,
   title,
@@ -34,30 +60,70 @@ const FeatureCard = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <div className="glassmorphism p-6 rounded-2xl text-center flex flex-col items-center animation-all hover:shadow-2xl hover:-translate-y-2 fade-in-up transition-transform duration-300 ">
-    <div className="bg-gradient-to-tr from-primary/60 to-accent/60 rounded-full p-4 mb-4 flex items-center justify-center shadow-lg">
+  <div className="relative bg-card/50 backdrop-blur-lg border-2 border-primary/30 rounded-2xl p-8 text-center flex flex-col items-center transition-all hover:shadow-primary/30 hover:-translate-y-1 duration-300 h-full overflow-hidden group hover:border-primary/60">
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+    <div className="absolute inset-0 opacity-10 flex items-center justify-center">
+      <Icons.dices className="h-32 w-32 text-primary animate-spin-slow" />
+    </div>
+    <div className="bg-gradient-to-tr from-primary/60 to-accent/60 rounded-full p-4 mb-6 flex items-center justify-center shadow-lg z-10 ring-2 ring-white/50 group-hover:ring-white/80 group-hover:scale-110 transition-all">
       {icon}
     </div>
-    <h3 className="text-xl font-bold font-headline mb-2 text-foreground">
+    <h3 className="text-xl font-bold font-headline mb-3 z-10 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent group-hover:bg-gradient-to-l transition-all">
       {title}
     </h3>
-    <p className="text-muted-foreground">{children}</p>
+    <p className="text-muted-foreground z-10 group-hover:text-foreground transition-colors">{children}</p>
+    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-80 group-hover:opacity-100 group-hover:h-1.5 transition-all"></div>
   </div>
 );
 
 export function FeaturesSection() {
+  const [ref, inView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
   return (
-    <section className="mt-20 md:mt-32 px-4 md:px-16">
-      <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12 text-foreground">
+    <motion.section
+      ref={ref}
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+      variants={containerVariants}
+      className="mt-20 md:mt-32 px-4 md:px-16 relative"
+    >
+      <div className="absolute inset-0 bg-[url('/images/casino-pattern.svg')] opacity-5 -z-10"></div>
+      
+      <motion.h2 
+        variants={itemVariants}
+        className="text-3xl md:text-4xl font-bold font-headline text-center mb-12 text-foreground"
+      >
         {sectionContent.title}
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      </motion.h2>
+      
+      <motion.div 
+        variants={containerVariants}
+        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+      >
         {sectionContent.features.map((feature, index) => (
-          <FeatureCard key={index} icon={feature.icon} title={feature.title}>
-            {feature.description}
-          </FeatureCard>
+          <motion.div key={index} variants={itemVariants}>
+            <FeatureCard icon={feature.icon} title={feature.title}>
+              {feature.description}
+            </FeatureCard>
+          </motion.div>
         ))}
-      </div>
-    </section>
+      </motion.div>
+      
+      <style>
+        {`
+          @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+
+          .animate-spin-slow {
+            animation: spin-slow 8s linear infinite;
+          }
+        `}
+      </style>
+    </motion.section>
   );
 }
