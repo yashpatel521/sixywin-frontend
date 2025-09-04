@@ -67,6 +67,8 @@ import {
   Spade,
   Pointer,
   HandMetal,
+  LoaderCircle,
+  Pencil,
 } from "lucide-react";
 import { IMAGES } from "@/libs/constants";
 
@@ -145,4 +147,6 @@ export const Icons = {
   spade: (props: LucideProps) => <Spade {...props} />,
   pointer: (props: LucideProps) => <Pointer {...props} />,
   handMetal: (props: LucideProps) => <HandMetal {...props} />,
+  spinner: (props: LucideProps) => <LoaderCircle {...props} />,
+  pencil: (props: LucideProps) => <Pencil {...props} />,
 };

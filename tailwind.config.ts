@@ -18,12 +18,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ["Inter", "sans-serif"],
-        headline: ["Space Grotesk", "sans-serif"],
-        code: ["monospace"],
-        'luckiest-guy': ["'Luckiest Guy'", "cursive"],
-        'anton': ["'Anton'", "sans-serif"],
-        'bungee': ["'Bungee'", "cursive"]
+        pacifico: ["Pacifico", "sans-serif"],
+        "irish-grover": ["Irish Grover", "cursive"],
+        "walter-turncoat": ["Walter Turncoat", "cursive"],
+        "shadows-into-light": ["Shadows Into Light", "cursive"],
       },
       colors: {
         background: "hsl(var(--background))",

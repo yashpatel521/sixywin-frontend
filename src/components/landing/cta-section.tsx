@@ -48,7 +48,7 @@ export function CtaSection() {
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
       variants={containerVariants}
-      className="mt-20 md:mt-32 text-center bg-gradient-to-r from-yellow-400/10 via-yellow-600/10 to-yellow-400/10 backdrop-blur-lg border border-yellow-400/20 rounded-3xl p-8 md:p-16 relative overflow-hidden"
+      className="md:mt-16 text-center bg-gradient-to-r from-yellow-400/10 via-yellow-600/10 to-yellow-400/10 backdrop-blur-lg border border-yellow-400/20 rounded-3xl p-8 md:p-16 relative overflow-hidden"
     >
       {/* Decorative elements */}
       <motion.div
@@ -65,14 +65,16 @@ export function CtaSection() {
       />
 
       <motion.div variants={itemVariants}>
-        <h2 className="text-3xl md:text-5xl font-bold font-headline mb-4 text-white dark:text-white tracking-tight drop-shadow-md">
-          {sectionContent.title}
+        <h2 className="text-3xl md:text-5xl font-bold font-walter-turncoat mb-4 text-white tracking-wider drop-shadow-md">
+          <span className="font-walter-turncoat">{sectionContent.title}</span>
         </h2>
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <p className="text-lg md:text-xl text-white/90 dark:text-white/90 max-w-2xl mx-auto mb-8 leading-relaxed">
-          {sectionContent.description}
+        <p className="text-lg md:text-xl font-shadows-into-light text-white/90 max-w-2xl mx-auto mb-8 leading-relaxed tracking-wide">
+          <span className="font-shadows-into-light">
+            {sectionContent.description}
+          </span>
         </p>
       </motion.div>
 
@@ -84,7 +86,7 @@ export function CtaSection() {
         <Button
           asChild
           size="lg"
-          className="relative overflow-hidden bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-lg hover:shadow-yellow-500/30 transition-all duration-300 group"
+          className="relative overflow-hidden bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-lg hover:shadow-yellow-500/30 transition-all duration-300 group text-xl font-irish-grover"
         >
           <Link to="/register">
             {sectionContent.buttonText}

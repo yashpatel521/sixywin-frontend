@@ -77,7 +77,7 @@ const TierCard = ({
   multiplier: number;
   description: string;
 }) => (
-  <motion.div 
+  <motion.div
     className="bg-card/50 backdrop-blur-lg border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center hover:shadow-2xl hover:-translate-y-2"
     whileHover={{ y: -5, scale: 1.02 }}
   >
@@ -106,21 +106,20 @@ export function HeroSection() {
       variants={containerVariants}
       className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mt-5"
     >
-      <motion.div variants={itemVariants} className="relative text-center lg:text-left lg:col-span-1">
-        <BouncingBalls />
-        <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 text-foreground">
+      <BouncingBalls />
+      <motion.div
+        variants={itemVariants}
+        className="relative text-center lg:text-left lg:col-span-1"
+      >
+        <h1 className="text-4xl md:text-6xl font-bold font-irish-grover mb-4 text-foreground">
           {sectionContent.welcome}{" "}
           <span className="text-primary">{sectionContent.appName}</span>
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8">
+        <p className="text-lg md:text-xl text-white font-irish-grover max-w-2xl mx-auto lg:mx-0 mb-8">
           {sectionContent.description}
         </p>
         <div className="flex justify-center lg:justify-start gap-4">
-          <Button
-            asChild
-            size="lg"
-            className="hover:scale-105 active:scale-95"
-          >
+          <Button asChild size="lg" className="font-walter-turncoat text-white text-xl transition-all duration-300 hover:scale-105 active:scale-95">
             <Link to="/register">
               {sectionContent.buttonText}{" "}
               <Icons.arrowRight className="ml-2 h-5 w-5" />
@@ -129,7 +128,10 @@ export function HeroSection() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="hidden lg:flex justify-center items-center lg:col-span-1">
+      <motion.div
+        variants={itemVariants}
+        className="hidden lg:flex justify-center items-center lg:col-span-1"
+      >
         <img
           src={sectionContent.image.src}
           alt={sectionContent.image.alt}
@@ -140,7 +142,7 @@ export function HeroSection() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="lg:col-span-1 space-y-4">
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           className="grid grid-cols-2 gap-4"
         >

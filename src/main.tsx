@@ -5,6 +5,10 @@ import App from "./App.tsx";
 
 // Casino-style fonts
 import { fontUrls } from "@/libs/fonts";
+import '@fontsource/walter-turncoat';
+import '@fontsource/shadows-into-light';
+import '@fontsource/irish-grover';
+import '@fontsource/pacifico';
 
 // Add font stylesheets to document head
 fontUrls.forEach(url => {

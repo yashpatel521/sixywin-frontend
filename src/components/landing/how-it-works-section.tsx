@@ -64,7 +64,7 @@ const StepCard = ({
   step: number;
 }) => (
   <motion.div
-    className="relative bg-card/50 backdrop-blur-lg border-2 border-primary/30 rounded-2xl p-8 flex flex-col items-center text-center shadow-lg hover:shadow-primary/30 transition-all duration-300 overflow-hidden group hover:border-primary/60"
+    className="relative bg-card/50 backdrop-blur-lg border-2 border-primary/30 rounded-2xl p-6 flex flex-col items-center text-center shadow-lg hover:shadow-primary/30 transition-all duration-300 overflow-hidden group hover:border-primary/60"
     whileHover={{ y: -5, scale: 1.02 }}
   >
     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-50 group-hover:opacity-70 transition-opacity"></div>
@@ -79,10 +79,12 @@ const StepCard = ({
         {step}
       </div>
     </div>
-    <h3 className="text-2xl font-bold font-headline mb-3 text-foreground relative z-10 group-hover:text-primary transition-colors">
+    <h3 className="text-2xl font-bold font-irish-grover mb-2 text-foreground relative z-10 group-hover:text-primary transition-colors">
       {title}
     </h3>
-    <p className="text-muted-foreground relative z-10 group-hover:text-foreground transition-colors">{children}</p>
+    <p className="text-muted-foreground relative z-10 group-hover:text-foreground transition-colors">
+      {children}
+    </p>
     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-80 group-hover:opacity-100 group-hover:h-1.5 transition-all" />
   </motion.div>
 );
@@ -99,11 +101,11 @@ export function HowItWorksSection() {
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
       variants={containerVariants}
-      className="mt-20 md:mt-32 py-20"
+      className="md:mt-16 "
     >
       <motion.h2
         variants={itemVariants}
-        className="text-4xl md:text-5xl font-bold font-headline text-center mb-16 text-foreground"
+        className="text-4xl md:text-5xl font-bold font-irish-grover text-center mb-16 text-foreground"
       >
         {sectionContent.title}
       </motion.h2>

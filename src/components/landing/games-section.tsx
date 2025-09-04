@@ -74,23 +74,23 @@ function GameCard({ icon, title, children, href, disabled }: GameCardProps) {
       <Icons.spade className="absolute bottom-2 left-2 h-6 w-6 text-primary/30 group-hover:text-primary/50 transition-colors" />
       <Icons.heart className="absolute bottom-2 right-2 h-6 w-6 text-accent/30 group-hover:text-accent/50 transition-colors" />
       
-      <CardHeader className="z-10 p-6">
+      <CardHeader className="z-10 p-4">
         <div className="mx-auto bg-[#1a1a24] text-primary rounded-full p-4 w-fit mb-4 shadow-lg ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all">
           {icon}
         </div>
-        <CardTitle className="font-headline text-xl text-white">
+        <CardTitle className="font-irish-grover text-2xl text-white">
           {title}
         </CardTitle>
-        <CardDescription className="text-gray-400 group-hover:text-gray-300 transition-colors">
+        <CardDescription className="text-muted-foreground group-hover:text-foreground transition-colors">
           {children}
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="flex-grow flex flex-col justify-end z-10 p-6 pt-0">
+      <CardContent className="flex-grow flex flex-col items-center justify-end z-10 p-4 pt-0">
         <Button
           asChild
           variant="default"
-          className={`mt-auto bg-primary hover:bg-primary/90 text-white ${disabled ? "cursor-not-allowed" : ""}`}
+          className={`mt-auto bg-primary hover:bg-primary/90 text-white text-sm py-2 px-4 w-fit ${disabled ? "cursor-not-allowed" : ""}`}
           disabled={disabled}
         >
           {disabled ? (
@@ -145,7 +145,7 @@ export function GamesSection() {
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
       variants={containerVariants}
-      className="mt-20 md:mt-32 relative"
+      className="md:mt-16 relative"
     >
       {/* Floating casino elements */}
       <motion.div variants={itemVariants} className="absolute top-1/4 left-1/4 opacity-20">
@@ -167,7 +167,7 @@ export function GamesSection() {
       
       <motion.div 
         variants={containerVariants}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10"
+        className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto relative z-10"
       >
         {sectionContent.games.map((game, index) => (
           <motion.div key={index} variants={itemVariants}>

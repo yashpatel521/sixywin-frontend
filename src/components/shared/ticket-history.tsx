@@ -25,26 +25,43 @@ import { Button } from "../ui/button";
 export default function TicketHistory({ userId }: { userId: number }) {
   const [pageNo, setPageNo] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   // const [tic]
-  const { data, request } = useApiRequest({
+  const { data, request, success } = useApiRequest({
     url: `/ticket/userTickets/${userId}`,
     method: "GET",
     isToken: true,
-    data: {
-      pageNo,
-    },
+    params: { pageNo },
   });
+
   useEffect(() => {
     request();
   }, []);
 
   const loadMoreTickets = async () => {
+    setError(null);
     setIsLoading(true);
-    setPageNo((prev) => prev + 1);
-    setIsLoading(false);
+    try {
+      const nextPage = pageNo + 1;
+      await request({ params: { pageNo: nextPage } });
+      setPageNo(nextPage);
+    } catch (err) {
+      setError("Failed to load more tickets");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const tickets: Ticket[] = data || [];
+  useEffect(() => {
+    if (success) {
+      setTickets((prev) => [...prev, ...data]);
+      setPageNo(pageNo + 1);
+    }
+  }, [success]);
+
+  const hasMoreData = data && data.length > 0;
+
   // console.log(tickets);
 
   const renderNumbers = (numbers: number[], matchedNumbers?: number[]) => (
@@ -123,6 +140,18 @@ export default function TicketHistory({ userId }: { userId: number }) {
         </div>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className="mb-4 p-4 bg-red-500/10 text-red-500 rounded-md">
+            {error}
+            <button
+              onClick={loadMoreTickets}
+              className="ml-2 text-red-700 underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {tickets.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <div className="text-xl font-medium">
@@ -198,9 +227,25 @@ export default function TicketHistory({ userId }: { userId: number }) {
 
             {/* Load More Button */}
             <div className="flex justify-center mt-4">
-              <Button onClick={loadMoreTickets} disabled={isLoading}>
-                {isLoading ? "Loading..." : "Load More"}
+              <Button
+                onClick={loadMoreTickets}
+                disabled={isLoading || !hasMoreData}
+                className="min-w-32"
+              >
+                {isLoading ? (
+                  <>
+                    <Icons.spinner className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : hasMoreData ? (
+                  "Load More"
+                ) : (
+                  "No More Tickets"
+                )}
               </Button>
+              {error && (
+                <div className="text-center text-red-500 mt-2">{error}</div>
+              )}
             </div>
           </>
         )}

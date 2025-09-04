@@ -68,7 +68,7 @@ const FeatureCard = ({
     <div className="bg-gradient-to-tr from-primary/60 to-accent/60 rounded-full p-4 mb-6 flex items-center justify-center shadow-lg z-10 ring-2 ring-white/50 group-hover:ring-white/80 group-hover:scale-110 transition-all">
       {icon}
     </div>
-    <h3 className="text-xl font-bold font-headline mb-3 z-10 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent group-hover:bg-gradient-to-l transition-all">
+    <h3 className="text-xl font-bold font-irish-grover mb-3 z-10 text-white">
       {title}
     </h3>
     <p className="text-muted-foreground z-10 group-hover:text-foreground transition-colors">{children}</p>
@@ -88,13 +88,13 @@ export function FeaturesSection() {
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
       variants={containerVariants}
-      className="mt-20 md:mt-32 px-4 md:px-16 relative"
+      className="md:mt-16 relative"
     >
       <div className="absolute inset-0 bg-[url('/images/casino-pattern.svg')] opacity-5 -z-10"></div>
       
       <motion.h2 
         variants={itemVariants}
-        className="text-3xl md:text-4xl font-bold font-headline text-center mb-12 text-foreground"
+        className="text-3xl md:text-4xl font-bold font-irish-grover text-center mb-12 text-foreground"
       >
         {sectionContent.title}
       </motion.h2>
