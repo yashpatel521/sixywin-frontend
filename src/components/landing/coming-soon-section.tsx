@@ -58,7 +58,7 @@ export function ComingSoonSection() {
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
       variants={containerVariants}
-      className="mt-20 md:mt-32 p-8 md:p-16 bg-gradient-to-r from-primary/80 to-accent/80 rounded-3xl text-foreground overflow-hidden relative"
+      className="md:mt-16 p-8 md:p-16 bg-gradient-to-r from-primary/80 to-accent/80 rounded-3xl text-foreground overflow-hidden relative"
     >
       <FloatingCoins count={15} />
 
@@ -91,7 +91,7 @@ export function ComingSoonSection() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="space-y-6 animation-all fade-in-up duration-700">
-          <h2 className="text-3xl md:text-4xl font-bold font-headline flex items-center gap-2">
+          <h2 className="text-3xl md:text-4xl font-bold font-irish-grover flex items-center gap-2">
             <Icons.gift className="h-8 w-8 text-accent animate-pulse" />
             {sectionContent.title}
           </h2>

@@ -73,12 +73,12 @@ function GameCard({
           <div className="mx-auto bg-gradient-to-br from-primary to-secondary p-3 rounded-xl w-fit mb-4 shadow-lg">
             {icon}
           </div>
-          <CardTitle className="font-bungee text-2xl text-white drop-shadow-md tracking-wider">
+          <CardTitle className="font-irish-grover text-2xl text-white drop-shadow-md tracking-wider">
             {title}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col justify-between pt-0">
-          <p className="font-sans text-white/90 mb-6 px-4 tracking-normal text-base leading-relaxed">
+          <p className="text-white/90 mb-6 px-4 tracking-normal text-base leading-relaxed">
             {description}
           </p>
           <div className="flex flex-col items-center gap-3 px-4 pb-4">
@@ -86,7 +86,7 @@ function GameCard({
               asChild
               variant="default"
               className={cn(
-                "w-full bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:shadow-primary/40 hover:brightness-110 transition-all duration-300 relative overflow-hidden",
+                "w-full bg-gradient-to-r from-primary to-secondary text-white font-shadows-into-light text-lg shadow-lg hover:shadow-xl hover:shadow-primary/40 hover:brightness-110 transition-all duration-300 relative overflow-hidden",
                 disabled && "cursor-not-allowed"
               )}
               disabled={disabled}
@@ -126,7 +126,7 @@ export default function GamesPage() {
           className="text-center mb-16"
         >
           <motion.h1
-            className="font-luckiest-guy text-4xl md:text-5xl uppercase tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-4"
+            className="font-irish-grover text-4xl md:text-5xl uppercase tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-4"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}
@@ -134,7 +134,7 @@ export default function GamesPage() {
             OUR GAMES
           </motion.h1>
           <motion.p
-            className="font-anton text-muted-foreground max-w-2xl mx-auto text-lg tracking-wider"
+            className="font-pacifico text-white max-w-2xl mx-auto text-lg tracking-wider"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -145,7 +145,7 @@ export default function GamesPage() {
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="flex flex-wrap justify-center gap-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -156,6 +156,7 @@ export default function GamesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
+              className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
             >
               <GameCard {...game} />
             </motion.div>

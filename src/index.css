@@ -196,10 +196,64 @@
 
   @keyframes bounce-6 {
     from {
-      transform: translateX(0px);
+      transform: translateY(0) rotate(0deg);
     }
     to {
-      transform: translateX(20px);
+      transform: translateY(-30px) rotate(10deg);
+    }
+  }
+
+  @keyframes bounce-7 {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.1);
+    }
+  }
+
+  @keyframes bounce-8 {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(30px);
+    }
+  }
+
+  @keyframes bounce-9 {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-25px) rotate(-5deg);
+    }
+  }
+
+  @keyframes bounce-10 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(20px, -20px);
+    }
+  }
+
+  @keyframes bounce-11 {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+  }
+
+  @keyframes bounce-12 {
+    0%, 100% {
+      transform: translateY(0) skew(0);
+    }
+    50% {
+      transform: translateY(-15px) skew(10deg);
     }
   }
 

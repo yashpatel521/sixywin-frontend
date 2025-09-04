@@ -11,6 +11,10 @@
     "clean": "rimraf dist .tsconfig.tsbuildinfo"
   },
   "dependencies": {
+    "@fontsource/irish-grover": "^5.2.6",
+    "@fontsource/pacifico": "^5.2.6",
+    "@fontsource/shadows-into-light": "^5.2.6",
+    "@fontsource/walter-turncoat": "^5.2.6",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
