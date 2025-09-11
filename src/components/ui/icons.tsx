@@ -69,6 +69,7 @@ import {
   HandMetal,
   LoaderCircle,
   Pencil,
+  Newspaper,
 } from "lucide-react";
 import { IMAGES } from "@/libs/constants";
 
@@ -149,4 +150,5 @@ export const Icons = {
   handMetal: (props: LucideProps) => <HandMetal {...props} />,
   spinner: (props: LucideProps) => <LoaderCircle {...props} />,
   pencil: (props: LucideProps) => <Pencil {...props} />,
+  newspaper: (props: LucideProps) => <Newspaper {...props} />,
 };

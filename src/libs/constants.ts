@@ -41,7 +41,7 @@ export const prizes = [
   { value: 200, label: "200", text: "200" },
   { value: 100, label: "100", text: "100" },
   { value: 0, label: "LOSE", text: "Oops" },
-  { value: 10000, label: "JACKPOT", text: "JACKPOT" },
+  { value: 2000, label: "JACKPOT", text: "JACKPOT" },
 ];
 
 export const segmentColors = ["#fde047", "#dc2626"];

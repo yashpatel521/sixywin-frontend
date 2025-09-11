@@ -23,6 +23,8 @@ import DoubleTroublePage from "./pages/DoubleTrouble";
 import AviatorPage from "./pages/Aviator";
 import FAQPage from "./pages/FAQ";
 import HowToPlayPage from "./pages/HowToPlay";
+import BlogPage from "./pages/Blog";
+import BlogPostPage from "./pages/BlogPost";
 // Import 404 page
 import NotFoundPage from "./pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -38,6 +40,8 @@ const publicRoutes = [
   { path: "/terms-of-service", element: <TermsOfServicePage /> },
   { path: "/faq", element: <FAQPage /> },
   { path: "/how-to-play", element: <HowToPlayPage /> },
+  { path: "/blog", element: <BlogPage /> },
+  { path: "/blog/:id", element: <BlogPostPage /> },
 ];
 
 const protectedRoutes = [

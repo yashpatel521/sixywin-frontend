@@ -195,6 +195,13 @@ export function Header() {
                 <Icons.barChart className="h-4 w-4 mr-2" />
                 Leaderboard
               </Link>
+              <Link
+                to="/blog"
+                className="text-foreground/60 hover:text-primary flex items-center"
+              >
+                <Icons.newspaper className="h-4 w-4 mr-2" />
+                Blog
+              </Link>
             </nav>
           )}
         </div>

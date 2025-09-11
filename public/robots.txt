@@ -24,3 +24,4 @@ Allow: /privacy-policy
 Allow: /terms-of-service
 Allow: /faq
 Allow: /how-to-play
+Allow: /blog

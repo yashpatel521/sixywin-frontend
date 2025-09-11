@@ -242,4 +242,24 @@ export const SEO_CONFIGS = {
     url: "/how-to-play",
     type: "website" as const,
   },
+
+  blog: {
+    title: "SixyWin Blog - Virtual Gaming Tips, News & Community Updates",
+    description:
+      "Stay updated with the latest news, game guides, and community highlights from SixyWin. Learn tips and strategies for virtual lottery, Aviator, and Double Trouble games.",
+    keywords:
+      "SixyWin blog, virtual gaming news, lottery tips, Aviator strategies, Double Trouble guide, gaming community updates",
+    url: "/blog",
+    type: "website" as const,
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      name: "SixyWin Gaming Blog",
+      description:
+        "Latest news, game guides, and community updates from SixyWin virtual gaming platform",
+      url: "https://sixywin.com/blog",
+    },
+  },
 };
+
+export type SEOConfig = typeof SEO_CONFIGS;
