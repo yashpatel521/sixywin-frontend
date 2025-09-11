@@ -50,6 +50,12 @@ export function Footer() {
           >
             Terms of Service
           </Link>
+          <Link
+            to="/blog"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            Blog
+          </Link>
         </div>
       </div>
     </footer>
