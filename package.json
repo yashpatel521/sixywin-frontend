@@ -39,7 +39,7 @@
     "@react-oauth/google": "^0.12.2",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
-    "axios": "^1.11.0",
+    "axios": "^1.12.0",
     "class-variance-authority": "^0.7.1",
     "crypto-js": "^4.2.0",
     "embla-carousel-react": "^8.6.0",
